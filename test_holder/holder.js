@@ -81,8 +81,9 @@ agent.setLoggingLevel(ev.AGENT_LOG_LEVEL);
 		const connections = await agent.getConnections();
 		logger.info(`***************${connections.length} CONNECTIONS TO DELETE***************`);
 		for (const index in connections) {
-			logger.debug(`***************DELETING CONNECTION ${connections[index].id} to ${connections[index].remote.name}***************`);
-			await agent.deleteConnection(connections[index].id);
+			const conn = connections[index];
+			logger.debug(`***************DELETING CONNECTION ${conn.id} to ${conn.remote ? conn.remote.name : 'nobody'}***************`);
+			await agent.deleteConnection(conn.id);
 		}
 	}
 
@@ -110,7 +111,7 @@ agent.setLoggingLevel(ev.AGENT_LOG_LEVEL);
 			const offer = offers[0];
 			try {
 				logger.info(`Accepting connection offer ${offer.id} from  ${offer.remote.name}`);
-				const r = await agent.acceptConnectionOffer(offer.id);
+				const r = await agent.acceptConnection(offer.id);
 				logger.info('Accepted connection offer '+r.id+' from '+r.remote.name);
 			} catch (error) {
 				logger.error(`Couldn't accept connection offer ${offer.id}.  You may want to delete it. Error: ${error}`);

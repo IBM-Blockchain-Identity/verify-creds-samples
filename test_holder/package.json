@@ -12,7 +12,7 @@
     "lint": "./node_modules/.bin/eslint . || true"
   },
   "dependencies": {
-    "openssi-websdk": "0.0.1-alpha",
+    "openssi-websdk": "0.0.2-alpha",
     "winston": "^3.0.0"
   },
   "devDependencies": {
