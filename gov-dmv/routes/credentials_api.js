@@ -16,7 +16,6 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
 const compression = require('compression');
 const middleware = require('./middleware.js');
 
@@ -35,7 +34,6 @@ exports.createRouter = function (issuance_manager) {
 	router.use(bodyParser.urlencoded({extended: true}));
 	router.use(bodyParser.json());
 	router.use(bodyParser.text());
-	router.use(cookieParser());
 	router.use(compression());
 
 	/* POST issue a credential */

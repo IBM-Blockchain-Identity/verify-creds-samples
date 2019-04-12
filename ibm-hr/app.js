@@ -17,7 +17,6 @@
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
-const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const session = require('express-session');
 
@@ -62,7 +61,6 @@ function createApp (ev, nano, agent, card_renderer, users, connection_icon_provi
 	app.use(morgan('dev'));
 	app.use(express.json());
 	app.use(express.urlencoded({extended: false}));
-	app.use(cookieParser());
 	app.use(express.static(path.join(__dirname, 'public')));
 	app.use(session({
 		secret: ev.SESSION_SECRET,

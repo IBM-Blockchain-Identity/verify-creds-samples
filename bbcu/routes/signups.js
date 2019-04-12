@@ -16,7 +16,6 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
 const compression = require('compression');
 
 const SIGNUP_STEPS = require('../libs/signups.js').SIGNUP_STEPS;
@@ -39,7 +38,6 @@ exports.createRouter = function (signup_manager) {
 	router.use(bodyParser.urlencoded({extended: true}));
 	router.use(bodyParser.json());
 	router.use(bodyParser.text());
-	router.use(cookieParser());
 	router.use(compression());
 
 	/* Get the status of the current signup flow */

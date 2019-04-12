@@ -16,7 +16,6 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
 const compression = require('compression');
 
 const USER_ERRORS = require('../libs/users.js').USERS_ERRORS;
@@ -45,7 +44,6 @@ exports.createRouter = function (users_instance, login_manager) {
 	router.use(bodyParser.urlencoded({extended: true}));
 	router.use(bodyParser.json());
 	router.use(bodyParser.text());
-	router.use(cookieParser());
 	router.use(compression());
 
 	// Log in as any user from the admin panel

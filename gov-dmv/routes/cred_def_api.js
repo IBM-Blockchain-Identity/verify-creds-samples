@@ -16,7 +16,6 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
 const compression = require('compression');
 
 /**
@@ -33,7 +32,6 @@ exports.createRouter = function (agent) {
 	router.use(bodyParser.urlencoded({extended: true}));
 	router.use(bodyParser.json());
 	router.use(bodyParser.text());
-	router.use(cookieParser());
 	router.use(compression());
 
 	/* POST a new credential definition */
