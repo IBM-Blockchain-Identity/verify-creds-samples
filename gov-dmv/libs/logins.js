@@ -178,6 +178,8 @@ class Login {
 		this.error = null;
 		this.connection_icon_provider = connection_icon_provider;
 		this.login_helper = login_helper;
+		this.connection_offer = null;
+		this.verification = null;
 	}
 
 	/**
@@ -196,7 +198,7 @@ class Login {
 			const user_doc = await this.user_records.read_user(this.user);
 
 			if (!user_doc.opts || !user_doc.opts.agent_name) {
-				const err = new Error('User record does not have an associate agent name');
+				const err = new Error('User record does not have an associated agent name');
 				err.code = LOGIN_ERRORS.AGENT_NOT_FOUND;
 				throw err;
 			}
@@ -231,16 +233,17 @@ class Login {
 					connection_to = {name: connection_to};
 			}
 			logger.info(`Making sure we have a connection to ${JSON.stringify(connection_to)}`);
-			const connection_offer = await this.agent.createConnection(connection_to, {
+			this.connection_offer = await this.agent.createConnection(connection_to, {
 				icon: icon
 			});
+
 			let connection;
 			try {
-				connection = await this.agent.waitForConnection(connection_offer.id, 30, 3000);
+				connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
 
 			} catch (error) {
-				logger.error(`Failed to establish connection offer ${connection_offer.id}.  Deleting connection.  error: ${error}`);
-				await this.agent.deleteConnection(connection_offer.id);
+				logger.error(`Failed to establish connection offer ${this.connection_offer.id}.  Deleting connection.  error: ${error}`);
+				await this.agent.deleteConnection(this.connection_offer.id);
 				throw error;
 			}
 			logger.info(`Established connection ${connection.id} to ${JSON.stringify(connection_to)}.  Their DID: ${connection.remote.pairwise.did}`);
@@ -250,9 +253,8 @@ class Login {
 
 			// If no proof requests, then send request
 			logger.info(`Sending proof request to ${connection.remote.pairwise.did}`);
-			let verification_request;
 			try {
-				verification_request = await this.agent.createVerification({
+				this.verification = await this.agent.createVerification({
 					did: connection.remote.pairwise.did
 				},
 				account_proof_schema.id,
@@ -265,15 +267,15 @@ class Login {
 				await this.agent.deleteConnection(connection.id);
 				throw error;
 			}
-			logger.info(`Created verification request: ${verification_request.id}`);
+			logger.info(`Created verification request: ${this.verification.id}`);
 
 			logger.info(`Waiting for verification of proof request from ${connection.remote.pairwise.did}`);
 			let proof;
 			try {
-				proof = await this.agent.waitForVerification(verification_request.id, 30, 3000);
+				proof = await this.agent.waitForVerification(this.verification.id, 30, 3000);
 			} catch (error) {
-				logger.error(`Failed to complete verification ${verification_request.id}. Deleting verification. error: ${error}`);
-				await this.agent.deleteVerification(verification_request.id);
+				logger.error(`Failed to complete verification ${this.verification.id}. Deleting verification. error: ${error}`);
+				await this.agent.deleteVerification(this.verification.id);
 				throw error;
 			}
 
@@ -331,6 +333,14 @@ class Login {
 			ret.error = this.error.code ? this.error.code : LOGIN_ERRORS.LOGIN_UNKNOWN_ERROR;
 			ret.reason = this.error.reason;
 		}
+
+		if (this.status === Login.LOGIN_STEPS.ESTABLISHING_CONNECTION && this.connection_offer)
+			ret.connection_offer = this.connection_offer;
+
+		// Just pass the ID until we know we need more.  Verification objects are large.
+		if (this.status === Login.LOGIN_STEPS.CHECKING_CREDENTIAL && this.verification)
+			ret.verification = {id: this.verification.id};
+
 		return ret;
 	}
 }

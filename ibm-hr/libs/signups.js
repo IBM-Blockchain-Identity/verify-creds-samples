@@ -193,6 +193,9 @@ class Signup {
 		this.card_renderer = card_renderer;
 		this.connection_icon_provider = connection_icon_provider;
 		this.signup_helper = signup_helper;
+		this.connection_offer = null;
+		this.verification = null;
+		this.credential = null;
 	}
 
 	/**
@@ -245,15 +248,15 @@ class Signup {
 			}
 
 			logger.info(`Making sure we have a connection to ${this.agent_name}`);
-			const connection_offer = await this.agent.createConnection(connection_to, {
+			this.connection_offer = await this.agent.createConnection(connection_to, {
 				icon: icon
 			});
 			try {
-				connection = await this.agent.waitForConnection(connection_offer.id, 30, 3000);
+				connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
 
 			} catch (error) {
-				logger.error(`Failed to establish connection offer ${connection_offer.id}.  Deleting connection.  error: ${error}`);
-				await this.agent.deleteConnection(connection_offer.id);
+				logger.error(`Failed to establish connection offer ${this.connection_offer.id}.  Deleting connection.  error: ${error}`);
+				await this.agent.deleteConnection(this.connection_offer.id);
 				throw error;
 			}
 			logger.info(`Established connection ${connection.id} to ${JSON.stringify(connection_to)}.  Their DID: ${connection.remote.pairwise.did}. My DID: ${connection.local.pairwise.did}`);
@@ -263,9 +266,8 @@ class Signup {
 			// If no proof requests, then send request
 			logger.info(`Sending proof request to ${connection.remote.pairwise.did}`);
 
-			let verification_request;
 			try {
-				verification_request = await this.agent.createVerification({
+				this.verification = await this.agent.createVerification({
 					did: connection.remote.pairwise.did
 				},
 				account_proof_schema.id,
@@ -278,15 +280,15 @@ class Signup {
 				await this.agent.deleteConnection(connection.id);
 				throw error;
 			}
-			logger.info(`Created verification request: ${verification_request.id}`);
+			logger.info(`Created verification request: ${this.verification.id}`);
 
 			logger.info(`Waiting for verification of proof request from ${connection.remote.pairwise.did}`);
 			let proof;
 			try {
-				proof = await this.agent.waitForVerification(verification_request.id, 30, 3000);
+				proof = await this.agent.waitForVerification(this.verification.id, 30, 3000);
 			} catch (error) {
-				logger.error(`Failed to complete verification ${verification_request.id}. Deleting verification. error: ${error}`);
-				await this.agent.deleteVerification(verification_request.id);
+				logger.error(`Failed to complete verification ${this.verification.id}. Deleting verification. error: ${error}`);
+				await this.agent.deleteVerification(this.verification.id);
 				throw error;
 			}
 
@@ -339,7 +341,7 @@ class Signup {
 			}
 
 			logger.info(`Sending credential offer to ${connection.remote.pairwise.did}`);
-			const credential = await this.agent.offerCredential({
+			this.credential = await this.agent.offerCredential({
 				did: connection.remote.pairwise.did
 			}, {
 				schema_name: schema.name,
@@ -348,13 +350,13 @@ class Signup {
 				icon: icon
 			});
 
-			logger.info(`Waiting for credential offer acceptance for credential ${credential.id}`);
+			logger.info(`Waiting for credential offer acceptance for credential ${this.credential.id}`);
 			let finished_credential;
 			try {
-				finished_credential = await this.agent.waitForCredential(credential.id, 30, 3000);
+				finished_credential = await this.agent.waitForCredential(this.credential.id, 30, 3000);
 			} catch (error) {
-				logger.error(`Failed to deliver credential ${credential.id}.  Deleting credential. error: ${error}`);
-				await this.agent.deleteCredential(credential.id);
+				logger.error(`Failed to deliver credential ${this.credential.id}.  Deleting credential. error: ${error}`);
+				await this.agent.deleteCredential(this.credential.id);
 				throw error;
 			}
 
@@ -407,6 +409,18 @@ class Signup {
 			ret.error = this.error.code ? this.error.code : SIGNUP_ERRORS.SIGNUP_UNKNOWN_ERROR;
 			ret.reason = this.error.reason;
 		}
+
+		if (this.status === Signup.SIGNUP_STEPS.ESTABLISHING_CONNECTION && this.connection_offer)
+			ret.connection_offer = this.connection_offer;
+
+		// Just pass the ID until we know we need more.  Credential objects are large.
+		if (this.status === Signup.SIGNUP_STEPS.ISSUING_CREDENTIAL && this.credential)
+			ret.credential = {id: this.credential.id};
+
+		// Just pass the ID until we know we need more.  Verification objects are large.
+		if (this.status === Signup.SIGNUP_STEPS.CHECKING_CREDENTIAL && this.verification)
+			ret.verification = {id: this.verification.id};
+
 		return ret;
 	}
 }

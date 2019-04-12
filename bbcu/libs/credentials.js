@@ -161,6 +161,8 @@ class Issuance {
 		this.card_renderer = card_renderer;
 		this.error = null;
 		this.connection_icon_provider = connection_icon_provider;
+		this.connection_offer = null;
+		this.credential = null;
 	}
 
 	/**
@@ -240,16 +242,17 @@ class Issuance {
 					connection_to = {name: connection_to};
 			}
 			logger.info(`Making sure we have a connection to ${JSON.stringify(connection_to)}`);
-			const connection_offer = await this.agent.createConnection(connection_to, {
+			this.connection_offer = await this.agent.createConnection(connection_to, {
 				icon: icon
 			});
+
 			let connection;
 			try {
-				connection = await this.agent.waitForConnection(connection_offer.id, 30, 3000);
+				connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
 
 			} catch (error) {
-				logger.error(`Failed to establish connection offer ${connection_offer.id}.  Deleting connection.  error: ${error}`);
-				await this.agent.deleteConnection(connection_offer.id);
+				logger.error(`Failed to establish connection offer ${this.connection_offer.id}.  Deleting connection.  error: ${error}`);
+				await this.agent.deleteConnection(this.connection_offer.id);
 				throw error;
 			}
 			logger.info(`Established connection ${connection.id} to ${JSON.stringify(connection_to)}.  Their DID: ${connection.remote.pairwise.did}`);
@@ -257,9 +260,8 @@ class Issuance {
 			this.status = Issuance.ISSUANCE_STEPS.ISSUING_CREDENTIAL;
 
 			logger.info(`Sending credential offer to ${connection.remote.pairwise.did}`);
-			let credential;
 			try {
-				credential = await this.agent.offerCredential({
+				this.credential = await this.agent.offerCredential({
 					did: connection.remote.pairwise.did
 				}, {
 					schema_name: schema.name,
@@ -273,13 +275,13 @@ class Issuance {
 				throw error;
 			}
 
-			logger.info(`Waiting for credential offer acceptance for credential ${credential.id}`);
+			logger.info(`Waiting for credential offer acceptance for credential ${this.credential.id}`);
 			let finished_credential;
 			try {
-				finished_credential = await this.agent.waitForCredential(credential.id, 30, 3000);
+				finished_credential = await this.agent.waitForCredential(this.credential.id, 30, 3000);
 			} catch (error) {
-				logger.error(`Failed to deliver credential ${credential.id}.  Deleting credential. error: ${error}`);
-				await this.agent.deleteCredential(credential.id);
+				logger.error(`Failed to deliver credential ${this.credential.id}.  Deleting credential. error: ${error}`);
+				await this.agent.deleteCredential(this.credential.id);
 				throw error;
 			}
 
@@ -327,6 +329,14 @@ class Issuance {
 		};
 		if (this.error)
 			ret.error = this.error;
+
+		if (this.status === Issuance.ISSUANCE_STEPS.ESTABLISHING_CONNECTION && this.connection_offer)
+			ret.connection_offer = this.connection_offer;
+
+		// Just pass the ID until we know we need more.  Credential objects are large.
+		if (this.status === Issuance.ISSUANCE_STEPS.ISSUING_CREDENTIAL && this.credential)
+			ret.credential = {id: this.credential.id};
+
 		return ret;
 	}
 }
