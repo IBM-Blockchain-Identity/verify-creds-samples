@@ -403,7 +403,7 @@ async function wait_for_url (url, max_attempts, max_backoff_period) {
 			times: max_attempts,
 			interval: function (retryCount) {
 				const backoff = Math.random() * Math.min(100 * Math.pow(2, retryCount), max_backoff_period);
-				logger.debug(`Will attempt to ping couchdb again in ${Number.parseFloat(backoff / 1000.0).toFixed(2)} seconds`);
+				logger.debug(`Will attempt to ping ${url} again in ${Number.parseFloat(backoff / 1000.0).toFixed(2)} seconds`);
 				return backoff;
 			}
 		};
