@@ -1,0 +1,51 @@
+extends layout
+
+block content
+    script.
+        window.user_id = '#{user_id}'
+    .container
+        .card.mt-3
+            h3.card-header Edit #{user_id}
+            .card-body
+                #editUserAlert
+                form#editUserForm
+                    .form-row
+                        .form-group.col
+                            label(for="createUserEmail") Email Address
+                            input#createUserEmail.form-control(type="email" placeholder="alice@example.com" name="email" required readonly="readonly")
+                    .form-row
+                        .form-group.col
+                            label(for="createUserAgentName") Agent URL
+                            input#createUserAgentName.form-control(type="text" placeholder="alice" name="agent_name" required)
+                    .form-row
+                        .form-group.col-md-6
+                            label(for="editUserFirstName") First Name
+                            input#editUserFirstName.form-control(type="text" placeholder="Alice" name="First Name" required)
+                        .form-group.col-md-6
+                            label(for="editUserLastName") Last Name
+                            input#editUserLastName.form-control(type="text" placeholder="Garcia" name="Last Name" required)
+                    .form-row
+                        .form-group.col-md-4
+                            label(for="editUserDoB") Date of Birth
+                            input#editUserDoB.form-control(type="text" placeholder="12-16-1990" name="Date of Birth" required)
+                        .form-group.col-md-8
+                            label(for="editUserSSN") Social Security Number
+                            input#editUserSSN.form-control(type="text" placeholder="123456789" name="Social Security Number" required)
+                    .form-row
+                        .form-group.col-md-4
+                            label(for="editUserJobTitle") Job Title
+                            input#editUserJobTitle.form-control(type="text" placeholder="Software Developer" name="Job Title" required)
+                        .form-group.col-md-4
+                            label(for="editUserHireDate") Hire Date
+                            input#editUserHireDate.form-control(type="text" placeholder="10-09-2017" name="Hire Date" required)
+                        .form-group.col-md-4
+                            label(for="editUserBaseSalary") Base Salary
+                            input#editUserBaseSalary.form-control(type="text" placeholder="80000" name="Base Salary" required)
+
+                    input#editUserCompany(type="hidden" name="Company" value="IBM" required)
+
+                    button#editUserButton.btn.btn-primary.mr-2(type="submit" data-original-text="Update" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Updating") Update
+                    button#cancelEditUserButton.btn.btn-primary(type="button") Cancel
+
+block scripts
+    script(src="/javascripts/user_edit.js")

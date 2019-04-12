@@ -1,0 +1,32 @@
+{
+  "name": "Gov DMV Driver License",
+  "version": "1.2",
+  "attributes": [
+    "last_name",
+    "first_name",
+    "dob",
+    "dob_timestamp",
+    "date_of_issue",
+    "expiration_date",
+    "customer_identifier",
+    "document_discriminator",
+    "portrait",
+    "signature",
+    "address_line_1",
+    "address_line_2",
+    "city",
+    "state",
+    "zip_code",
+    "country",
+    "vehicle_class",
+    "endorsements",
+    "rci_codes",
+    "cardholder_sex",
+    "height",
+    "weight",
+    "eye_color",
+    "hair_color",
+    "card_front",
+    "card_back"
+  ]
+}

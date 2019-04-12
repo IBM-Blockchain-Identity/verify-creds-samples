@@ -1,0 +1,73 @@
+.disclaimer {
+  height: 50px;
+  background-color:black;
+  color:white;
+  text-align:center;
+  font-size: 1.5em;
+  width:100%;padding:5px;
+}
+
+.carousel-item {
+  min-height: 500px;
+}
+
+.carousel-caption {
+  color: black;
+}
+
+.item-padding {
+  padding-top: 100px;
+}
+
+.form-control {
+  border: 0;
+  background-color: #eff4ff;
+  border-radius: 0;
+}
+
+.form-control:disabled, .form-control[readonly] {
+  background-color: #eff4ff;
+}
+
+.btn {
+  border-radius: 0;
+}
+
+hr {
+  border-bottom: 1px solid #eff4ff;
+}
+
+.hr-thick {
+  border-bottom: 2px solid #eff4ff;
+}
+
+body {
+  background-image: linear-gradient(#a8c3ff, #a8c3ff), linear-gradient(#eff4ff, #eff4ff);
+  background-repeat: no-repeat, no-repeat;
+  background-position: 0 0, 0 0;
+  background-size: 100% 400px, cover;
+}
+
+.inputfile {
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
+
+.info-box {
+  border-top: 1px solid #a8c3ff;
+  background-color: #eff4ff;
+}
+
+.info-box .form-control {
+  border: 0;
+  background-color: #fff;
+  border-radius: 0;
+}
+
+.info-box .form-control:disabled, .info-box .form-control[readonly] {
+  background-color: #fff;
+}

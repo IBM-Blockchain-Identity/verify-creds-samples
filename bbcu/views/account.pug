@@ -1,0 +1,150 @@
+extends user_layout
+
+block content
+  script.
+    window.user_id = '#{user_id}'
+
+  #accountPage.container
+    .row.greeting-row
+      .col
+        h3.greeting Welcome, <span id="infoFirstName">
+        sub.timestamp Last sign on: Yesterday, 11:22 AM ET
+    .row
+      .col-md-8.left-column
+
+        .card.account-card.mb-4
+          .card-header
+            h4.font-weight-bold Accounts
+          .card-body
+            .card.inner-card.mb-2
+              .card-header
+                h4 Checking Account ending in 9479
+              .card-body
+                .d-flex.justify-content-between
+                  p BBCU Checking
+                  a.text-decoration-underline(href="#") View Account
+                .d-flex.justify-content-between
+                  p.account-status Balance: $1,000.00
+                  a.text-decoration-underline(href="#") Make a Transfer
+            .card.mb-2.inner-card
+              .card-header
+                h4 Savings Account ending in 6357
+              .card-body
+                .d-flex.justify-content-between
+                  p Primary Savings
+                  a.text-decoration-underline(href="#") View Account
+                .d-flex.justify-content-between
+                  p.account-status Balance: $1,000,000,000.00
+                  a.text-decoration-underline(href="#") Make a Transfer
+
+        .card.account-card.mb-4
+          .card-header
+            h4.font-weight-bold Quick Links
+          .card-body
+            .row
+              .col-sm-6
+                a.blue.text-decoration-underline.font-22(href="#") Learn your loan options
+              .col-sm-6
+                a.blue.text-decoration-underline.font-22(href="#") View credit options
+              .col-sm-6
+                a.blue.text-decoration-underline.font-22(href="#") Find a local BBCU branch
+              .col-sm-6
+                a.blue.text-decoration-underline.font-22(href="#") Discover more rewards
+              .col-sm-6
+                a.blue.text-decoration-underline.font-22(href="#") Find your credit score
+              .col-sm-6
+                a.blue.text-decoration-underline.font-22(href="#") Open a new account
+
+      .col-md-4
+        .card.mb-4.box-shadow
+          .card-body.height-200.card-background
+          .card-body
+            h3.blue Tips and Tricks
+            p How you can save more with a BBCUPlatinum card.
+
+        .card.mb-4.box-shadow
+          .card-body.height-200.rewards-background
+          .card-body
+            h3.blue Rewards
+            p Where will you travel with the BBCU rewards you earn?
+
+  #settingsPage.container.d-none
+    .card.mb-2
+      .card-body
+        h3 Security
+        a(href="#") Security Questions
+        br
+        a(href="#") Security Word
+        br
+        a(href="#") 2-Step Authentication
+        br
+        a(href="#") Apps With Account Access
+        br
+        a.issuanceLink(href="#") Mobile Wallet Enrollment
+
+block extra
+
+  #issuanceModal.bbcu-signon.modal(tabindex="-1" role="dialog")
+    .modal-dialog(role="document")
+      .modal-content
+        .modal-header
+          button.close(type="button" data-dismiss="modal")
+            span &times;
+        .modal-body
+          #connectionFlowAlert
+          #issuanceCarousel.carousel.slide(data-ride="false" data-interval="false" data-keyboard="false" data-wrap="false" pause="false")
+            .carousel-inner.text-center
+              .carousel-item.active
+                .d-block.w-100.item-padding
+                  button#connectWalletButton.btn.btn-primary.shadow
+                    i.fas.fa-id-card.fa-10x.mr-3
+                    i.fas.fa-arrow-right.fa-7x.mr-3
+                    i.fas.fa-mobile-alt.fa-10x
+                .carousel-caption
+                  p Click the button above to deliver your account credential to your mobile device
+              .carousel-item
+                .d-block.w-100.item-padding.text-primary
+                  i.fas.fa-store-alt.fa-10x.mr-3
+                  i.fas.fa-sync-alt.fa-7x.mr-3.fa-spin
+                  i.fas.fa-mobile-alt.fa-10x
+                .carousel-caption
+                  h5 Collecting information
+                  p We're preparing to issue you a credential.
+              .carousel-item
+                .d-block.w-100.item-padding.text-primary
+                  i.fas.fa-store-alt.fa-10x.mr-3
+                  i.fas.fa-sync-alt.fa-7x.mr-3.fa-spin
+                  i.fas.fa-mobile-alt.fa-10x
+                .carousel-caption
+                  h5 Establishing a connection with your device
+                  p Please accept any connection offers on your device.
+              .carousel-item
+                .d-block.w-100.item-padding.text-primary
+                  i.fas.fa-id-card.fa-10x.mr-3
+                  i.fas.fa-redo-alt.fa-7x.mr-3.fa-spin
+                  i.fas.fa-mobile-alt.fa-10x
+                .carousel-caption
+                  h5 Delivering your account credential
+                  p Please accept the credential offer on your mobile device.
+              .carousel-item
+                .d-block.w-100.item-padding.text-success
+                  i.fas.fa-check.fa-10x
+                .carousel-caption.text-success
+                  h5 All done!
+                  p Your account ownership credential has been delivered to your wallet.
+              .carousel-item
+                .d-block.w-100.item-padding.text-danger
+                  i.fas.fa-exclamation-circle.fa-10x
+                .carousel-caption.text-danger
+                  h5 Oh no!
+                  p Something went wrong! Please refresh the page and try again.
+              .carousel-item
+                .d-block.w-100.item-padding.text-danger
+                  i.fas.fa-exclamation-circle.fa-10x
+                .carousel-caption.text-danger
+                  h5 Issuance Canceled
+                  p Refresh the page to start over.
+
+block scripts
+  script(src="/javascripts/qrcode.min.js")
+  script(src="/javascripts/connect_with_issuer.js")

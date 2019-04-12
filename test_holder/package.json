@@ -1,0 +1,21 @@
+{
+  "name": "test-holder",
+  "author": "Bryce Curtis <bcurtis@us.ibm.com>",
+  "contributors": [
+    "Dale Avery <davery@us.ibm.com"
+  ],
+  "version": "0.0.1",
+  "private": true,
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "node holder.js",
+    "lint": "./node_modules/.bin/eslint . || true"
+  },
+  "dependencies": {
+    "openssi-websdk": "0.0.1-alpha",
+    "winston": "^3.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.9.0"
+  }
+}

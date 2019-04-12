@@ -1,0 +1,125 @@
+extends layout
+
+block content
+    script.
+        window.user_id = '#{user_id}'
+    .card.mb-3
+        h3.card-header.no-top-border Edit a User
+        .card-body
+            #editUserAlert
+            form#editUserForm
+                .form-row
+                    .form-group.col
+                        label(for="createUserEmail") Email Address
+                        input#createUserEmail.form-control(type="email" placeholder="name@example.com" name="email" required readonly="readonly")
+                .form-row
+                    .form-group.col
+                        label(for="createUserAgentName") Agent URL
+                        input#createUserAgentName.form-control(type="text" name="agent_name" required)
+                hr
+                .form-row
+                    .col-md-4
+                        h4 General Info
+                    .col-md-8
+                        .form-row
+                            .form-group.col
+                                label(for="editUserFirstName") First Name
+                                input#editUserFirstName.form-control(type="text" name="first_name" required)
+                            .form-group.col
+                                label(for="editUserLastName") Last Name
+                                input#editUserLastName.form-control(type="text" name="last_name" required)
+                        .form-row
+                            .form-group.col-md-5
+                                label(for="editUserDoB") Date of Birth
+                                input#editUserDoB.form-control(type="text" name="dob" required)
+                                input#editUserDoBTimestamp.form-control(type="hidden" name="dob_timestamp")
+                            .form-group.col-md-2
+                                label(for="editUserHeight") Height
+                                input#editUserHeight.form-control(type="text" name="height" required)
+                            .form-group.col-md-2
+                                label(for="editUserWeight") Weight
+                                input#editUserWeight.form-control(type="text" name="weight" required)
+                            .form-group.col.md-3
+                                label(for="editUserSex") Sex
+                                input#editUserSex.form-control(type="text" name="cardholder_sex" required)
+                        .form-row
+                            .form-group.col-md-4
+                                label(for="editUserHairColor") Hair Color
+                                input#editUserHairColor.form-control(type="text" name="hair_color" required)
+                            .form-group.col-md-4
+                                label(for="editUserEyeColor") Eye Color
+                                input#editUserEyeColor.form-control(type="text" name="eye_color" required)
+                hr
+                .form-row
+                    .col-md-4
+                        h4 Address
+                    .col-md-8
+                        .row
+                            .col-md-8
+                                .form-group
+                                    label(for="editUserAddress1") Address 1
+                                    input#editUserAddress1.form-control(type="text" name="address_line_1" required)
+                        .row
+                            .col-md-8
+                                .form-group
+                                    label(for="editUserAddress2") Address 2
+                                    input#editUserAddress2.form-control(type="text" name="address_line_2" required)
+                        .form-row
+                            .form-group.col-md-4
+                                label(for="editUserCity") City
+                                input#editUserCity.form-control(type="text" name="city" required)
+                            .form-group.col-md-3
+                                label(for="editUserState") State
+                                input#editUserState.form-control(type="text" name="state" required)
+                            .form-group.col-md-2
+                                label(for="editUserZipCode") Zip
+                                input#editUserZipCode.form-control(type="text" name="zip_code" required)
+                            .form-group.col-md-3
+                                label(for="editUserCountry") Country
+                                input#editUserCountry.form-control(type="text" name="country" required)
+
+                hr
+                .form-row
+                    .col-md-4
+                        h4 License Info
+                        .text-center
+                            img#userPortraitPreview.img-thumbnail(src="" height="200" alt="Profile Image")
+                    .col-md-8
+                        .form-row
+                            .form-group.col
+                                label(for="editUserVehicleClass") Vehicle Class
+                                input#editUserVehicleClass.form-control(type="text" name="vehicle_class" required)
+                            .form-group.col
+                                label(for="editUserDiscriminator") Doc. Discriminator
+                                input#editUserDiscriminator.form-control(type="text" name="document_discriminator" required)
+                            .form-group.col
+                                label(for="editUserCustomerID") Customer ID
+                                input#editUserCustomerID.form-control(type="text" name="customer_identifier" required)
+                        .form-row
+                            .form-group.col
+                                label(for="editUserDateOfIssue") Date Issued
+                                input#editUserDateOfIssue.form-control(type="text" name="date_of_issue" required)
+                            .form-group.col
+                                label(for="editUserExpires") Expires
+                                input#editUserExpires.form-control(type="text" name="expiration_date" required)
+                            .form-group.col
+                                label(for="editUserRCI") RCI Codes
+                                input#editUserRCI.form-control(type="text" name="rci_codes" required)
+                        .form-row
+                            .form-group.col
+                                label(for="editUserPortrait") Portrait
+                                input#editUserPortrait.form-control-file(type="file" name="portrait_selection")
+                                input(type="hidden" name="portrait" required)
+                            .form-group.col
+                                label(for="editUserSignature") Signature
+                                input#editUserSignature.form-control(type="text" name="signature" required)
+                            .form-group.col
+                                label(for="editUserEndorsements") Endorsements
+                                input#editUserEndorsements.form-control(type="text" name="endorsements" required)
+                hr
+                .d-flex.flex-row-reverse
+                    button#editUserButton.btn.btn-primary(type="submit" data-original-text="Update" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Updating") Update
+                    button#cancelEditUserButton.btn.btn-primary.mr-2(type="button") Cancel
+
+block scripts
+    script(src="/javascripts/user_edit.js")

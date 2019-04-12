@@ -1,0 +1,14 @@
+version: "3"
+services:
+  test-holder:
+    build: .
+    image: test-holder
+    environment:
+      - ACCOUNT_URL
+      - AGENT_NAME
+      - AGENT_PASSWORD
+      - AGENT_ADMIN_NAME
+      - AGENT_ADMIN_PASSWORD
+      - DELETE_BAD_CONNECTION_OFFERS=true
+      - CONNECTIONS_CLEANUP=true
+      - CREDENTIALS_CLEANUP=true

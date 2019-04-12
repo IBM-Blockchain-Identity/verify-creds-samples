@@ -1,0 +1,67 @@
+extends user_layout
+
+block content
+    script.
+        window.user_id = '#{user_id}'
+    .container
+        .card.mb-3
+            h3.card-header Edit a User
+            .card-body
+                #editUserAlert
+                form#editUserForm
+                    .form-row
+                        .form-group.col
+                            label(for="editUserEmail") Email Address
+                            input#editUserEmail.form-control(type="email" name="email" required readonly="readonly")
+                    .form-row
+                        .form-group.col
+                            label(for="editUserAgentName") Agent URL
+                            input#editUserAgentName.form-control(type="text" name="agent_name" required)
+                    .form-row
+                        .form-group.col
+                            label(for="editUserFirstName") First Name
+                            input#editUserFirstName.form-control(type="text" name="first_name" required)
+                        .form-group.col
+                            label(for="editUserMiddleName") Middle Name
+                            input#editUserMiddleName.form-control(type="text" name="middle_name" required)
+                        .form-group.col
+                            label(for="editUserLastName") Last Name
+                            input#editUserLastName.form-control(type="text" name="last_name" required)
+                    .form-row
+                        .form-group.col
+                            label(for="editUserSSN") SSN
+                            input#editUserSSN.form-control(type="text" name="ssn" required)
+                        .form-group.col
+                            label(for="editUserDoB") Date of Birth
+                            input#editUserDoB.form-control(type="text" name="dob" required)
+
+                    .form-group
+                        label(for="editUserAddress1") Address 1
+                        input#editUserAddress1.form-control(type="text" name="address_line_1" required)
+                    .form-row
+                        .form-group.col
+                            label(for="editUserAddress2") Address 2
+                            input#editUserAddress2.form-control(type="text" name="address_line_2" required)
+                        .form-group.col
+                            label(for="editUserState") State
+                            input#editUserState.form-control(type="text" name="state" required)
+                        .form-group.col
+                            label(for="editUserZipCode") Zip Code
+                            input#editUserZipCode.form-control(type="text" name="postal_code" required)
+
+                    .form-row
+                        .form-group.col
+                            label(for="editUserInstNo") Institution Number
+                            input#editUserInstNo.form-control(type="text" name="institution_number" required)
+                        .form-group.col
+                            label(for="editUserTransitNo") Transit Number
+                            input#editUserTransitNo.form-control(type="text" name="transit_number" required)
+                        .form-group.col
+                            label(for="editUserAccountNo") Account Number
+                            input#editUserAccountNo.form-control(type="text" name="account_number" required)
+
+                    button#editUserButton.btn.btn-primary.mr-2(type="submit" data-original-text="Update" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Updating") Update
+                    a.btn.btn-primary(href="/admin") Cancel
+
+block scripts
+    script(src="/javascripts/user_edit.js")

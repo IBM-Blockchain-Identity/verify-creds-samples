@@ -1,0 +1,66 @@
+{
+  "globals": {
+    "Clipboard": false,
+    "JSONEditor": false
+  },
+  "env": {
+    "es6": true,
+    "node": true,
+    "mocha": true,
+    "jquery": true,
+    "browser": true
+  },
+  "extends": "eslint:recommended",
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaVersion": 2017
+  },
+  "rules": {
+    "indent": [
+      "error",
+      "tab"
+    ],
+    "linebreak-style": [
+      "error",
+      "unix"
+    ],
+    "quotes": [
+      "error",
+      "single"
+    ],
+    "semi": [
+      "error",
+      "always"
+    ],
+    "eqeqeq": [
+      "error",
+      "always"
+    ],
+    "no-var": [
+      "error"
+    ],
+    "no-console": "off",
+    "no-unused-vars": [
+      "warn",
+      {
+        "args": "none"
+      }
+    ],
+    "prefer-const": ["error"],
+    "block-spacing": [2, "always"],
+    "global-require": 2,
+    "no-trailing-spaces": "error",
+    "no-multi-spaces": 2,
+    "array-bracket-spacing": [2, "always"],
+    "comma-spacing": [2, {"before": false, "after": true}],
+    "keyword-spacing": [2, {"before": true, "after": true}],
+    "space-before-function-paren": [2, "always"],
+    "object-curly-spacing": [2, "never"],
+    "template-curly-spacing": [2, "never"],
+    "arrow-spacing": 2,
+    "space-in-parens": [2, "never"],
+    "space-before-blocks": 2,
+    "valid-jsdoc": "error",
+    "prefer-arrow-callback": "error"
+  }
+}

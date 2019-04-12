@@ -1,0 +1,10 @@
+{
+  "name": "BBCU Login Request",
+  "version": "1.0",
+  "requested_attributes": {
+    "account_number": {
+      "name": "account_number",
+      "restrictions": []
+    }
+  }
+}

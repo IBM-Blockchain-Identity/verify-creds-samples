@@ -1,0 +1,160 @@
+html, body, main {
+    background-color: #edeff0;
+    height: 100%;
+}
+
+.container-fluid {
+    padding: 0;
+}
+
+.main-nav {
+    height: 64px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px 0 rgba(0,0,0,.12);
+    padding: 8px 16px;
+}
+
+.navbar-brand {
+    height: 45px;
+    width: 105px;
+    background-image: url(/images/ibm_logo.svg);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    padding: 2px;
+}
+
+.card-header {
+    border: none;
+    background-color: #ffffff
+}
+
+.card {
+    border: none;
+}
+
+.btn {
+    border-radius: 2rem;
+}
+
+.btn-primary {
+    background-color: #0b77e3;
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background-color: white;
+    color: #0b77e3;
+}
+
+.btn-danger {
+    color: #ffffff;
+}
+
+.btn-danger:hover {
+    background-color: white;
+    color: red;
+}
+
+h1, h2, h3, h4, h5, h6, label {
+    font-weight: bolder
+}
+
+.account-content dt, .account-content dd {
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.account-nav {
+    padding-bottom: 0;
+}
+
+.account-nav .nav-item {
+    margin-right: 40px;
+    font-size: 12px;
+    color: black;
+    height: 30px;
+}
+
+.account-nav .nav-item a {
+    color: black;
+}
+
+.account-nav .nav-item a:hover {
+    color: black;
+    text-decoration: none;
+}
+
+.account-nav .active {
+    border-bottom: 4px solid #0b77e3;
+    font-weight: bolder;
+}
+
+.account-menu {
+    background-color: #0b77e3;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-pic {
+    background-color: #0b77e3;
+    color: white;
+    height: 120px;
+    width: 120px;
+    border-radius: 100%;
+    border: 4px solid white;
+}
+
+@media (min-width: 576px) {
+    .account-menu {
+        width: 300px;
+    }
+}
+
+@media (max-width: 576px) {
+    .account-content {
+        flex-direction: column;
+    }
+}
+
+.issueButton {
+    background-color: #0b77e3;
+    border: 1px solid #ffffff;
+    color: #ffffff;
+    -webkit-animation: glowing 1500ms infinite;
+    -moz-animation: glowing 1500ms infinite;
+    -o-animation: glowing 1500ms infinite;
+    animation: glowing 1500ms infinite;
+}
+
+.issueButton:hover {
+    background-color: #ffffff !important;
+    border: 1px transparent;
+    color: #0b77e3;
+}
+
+@-webkit-keyframes glowing {
+    0% { background-color: #0b77e3; -webkit-box-shadow: 0 0 3px #0b77e3; }
+    50% { background-color: #73abe3; -webkit-box-shadow: 0 0 40px #73abe3; }
+    100% { background-color: #0b77e3; -webkit-box-shadow: 0 0 3px #0b77e3; }
+}
+
+@-moz-keyframes glowing {
+    0% { background-color: #0b77e3; -moz-box-shadow: 0 0 3px #0b77e3; }
+    50% { background-color: #73abe3; -moz-box-shadow: 0 0 40px #73abe3; }
+    100% { background-color: #0b77e3; -moz-box-shadow: 0 0 3px #0b77e3; }
+}
+
+@-o-keyframes glowing {
+    0% { background-color: #0b77e3; box-shadow: 0 0 3px #0b77e3; }
+    50% { background-color: #73abe3; box-shadow: 0 0 40px #73abe3; }
+    100% { background-color: #0b77e3; box-shadow: 0 0 3px #0b77e3; }
+}
+
+@keyframes glowing {
+    0% { background-color: #0b77e3; box-shadow: 0 0 3px #0b77e3; }
+    50% { background-color: #73abe3; box-shadow: 0 0 40px #73abe3; }
+    100% { background-color: #0b77e3; box-shadow: 0 0 3px #0b77e3; }
+}

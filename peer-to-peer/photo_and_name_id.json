@@ -1,0 +1,49 @@
+{
+  "name": "Photo and Name ID",
+  "version": "1.0",
+  "requested_attributes": {
+    "first_name_referent": {
+      "name": "first_name",
+      "restrictions": [
+        {
+          "schema_name": "Gov DMV Driver License"
+        }
+      ]
+    },
+    "last_name_referent": {
+      "name": "last_name",
+      "restrictions": [
+        {
+          "schema_name": "Gov DMV Driver License"
+        }
+      ]
+    },
+    "firstname_referent": {
+      "name": "First Name",
+      "restrictions": [
+        {
+          "schema_name": "Employment"
+        }
+      ]
+    },
+    "lastname_referent": {
+      "name": "Last Name",
+      "restrictions": [
+        {
+          "schema_name": "Employment"
+        }
+      ]
+    },
+    "portrait_referent": {
+      "name": "portrait",
+      "restrictions": [
+        {
+          "schema_name": "Gov DMV Driver License"
+        }
+      ]
+    }
+  },
+  "properties": {
+    "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACwAAAAsCAYAAAAehFoBAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAgpJREFUeNrsWetthDAMDuj+N52gbFBGYAQ2KCMwwnUDRqAbMEI6QRmBbsAGV+fqSBYCEhKc4yQsWdzDiT/s4BfJ7XYTNkqSRMKlBM4EH/WApbMJpY5gFXAleKkBXQr1LeOxWVhvApcB5FgBI9DOpssFsBZ4BbmR2cJaV4ZHQwYBBkpEJLLpS8WT0cXHAnsC2Oq9i4eOz0da+DzD3HQCJq7NDw0YAFbAnT6DGEl+8PMI3AIXe4WVVf4XWf1fW7LXcg6sU68M0hcCGMGOBFALXJD/TZWniEy/BpoN8ASsBpFb9ikn8jI2YGO1webmhZu8RgOs3U5cnLuAJWtrXDfO3SgX4NY8RFvAkvUDrq+2AvYNayZEdZ7rzboyVhx+M32Yb/+GVxk1cYCLfAEPD8l0Adkrjw34O1Bx7nuk0sAzWHt2xx/4VUWpJXCgYuJwvTGkdSbhxM50DQFdOIKtyJoyNmA5qdKuK3tIkmzuRZJv8RPU05Ex1jv+9IsuV5h6M0wyOkG8oMzX6mTH1kOG1sMoc52UmXM8LB2DaBZemHCWkwymgSrYo92ja366Nv/iuWk2Y8mtNOLDN7LG4Zm2KIT1cclYwxqpZfdixfrQ7T0MnA4Ez1HVCZh7oE1q4ePOh8WBXsqkjhZtIhmwsXXiLhaWpDPoGMFWmJCKNW8mLq9uzThV8L66HVwKpD8BBgDEEobF4kym7gAAAABJRU5ErkJggg=="
+  }
+}

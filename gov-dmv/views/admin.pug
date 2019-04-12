@@ -1,0 +1,202 @@
+extends layout
+
+block content
+    .card.mb-3
+        .card-body
+            #createUserAlert
+            form#createUserForm
+                .row
+                    .col-md-4
+                        img.img-fluid.d-none.d-md-block(src="/images/navbar-logo.png")
+
+                    .col-md-8
+                        .form-row
+                            ol.breadcrumb.bg-white.pl-0
+                                li.breadcrumb-item
+                                    a(href="/") Home
+                                li.breadcrumb-item.active DMV User Administration
+                        .form-row
+                            .d-flex.justify-content-between.w-100
+                                h3 Create a New User
+                                button.btn.btn-secondary(data-toggle="modal" data-target="#autofillModal") Demo Users
+                        hr.hr-thick
+                        .form-row
+                            .form-group.col
+                                label(for="createUserEmail") Email Address
+                                input#createUserEmail.form-control(type="email" placeholder="name@example.com" name="email" required)
+                            .form-group.col
+                                label(for="createUserPassword") Password
+                                input#createUserPassword.form-control(type="text" name="password" required)
+                            .form-group.col
+                                label(for="createUserConfirmPassword") Confirm Password
+                                input#createUserConfirmPassword.form-control(type="text" name="confirm_password" required)
+                                span#createUserPasswordMessage
+                        .form-row
+                            .form-group.col
+                                label(for="createUserAgentName") Agent URL
+                                input#createUserAgentName.form-control(type="text" name="agent_name" required)
+                hr
+                .row
+                    .col-md-4
+                        h4 General Info
+                        .mt-2
+                            input#createUserPortrait.inputfile(type="file" name="portrait_selection")
+                            label.btn.btn-secondary(for="createUserPortrait") Upload Photo
+                            input(type="hidden" name="portrait" required)
+                        .text-center.mt-2
+                            img#userPortraitPreview.img-thumbnail.d-none(src="" height="200" alt="Profile Image")
+
+                    .col-md-8
+                        .form-row
+                            .form-group.col
+                                label(for="createUserFirstName") First Name
+                                input#createUserFirstName.form-control(type="text" name="first_name" required)
+                            .form-group.col
+                                label(for="createUserLastName") Last Name
+                                input#createUserLastName.form-control(type="text" name="last_name" required)
+                        .form-row
+                            .form-group.col-md-5
+                                label(for="createUserDoB") Date of Birth
+                                input#createUserDoB.form-control(type="text" name="dob" required)
+                                input#createUserDoBTimestamp.form-control(type="hidden" name="dob_timestamp")
+                            .form-group.col-md-2
+                                label(for="createUserHeight") Height
+                                input#createUserHeight.form-control(type="text" name="height" required)
+                            .form-group.col-md-2
+                                label(for="createUserWeight") Weight
+                                input#createUserWeight.form-control(type="text" name="weight" required)
+                            .form-group.col-md-3
+                                label(for="createUserSex") Sex
+                                input#createUserSex.form-control(type="text" name="cardholder_sex" required)
+                        .form-row
+                            .form-group.col-md-4
+                                label(for="createUserHairColor") Hair Color
+                                input#createUserHairColor.form-control(type="text" name="hair_color" required)
+                            .form-group.col-md-4
+                                label(for="createUserEyeColor") Eye Color
+                                input#createUserEyeColor.form-control(type="text" name="eye_color" required)
+                hr
+                .row
+                    .col-md-4
+                        h4 Address
+                    .col-md-8
+                        .form-row
+                            .form-group.col-md-8
+                                label(for="createUserAddress1") Address 1
+                                input#createUserAddress1.form-control(type="text" name="address_line_1" required)
+                            .form-group.col-md-8
+                                label(for="createUserAddress2") Address 2
+                                input#createUserAddress2.form-control(type="text" name="address_line_2" required)
+                        .form-row
+                            .form-group.col-md-4
+                                label(for="createUserCity") City
+                                input#createUserCity.form-control(type="text" name="city" required)
+                            .form-group.col-md-3
+                                label(for="createUserState") State
+                                input#createUserState.form-control(type="text" name="state" required)
+                            .form-group.col-md-2
+                                label(for="createUserZipCode") Zip
+                                input#createUserZipCode.form-control(type="text" name="zip_code" required)
+                            .form-group.col-md-3
+                                label(for="createUserCountry") Country
+                                input#createUserCountry.form-control(type="text" name="country" required)
+                hr
+                .row
+                    .col-md-4
+                        h4 License Info
+                    .col-md-8
+                        .form-row
+                            .form-group.col
+                                label(for="createUserVehicleClass") Vehicle Class
+                                input#createUserVehicleClass.form-control(type="text" name="vehicle_class" required)
+                            .form-group.col
+                                label(for="createUserDiscriminator") Doc. Discriminator
+                                input#createUserDiscriminator.form-control(type="text" name="document_discriminator" required)
+                            .form-group.col
+                                label(for="createUserCustomerID") Customer ID
+                                input#createUserCustomerID.form-control(type="text" name="customer_identifier" required)
+                        .form-row
+                            .form-group.col
+                                label(for="createUserDateOfIssue") Date Issued
+                                input#createUserDateOfIssue.form-control(type="text" name="date_of_issue" required)
+                            .form-group.col
+                                label(for="createUserExpires") Expires
+                                input#createUserExpires.form-control(type="text" name="expiration_date" required)
+                            .form-group.col
+                                label(for="createUserRCI") RCI Codes
+                                input#createUserRCI.form-control(type="text" name="rci_codes" required)
+                        .form-row
+                            .form-group.col
+                                label(for="createUserSignature") Signature
+                                input#createUserSignature.form-control(type="text" name="signature" required)
+                            .form-group.col
+                                label(for="createUserEndorsements") Endorsements
+                                input#createUserEndorsements.form-control(type="text" name="endorsements" required)
+
+                hr
+                .d-flex.flex-row-reverse
+                    button#createUserButton.btn.btn-primary(type="submit" data-original-text="Create User" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Creating") Create User
+
+    .card.mb-3
+        .card-header.clearfix
+            h3.card-title.float-left User List
+            button#refreshUsersButton.btn.btn-primary.float-right(type="button" data-original-text="Refresh" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Loading") Refresh
+        .card-body
+            #userTableAlert
+            table#userTable.table.table-striped
+
+    .card.mb-3
+        .card-header.clearfix
+            h3.card-title.float-left Schemas
+            .btn-toolbar.float-right
+                button#openSchemaModalButton.btn.btn-primary.float-right.mr-2(type="button" data-original-text="Create Schema" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Loading") Create Schema
+                button#refreshSchemaButton.btn.btn-primary.float-right(type="button" data-original-text="Refresh" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Loading") Refresh
+        .card-body
+            #schemaAlert
+            table#schemaTable.table.table-striped
+
+    .card.mb-3
+        .card-header.clearfix
+            h3.card-title.float-left Credential Definitions
+            button#refreshCredDefsButton.btn.btn-primary.float-right(type="button" data-original-text="Refresh" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Loading") Refresh
+        .card-body
+            #credDefAlert
+            table#credDefTable.table.table-striped
+
+block extra
+    #autofillModal.modal(tabindex="-1" role="dialog")
+        .modal-dialog(role="document")
+            .modal-content
+                .modal-header
+                    h5.modal-title Select a User Template
+                    button.close(type="button" data-dismiss="modal")
+                        span &times;
+                .modal-body
+                    form#userTemplateForm
+                        .form-group
+                            label(for="userTemplate") User template:
+                            select#userTemplate.form-control(name="user_template")
+                        button.btn.btn-primary(type="submit") AutoFill
+
+    #newSchemaModal.modal(tabindex="-1" role="dialog")
+        .modal-dialog(role="document")
+            .modal-content
+                .modal-header
+                    h5.modal-title Publish New Schema
+                    button.close(type="button" data-dismiss="modal")
+                        span &times;
+                .modal-body
+                    form#licenseSchemaForm
+                        .row
+                            .col
+                                .form-group
+                                    label(for="schema_name") Name:
+                                    input#schema_name.form-control(type="text" placeholder="Driver License" value="driver_license" required)
+                            .col
+                                .form-group
+                                    label(for="schema_version") Version:
+                                    input#schema_version.form-control(type="text" placeholder="ex. '1.0', '1.0.2', etc." required)
+                        button#createSchemaButton.btn.btn-primary(type="submit" data-original-text="Submit" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Submitting") Submit
+block scripts
+    script(src="/javascripts/admin.js")
+    script(src="/javascripts/demo_users.js")

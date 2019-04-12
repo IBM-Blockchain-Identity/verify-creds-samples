@@ -1,0 +1,20 @@
+{
+  "name": "BBCU Account",
+  "version": "1.0",
+  "attributes": [
+    "first_name",
+    "middle_name",
+    "last_name",
+    "dob",
+    "address_line_1",
+    "address_line_2",
+    "ssn",
+    "state",
+    "postal_code",
+    "institution_number",
+    "transit_number",
+    "account_number",
+    "card_front",
+    "card_back"
+  ]
+}

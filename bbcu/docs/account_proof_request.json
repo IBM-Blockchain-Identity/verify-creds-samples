@@ -1,0 +1,112 @@
+{
+  "name": "Verify Employment",
+  "version": "1.0",
+  "nonce": "<generated>",
+  "requested_attributes": {
+    "address_line_1_mdl": {
+      "name": "address_line_1",
+      "restrictions": [
+        {
+          "cred_def_id": "<mdl_cred_def_id>"
+        }
+      ]
+    },
+    "address_line_2_mdl": {
+      "name": "address_line_2",
+      "restrictions": [
+        {
+          "cred_def_id": "<mdl_cred_def_id>"
+        }
+      ]
+    },
+    "dob_mdl": {
+      "name": "dob",
+      "restrictions": [
+        {
+          "cred_def_id": "<mdl_cred_def_id>"
+        }
+      ]
+    },
+    "first_name_mdl": {
+      "name": "first_name",
+      "restrictions": [
+        {
+          "cred_def_id": "<mdl_cred_def_id>"
+        }
+      ]
+    },
+    "last_name_mdl": {
+      "name": "last_name",
+      "restrictions": [
+        {
+          "cred_def_id": "<mdl_cred_def_id>"
+        }
+      ]
+    },
+    "country_mdl": {
+      "name": "country",
+      "restrictions": [
+        {
+          "cred_def_id": "<mdl_cred_def_id>"
+        }
+      ]
+    },
+    "state_mdl": {
+      "name": "state",
+      "restrictions": [
+        {
+          "cred_def_id": "<mdl_cred_def_id>"
+        }
+      ]
+    },
+    "zip_code_mdl": {
+      "name": "zip_code",
+      "restrictions": [
+        {
+          "cred_def_id": "<mdl_cred_def_id>"
+        }
+      ]
+    },
+    "first_name_hr": {
+      "name": "First Name",
+      "restrictions": [
+        {
+          "cred_def_id": "<hr_cred_def_id>"
+        }
+      ]
+    },
+    "last_name_hr": {
+      "name": "Last Name",
+      "restrictions": [
+        {
+          "cred_def_id": "<hr_cred_def_id>"
+        }
+      ]
+    },
+    "company_hr": {
+      "name": "Company",
+      "restrictions": [
+        {
+          "cred_def_id": "<hr_cred_def_id>"
+        }
+      ]
+    },
+    "salary_hr": {
+      "name": "Base Salary",
+      "restrictions": [
+        {
+          "cred_def_id": "<hr_cred_def_id>"
+        }
+      ]
+    },
+    "social_security_number_hr": {
+      "name": "Social Security Number",
+      "restrictions": [
+        {
+          "cred_def_id": "<hr_cred_def_id>"
+        }
+      ]
+    }
+  },
+  "requested_predicates": {}
+}

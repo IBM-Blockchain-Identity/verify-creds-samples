@@ -1,0 +1,128 @@
+extends layout
+
+block content
+    .container
+        .card.mb-3.mt-3
+            .card-header.clearfix
+                h3.card-title.float-left Create a New User
+                button.btn.btn-primary.float-right(data-toggle="modal" data-target="#autofillModal") Demo Users
+
+            .card-body
+                #createUserAlert
+                form#createUserForm
+                    .form-row
+                        .form-group.col
+                            label(for="createUserEmail") Email Address
+                            input#createUserEmail.form-control(type="email" placeholder="name@example.com" name="email" required)
+                        .form-group.col
+                            label(for="createUserPassword") Password
+                            input#createUserPassword.form-control(type="text" name="password" required)
+                        .form-group.col
+                            label(for="createUserConfirmPassword") Confirm Password
+                            input#createUserConfirmPassword.form-control(type="text" name="confirm_password" required)
+                            span#createUserPasswordMessage
+                    .form-row
+                        .form-group.col
+                            label(for="createUserAgentName") Agent URL
+                            input#createUserAgentName.form-control(type="text" name="agent_name" required)
+                    .form-row
+                        .form-group.col-md-6
+                            label(for="createUserFirstName") First Name
+                            input#createUserFirstName.form-control(type="text" placeholder="Alice" name="First Name" required)
+                        .form-group.col-md-6
+                            label(for="createUserLastName") Last Name
+                            input#createUserLastName.form-control(type="text" placeholder="Garcia" name="Last Name" required)
+                    .form-row
+                        .form-group.col-md-4
+                            label(for="createUserDoB") Date of Birth
+                            input#createUserDoB.form-control(type="text" placeholder="12-16-1990" name="Date of Birth" required)
+                        .form-group.col-md-8
+                            label(for="createUserSSN") Social Security Number
+                            input#createUserSSN.form-control(type="text" placeholder="123456789" name="Social Security Number" required)
+                    .form-row
+                        .col-md-4
+                            .text-center
+                                img#userPortraitPreview.img-thumbnail(src="" height="200" alt="Profile Image")
+                        .col-md-8
+                            .form-row
+                                .form-group.col
+                                    label(for="createUserPortrait") Portrait
+                                    input#createUserPortrait.form-control-file(type="file" name="portrait_selection")
+                                    input(type="hidden" name="portrait" required)
+                            .form-row
+                                .form-group.col-md-4
+                                    label(for="createUserJobTitle") Job Title
+                                    input#createUserJobTitle.form-control(type="text" placeholder="Software Developer" name="Job Title" required)
+                                .form-group.col-md-4
+                                    label(for="createUserHireDate") Hire Date
+                                    input#createUserHireDate.form-control(type="text" placeholder="10-09-2017" name="Hire Date" required)
+                                .form-group.col-md-4
+                                    label(for="createUserBaseSalary") Base Salary
+                                    input#createUserBaseSalary.form-control(type="number" placeholder="80000" name="Base Salary" required)
+                    input#createUserCompany(type="hidden" name="Company" value="IBM" required)
+
+                    button#createUserButton.btn.btn-primary(type="submit" data-original-text="Create" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Creating") Create
+
+        .card.mb-3
+            .card-header.clearfix
+                h3.card-title.float-left User List
+                button#refreshUsersButton.btn.btn-primary.float-right(type="button" data-original-text="Refresh" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Loading") Refresh
+            .card-body
+                #userTableAlert
+                table#userTable.table.table-striped
+
+        .card.mb-3
+            .card-header.clearfix
+                h3.card-title.float-left Schemas
+                .btn-toolbar.float-right
+                    button#openSchemaModalButton.btn.btn-primary.float-right.mr-2(data-original-text="Create Schema" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Loading") Create Schema
+                    button#refreshSchemaButton.btn.btn-primary.float-right(type="button" data-original-text="Refresh" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Loading") Refresh
+            .card-body
+                #schemaAlert
+                table#schemaTable.table.table-striped
+
+        .card.mb-3
+            .card-header.clearfix
+                h3.card-title.float-left Credential Definitions
+                button#refreshCredDefsButton.btn.btn-primary.float-right(type="button" data-original-text="Refresh" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Loading") Refresh
+            .card-body
+                #credDefAlert
+                table#credDefTable.table.table-striped
+
+block extra
+    #autofillModal.modal(tabindex="-1" role="dialog")
+        .modal-dialog(role="document")
+            .modal-content
+                .modal-header
+                    h5.modal-title Select a User Template
+                    button.close(type="button" data-dismiss="modal")
+                        span &times;
+                .modal-body
+                    form#userTemplateForm
+                        .form-group
+                            label(for="userTemplate") User template:
+                            select#userTemplate.form-control(name="user_template")
+                        button.btn.btn-primary(type="submit") AutoFill
+
+    #newSchemaModal.modal(tabindex="-1" role="dialog")
+        .modal-dialog(role="document")
+            .modal-content
+                .modal-header
+                    h5.modal-title Publish New Schema
+                    button.close(type="button" data-dismiss="modal")
+                        span &times;
+                .modal-body
+                    form#licenseSchemaForm
+                        .row
+                            .col
+                                .form-group
+                                    label(for="schema_name") Name:
+                                    input#schema_name.form-control(type="text" placeholder="employment" value="employment" required)
+                            .col
+                                .form-group
+                                    label(for="schema_version") Version:
+                                    input#schema_version.form-control(type="text" placeholder="ex. '1.0', '1.0.2', etc." required)
+                        button#createSchemaButton.btn.btn-primary(type="submit" data-original-text="Submit" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Submitting") Submit
+block scripts
+    script(src="/javascripts/admin.js")
+    script(src="/javascripts/demo_users.js")

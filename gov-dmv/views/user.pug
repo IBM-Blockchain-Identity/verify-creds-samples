@@ -1,0 +1,190 @@
+extends layout
+
+block content
+  script.
+    window.user_id = '#{user_id}'
+    window.ev_FRIENDLY_NAME = '#{ev_FRIENDLY_NAME}'
+    window.ev_MY_URL = '#{ev_MY_URL}'
+  .card.mb-3.pl-4.pr-4
+    .card-body
+      #personalInfoAlert
+      .row
+        .col-md-4
+          img.img-fluid.d-none.d-md-block(src="/images/navbar-logo.png")
+
+        .col-md-8
+          .form-row
+            ol.breadcrumb.bg-white.pl-0
+              li.breadcrumb-item
+                a(href="/") Home
+              li.breadcrumb-item.active My Profile
+          .form-row
+            h3 Info for: <span class="first-name"></span> <span class="last-name"></span>
+          hr.hr-thick
+          .form-row
+            .form-group.col
+              label(for="userEmail") Email Address
+              input#userEmail.form-control(type="email" readonly disabled)
+          .form-row
+            .form-group.col
+              label(for="userIdentity") Agent URL
+              input#userIdentity.form-control(type="text" readonly disabled)
+      .row.info-box.pt-3.mt-3
+        .col-md-4
+          h4 General Info
+          .text-center
+            img#userPortraitPreview.img-thumbnail(src="" height="200" alt="Profile Image")
+        .col-md-8
+          .form-row
+            .form-group.col
+              label(for="infoFirstName") First Name
+              input#infoFirstName.form-control(type="text" readonly disabled)
+            .form-group.col
+              label(for="infoLastName") Last Name
+              input#infoLastName.form-control(type="text" readonly disabled)
+          .form-row
+            .form-group.col-md-5
+              label(for="infoDoB") Date of Birth
+              input#infoDoB.form-control(type="text" disabled readonly)
+              input#infoDoBTimestamp.form-control(type="hidden" disabled readonly)
+            .form-group.col-md-2
+              label(for="infoHeight") Height
+              input#infoHeight.form-control(type="text" disabled readonly)
+            .form-group.col-md-2
+              label(for="infoWeight") Weight
+              input#infoWeight.form-control(type="text" disabled readonly)
+            .form-group.col-md-3
+              label(for="infoSex") Sex
+              input#infoSex.form-control(type="text" disabled readonly)
+          .form-row
+            .form-group.col-md-4
+              label(for="infoEyeColor") Eye Color
+              input#infoEyeColor.form-control(type="text" disabled readonly)
+            .form-group.col-md-4
+              label(for="infoHairColor") Hair Color
+              input#infoHairColor.form-control(type="text" disabled readonly)
+      .row.info-box.pt-3.mt-4
+        .col-md-4
+          h4 Address
+        .col-md-8
+          .form-row
+            .form-group.col-md-8
+              label(for="infoAddress1") Address Line 1
+              input#infoAddress1.form-control(type="text" disabled readonly)
+          .form-row
+            .form-group.col-md-8
+              label(for="infoAddress2") Address Line 2
+              input#infoAddress2.form-control(type="text" disabled readonly)
+          .form-row
+            .form-group.col-md-4
+              label(for="infoCity") City
+              input#infoCity.form-control(type="text" disabled readonly)
+            .form-group.col-md-3
+              label(for="infoState") State
+              input#infoState.form-control(type="text" disabled readonly)
+            .form-group.col-md-2
+              label(for="infoZipCode") Zip
+              input#infoZipCode.form-control(type="text" disabled readonly)
+            .form-group.col-md-3
+              label(for="infoCountry") Country
+              input#infoCountry.form-control(type="text" disabled readonly)
+      .row.info-box.pt-3.mt-4
+        .col-md-4
+          h4 License Specific
+        .col-md-8
+          .form-row
+            .form-group.col
+              label(for="infoVehicleClass") Vehicle Class
+              input#infoVehicleClass.form-control(type="text" disabled readonly)
+            .form-group.col
+              label(for="infoDocDiscrim") Doc. Discriminator
+              input#infoDocDiscrim.form-control(type="text" disabled readonly)
+            .form-group.col
+              label(for="infoCustomerID") Customer ID
+              input#infoCustomerID.form-control(type="text" disabled readonly)
+          .form-row
+            .form-group.col
+              label(for="infoDateIssued") Date of Issue
+              input#infoDateIssued.form-control(type="text" disabled readonly)
+            .form-group.col
+              label(for="infoRCI") RCI Codes
+              input#infoRCI.form-control(type="text" disabled readonly)
+            .form-group.col
+              label(for="infoExpires") Expiration Date
+              input#infoExpires.form-control(type="text" disabled readonly)
+          .form-row
+            .form-group.col
+              label(for="infoEndorsements") Endorsements
+              input#infoEndorsements.form-control(type="text" disabled readonly)
+            .form-group.col
+              label(for="infoSignature") Signature
+              input#infoSignature.form-control(type="text" disabled readonly)
+      hr
+      h3 Download Digital License
+      p You can use either method:
+      ol
+        li Click to Download your license to your phone
+          p
+          button#connectWalletButton.btn.btn-primary Download your digital license
+          p
+        li Scan with Credici Mobile App to Download your license to your phone
+          p
+          div#qrcodePlaceHolder
+
+block extra
+  #issuanceModal.modal(tabindex="-1" role="dialog")
+    .modal-dialog(role="document")
+      .modal-content
+        .modal-header
+          button.close(type="button" data-dismiss="modal")
+            span &times;
+        .modal-body
+          #connectionFlowAlert
+          #issuanceCarousel.carousel.slide(data-ride="false" data-interval="false" data-keyboard="false" data-wrap="false" pause="false")
+            .carousel-inner.text-center
+              .carousel-item.active
+                .d-block.w-100.item-padding.text-primary
+                  i.fas.fa-store-alt.fa-10x.mr-3
+                  i.fas.fa-sync-alt.fa-7x.mr-3.fa-spin
+                  i.fas.fa-mobile-alt.fa-10x
+                .carousel-caption
+                  h5 Collecting information
+                  p We're preparing to issue you a credential.
+              .carousel-item
+                .d-block.w-100.item-padding.text-primary
+                  i.fas.fa-store-alt.fa-10x.mr-3
+                  i.fas.fa-sync-alt.fa-7x.mr-3.fa-spin
+                  i.fas.fa-mobile-alt.fa-10x
+                .carousel-caption
+                  h5 Establishing a connection with your device
+                  p Please accept any connection offers on your device.
+              .carousel-item
+                .d-block.w-100.item-padding.text-primary
+                  i.fas.fa-id-card.fa-10x.mr-3
+                  i.fas.fa-redo-alt.fa-7x.mr-3.fa-spin
+                  i.fas.fa-mobile-alt.fa-10x
+                .carousel-caption
+                  h5 Delivering your account credential
+                  p Please accept the credential offer on your mobile device.
+              .carousel-item
+                .d-block.w-100.item-padding.text-success
+                  i.fas.fa-check.fa-10x
+                .carousel-caption.text-success
+                  h5 All done!
+                  p Your account ownership credential has been delivered to your wallet.
+              .carousel-item
+                .d-block.w-100.item-padding.text-danger
+                  i.fas.fa-exclamation-circle.fa-10x
+                .carousel-caption.text-danger
+                  h5 Oh no!
+                  p Something went wrong! Please refresh the page and try again.
+              .carousel-item
+                .d-block.w-100.item-padding.text-danger
+                  i.fas.fa-exclamation-circle.fa-10x
+                .carousel-caption.text-danger
+                  h5 Issuance Canceled
+                  p Refresh the page to start over.
+
+block scripts
+  script(src="/javascripts/qrcode.min.js")
+  script(src="/javascripts/connect_with_dmv.js")

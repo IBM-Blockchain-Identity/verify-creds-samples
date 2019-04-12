@@ -1,0 +1,134 @@
+extends user_layout
+
+block content
+    .container
+        .card.mb-3
+            .card-header.clearfix
+                h3.card-title.float-left Create a New User
+                button.btn.btn-primary.float-right(data-toggle="modal" data-target="#autofillModal") Demo Users
+
+            .card-body
+                #createUserAlert
+                form#createUserForm
+                    .form-row
+                        .form-group.col
+                            label(for="createUserEmail") Email Address
+                            input#createUserEmail.form-control(type="email" placeholder="name@example.com" name="email" required)
+                        .form-group.col
+                            label(for="createUserPassword") Password
+                            input#createUserPassword.form-control(type="text" name="password" required)
+                        .form-group.col
+                            label(for="createUserConfirmPassword") Confirm Password
+                            input#createUserConfirmPassword.form-control(type="text" name="confirm_password" required)
+                            span#createUserPasswordMessage
+                    .form-row
+                        .form-group.col
+                            label(for="createUserAgentName") Agent URL
+                            input#createUserAgentName.form-control(type="text" name="agent_name" required)
+                    .form-row
+                        .form-group.col
+                            label(for="createUserFirstName") First Name
+                            input#createUserFirstName.form-control(type="text" name="first_name" required)
+                        .form-group.col
+                            label(for="createUserMiddleName") Middle Name
+                            input#createUserMiddleName.form-control(type="text" name="middle_name" required)
+                        .form-group.col
+                            label(for="createUserLastName") Last Name
+                            input#createUserLastName.form-control(type="text" name="last_name" required)
+                    .form-row
+                        .form-group.col
+                            label(for="createUserDoB") Date of Birth
+                            input#createUserDoB.form-control(type="text" name="dob" required)
+                        .form-group.col
+                            label(for="createUserSSN") Social Security No.
+                            input#createUserSSN.form-control(type="text" name="ssn" required)
+                    .form-row
+                        .form-group.col
+                            label(for="createUserAddrLine1") Address Line 1
+                            input#createUserAddrLine1.form-control(type="text" name="address_line_1" required)
+                        .form-group.col
+                            label(for="createUserAddrLine2") Address Line 2
+                            input#createUserAddrLine2.form-control(type="text" name="address_line_2" required)
+                    .form-row
+                        .form-group.col
+                            label(for="createUserState") State
+                            input#createUserState.form-control(type="text" name="state" required)
+                        .form-group.col
+                            label(for="createUserPostalCode") Postal Code
+                            input#createUserPostalCode.form-control(type="text" name="postal_code" required)
+                    .form-row
+                        .form-group.col
+                            label(for="createUserAccountNumber") Account Number
+                            input#createUserAccountNumber.form-control(type="text" name="account_number" required)
+                        .form-group.col
+                            label(for="createUserInstitutionNumber") Institution Number
+                            input#createUserInstitutionNumber.form-control(type="text" name="institution_number" required)
+                        .form-group.col
+                            label(for="createUserTransitNumber") Transit Number
+                            input#createUserTransitNumber.form-control(type="text" name="transit_number" required)
+                    button#createUserButton.btn.btn-primary(type="submit" data-original-text="Create" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Creating") Create
+
+        .card.mb-3
+            .card-header.clearfix
+                h3.card-title.float-left User List
+                button#refreshUsersButton.btn.btn-primary.float-right(type="button" data-original-text="Refresh" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Loading") Refresh
+            .card-body
+                #userTableAlert
+                table#userTable.table.table-striped
+
+        .card.mb-3
+            .card-header.clearfix
+                h3.card-title.float-left Schemas
+                .btn-toolbar.float-right
+                    button#openSchemaModalButton.btn.btn-primary.float-right.mr-2(type="button" data-original-text="Create Schema" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Loading") Create Schema
+                    button#refreshSchemaButton.btn.btn-primary.float-right(type="button" data-original-text="Refresh" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Loading") Refresh
+            .card-body
+                #schemaAlert
+                table#schemaTable.table.table-striped
+
+        .card.mb-3
+            .card-header.clearfix
+                h3.card-title.float-left Credential Definitions
+                button#refreshCredDefsButton.btn.btn-primary.float-right(type="button" data-original-text="Refresh" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Loading") Refresh
+            .card-body
+                #credDefAlert
+                table#credDefTable.table.table-striped
+
+block extra
+    #autofillModal.modal(tabindex="-1" role="dialog")
+        .modal-dialog(role="document")
+            .modal-content
+                .modal-header
+                    h5.modal-title Select a User Template
+                    button.close(type="button" data-dismiss="modal")
+                        span &times;
+                .modal-body
+                    form#userTemplateForm
+                        .form-group
+                            label(for="userTemplate") User template:
+                            select#userTemplate.form-control(name="user_template")
+                        button.btn.btn-primary(type="submit") AutoFill
+
+    #newSchemaModal.modal(tabindex="-1" role="dialog")
+        .modal-dialog(role="document")
+            .modal-content
+                .modal-header
+                    h5.modal-title Publish New Schema
+                    button.close(type="button" data-dismiss="modal")
+                        span &times;
+                .modal-body
+                    form#licenseSchemaForm
+                        .row
+                            .col
+                                .form-group
+                                    label(for="schema_name") Name:
+                                    input#schema_name.form-control(type="text" placeholder="BBCU Account" value="BBCU Account" required)
+                            .col
+                                .form-group
+                                    label(for="schema_version") Version:
+                                    input#schema_version.form-control(type="text" placeholder="ex. '1.0', '1.0.2', etc." required)
+                        button#createSchemaButton.btn.btn-primary(type="submit" data-original-text="Submit" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Submitting") Submit
+
+block scripts
+    script(src="/javascripts/admin.js")
+    script(src="/javascripts/demo_users.js")

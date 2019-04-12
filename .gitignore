@@ -1,0 +1,21 @@
+# IntelliJ
+.idea
+
+# Mac stuff
+.DS_Store
+
+# NPM dependencies
+node_modules
+
+# docker-compose environment variables
+.env
+
+# The first thing people delete when `npm install` fails
+package-lock.json
+
+# Persisted couchdb storage directory
+couchdb
+
+# Deployment files
+travis/deployment_spec.yml
+travis/ingress.yml

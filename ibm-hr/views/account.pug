@@ -1,0 +1,107 @@
+extends layout
+
+block navbar
+  div
+    a.btn.btn-primary(href="/logout") Logout
+
+block content
+  script.
+    window.user_id = '#{user_id}'
+
+  .flex-container.full-height.account-content
+    .account-menu
+      img.profile-pic.mt-5(src='/images/user-solid.png')
+      h3.infoFullName.mt-3.mb3
+      h6.infoJobTitle.mb-6
+      button.btn.btn-primary.issueButton.mt-4.mb-6 Issue Credential
+      hr
+
+    .account-info.ml-3
+      .card.mt-3.d-none.d-sm-block
+        .card-body.account-nav
+          ul.nav
+            li.nav-item.active
+              a(href="#") Job Details
+            li.nav-item
+              a(href="#") All Current Jobs
+            li.nav-item
+              a(href="#") Management Chain
+            li.nav-item
+              a(href="#") Additional Data
+            li.nav-item
+              a(href="#") More
+
+      .card.mt-3
+        .card-body
+          #personalInfoAlert
+          .row
+            .col-md-6
+              h5 Job Details
+              dl.row
+                dt.col-sm-3 Job Title
+                dd.infoJobTitle.col-sm-9
+                dt.col-sm-3 Hire Date
+                dd.infoHireDate.col-sm-9
+                dt.col-sm-3 Base Salary
+                dd.infoBaseSalary.col-sm-9
+            .col-md-6
+              h5 Contact Information - Public
+              dl.row
+                dt.col-sm-2 Email
+                dd.infoEmail.col.sm-9
+
+  .modal#issuanceModal(tabindex="-1")
+    .modal-dialog
+      .modal-content
+        .modal-header
+          h3.modal-title Download My Credential
+        .modal-body
+          #connectionFlowAlert
+          #issuanceCarousel.carousel.slide(data-ride="false" data-interval="false" data-keyboard="false" data-wrap="false" pause="false")
+            .carousel-inner.text-center
+              .carousel-item.active
+                .d-block.w-100.item-padding.text-primary
+                  i.fas.fa-store-alt.fa-10x.mr-3
+                  i.fas.fa-sync-alt.fa-7x.mr-3.fa-spin
+                  i.fas.fa-mobile-alt.fa-10x
+                .carousel-caption
+                  h5 Collecting information
+                  p We're preparing to issue you a credential.
+              .carousel-item
+                .d-block.w-100.item-padding.text-primary
+                  i.fas.fa-store-alt.fa-10x.mr-3
+                  i.fas.fa-sync-alt.fa-7x.mr-3.fa-spin
+                  i.fas.fa-mobile-alt.fa-10x
+                .carousel-caption
+                  h5 Establishing a connection with your device
+                  p Please accept any connection offers on your device.
+              .carousel-item
+                .d-block.w-100.item-padding.text-primary
+                  i.fas.fa-id-card.fa-10x.mr-3
+                  i.fas.fa-redo-alt.fa-7x.mr-3.fa-spin
+                  i.fas.fa-mobile-alt.fa-10x
+                .carousel-caption
+                  h5 Delivering your credential
+                  p Please accept the credential offer on your mobile device.
+              .carousel-item
+                .d-block.w-100.item-padding.text-success
+                  i.fas.fa-check.fa-10x
+                .carousel-caption.text-success
+                  h5 All done!
+                  p Your credential has been delivered to your wallet.
+              .carousel-item
+                .d-block.w-100.item-padding.text-danger
+                  i.fas.fa-exclamation-circle.fa-10x
+                .carousel-caption.text-danger
+                  h5 Oh no!
+                  p Something went wrong! Please refresh the page and try again.
+              .carousel-item
+                .d-block.w-100.item-padding.text-danger
+                  i.fas.fa-exclamation-circle.fa-10x
+                .carousel-caption.text-danger
+                  h5 Issuance Canceled
+                  p Refresh the page to start over.
+
+block scripts
+  script(src="/javascripts/qrcode.min.js")
+  script(src="/javascripts/account.js")

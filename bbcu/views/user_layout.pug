@@ -1,0 +1,25 @@
+extends site_layout
+
+block banner
+    .bbcu-logo-bar
+        .container.clear-fix
+            a(href="/")
+                img.bbcu-logo(src="/images/logo.png")
+            a.bbcu-search-icon(href="/admin")
+                img(src="/images/Icons/Search_Icon.png")
+    nav.navbar.navbar-expand-lg.bbcu-nav-bar.mb-3
+        .container
+            ul.navbar-nav
+                li#accountsNav.nav-item
+                    a.nav-link(href="#") Accounts
+                li.nav-item
+                    a.nav-link(href="#") Transfers
+                li.nav-item
+                    a.nav-link(href="#") Rewards
+            ul.navbar-nav.navbar-right
+                li.nav-item
+                    a#notification_icon.bbcu-nav-icon(href="#")
+                li#profileNav.nav-item
+                    a#profile_icon.bbcu-nav-icon(href="#")
+                li.nav-item
+                    a.nav-link#sign-off-link(href="/logout") Sign Off

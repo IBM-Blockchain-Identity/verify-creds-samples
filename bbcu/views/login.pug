@@ -1,0 +1,190 @@
+extends login_layout
+
+block content
+    .container-fluid.bbcu-banner
+        .container
+            .d-flex.justify-content-between
+                .banner-content.align-self-center
+                    h3 What's a Mobile Wallet?
+                    p A Mobile Wallet will allow you to sign into your accounts securely without having to remember your password.
+                    a.btn(href="#") Learn More
+
+                .banner-sign-in.align-self-center
+                    #loginCarousel.carousel.slide(data-ride="false" data-interval="false" data-keyboard="false" data-wrap="false" pause="false")
+                        .carousel-inner
+                            .carousel-item.active
+                                h3 Mobile Wallet Sign On
+                                button#mobile-sign-on-button.btn.btn-bbcu.vcSignonLink Login with Mobile Wallet
+                                button.btn.btn-bbcu.vcSignupLink(href="/signup") Sign up for Mobile Wallet
+                                .sign-in-links
+                                    a.userpassLink(href="#") Login with User ID and Password
+                            .carousel-item
+                                h3 Sign On
+                                form#loginForm
+                                    .row.ml-0.mr-0
+                                        .form-group.col.pl-0
+                                            label#userIDLabel.hidden-form-label(for="userID") User ID
+                                            input#userID.form-control(type="text" name="username" placeholder="User ID" required)
+                                        .form-group.col.pr-0
+                                            label#passwordLabel.hidden-form-label(for="password") Password
+                                            input#password.form-control(type="password" name="password" placeholder="Password" required)
+                                    .form-check
+                                        input#rememberUsername.form-check-input(type="checkbox" name="remember_username")
+                                        label.form-check-label(for="rememberUsername") Remember my User ID
+                                    button.btn.btn-bbcu.mt-3(type="submit") Sign On
+                                .sign-in-links
+                                    .row
+                                        a.col(href="#") Forgot User ID?
+                                        a.col(href="#") Activate a Card
+                                    .row
+                                        a.col(href="#") Forgot Password?
+                                        a.col.vcSignonLink(href="#") Register for Online Access
+                            .carousel-item
+                                h3 Mobile Wallet Sign On
+                                form#vcSignonForm
+                                    .row.ml-0.mr-0
+                                        .col.pr-0.pl-0
+                                            label#vcUserIDLabel.hidden-form-label(for="vcUserID") User ID
+                                            input#vcUserID.form-control(type="text" name="username" placeholder="User ID")
+                                    .form-check
+                                        input#rememberInfo.form-check-input(type="checkbox" name="remember_info")
+                                        label.form-check-label(for="rememberInfo") Remember my Info
+                                    button.btn.btn-bbcu.mt-3(type="submit") Sign On
+                                .sign-in-links
+                                    .row
+                                        a.col.userpassLink(href="#") Login with Username and Password
+                                    .row
+                                        a.col.vcSignupLink(href="#") Sign up for Mobile Wallet
+
+    .container.mt-5
+        .row
+            .col-md-4
+                .d-flex.flex-column
+                    h4.font-weight-bold.mb-4 What's New at BBCU?
+                    img.img-fluid.object-cover(src="/images/Images/3up_Image-1.jpg")
+                    a.mt-4.up3-link.text-decoration-underline(href="#") Learn More
+            .col-md-4
+                .d-flex.flex-column
+                    h4.font-weight-bold.mb-4 Credit Card Rewards
+                    img.img-fluid.object-cover(src="/images/Images/3up_Image-2.jpg")
+                    a.mt-4.up3-link.text-decoration-underline(href="#") Learn More
+            .col-md-4
+                .d-flex.flex-column
+                    h4.font-weight-bold.mb-4 Travel Rewards Programs
+                    img.img-fluid.object-cover(src="/images/Images/3up_Image-3.jpg")
+                    a.mt-4.up3-link.text-decoration-underline(href="#") Learn More
+
+block extra
+    #vcSignonModal.bbcu-signon.modal(tabindex="-1" role="dialog")
+        .modal-dialog(role="document")
+            .modal-content
+                .modal-header
+                    button.close(type="button" data-dismiss="modal")
+                        span &times;
+                .modal-body
+                    #vcSignonCarousel.carousel.slide(data-ride="false" data-interval="false" data-keyboard="false" data-wrap="false" pause="false")
+                        .carousel-inner
+                            .carousel-item.active.text-center
+                                h2 Logging in with your Mobile Wallet...
+                                .spinner-container
+                                    i.fas.fa-circle-notch.fa-spin.fa-2x
+                                button#vcSignonCancel.btn.btn-bbcu(type="button" data-dismiss="modal") Cancel
+                            .carousel-item.text-center
+                                h2 Login Failed
+                                p#vcSignonFailed We were unable to authenticate your mobile wallet.
+                                button.btn.btn-bbcu.userpassLink(type="button" data-dismiss="modal") Standard Sign On
+
+    #vcSignupModal.bbcu-signon.modal(tabindex="-1" role="dialog")
+        .modal-dialog(role="document")
+            .modal-content
+                .modal-header
+                    button.close(type="button" data-dismiss="modal")
+                        span &times;
+                .modal-body
+                    #vcSignupCarousel.carousel.slide(data-ride="false" data-interval="false" data-keyboard="false" data-wrap="false" pause="false")
+                        .carousel-inner
+
+                            .carousel-item.active.text-center
+                                h2 Before registering for a Mobile Wallet, you will need the following credentials:
+                                .cred-images.row
+                                    .col.d-flex.flex-column.justify-content-center
+                                        a.pt-2(href="#" target="_blank")
+                                            i.fas.fa-id-card.fa-5x
+                                        p Driver's License
+                                    .col.d-flex.flex-column.justify-content-center
+                                        a.pt-2(href="#" target="_blank")
+                                            i.fas.fa-id-card.fa-5x
+                                        p Proof of Employment
+                                .cred-buttons
+                                    button#credsNextButton.btn.btn-bbcu Next
+                                    a.vcSignupCancel(href="#") Cancel
+                                .info-link-container
+                                    a.info-link(href="#") If you don’t have a Mobile Wallet application, click here to learn how to get one.
+
+                            .carousel-item.text-center
+                                h2 Please enter User ID and Phone Number to create a Mobile Wallet account
+                                .signup-form.text-left
+                                    form#signupForm
+                                        .form-group
+                                            label.hidden-form-label(for="signupUserID") Email Address
+                                            input#signupUserID.form-control(type="email" name="username" placeholder="Email Address" required)
+                                        .form-group
+                                            label.hidden-form-label(for="signupPassword") Password
+                                            input#signupPassword.form-control(type="password" name="password" placeholder="Password" required)
+                                        .form-group
+                                            label.hidden-form-label(for="signupAgentName") Agent URL
+                                            input#signupAgentName.form-control(type="text" name="agent_name" placeholder="Agent URL" required)
+                                .cred-buttons
+                                    button#signupNextButton.btn.btn-bbcu(disabled) Next
+                                    a.vcSignupCancel(href="#") Cancel
+                                .info-link-container
+                                    a.info-link(href="#") If you don’t have a Mobile Wallet application, click here to learn how to get one.
+
+                            .carousel-item.text-center
+                                h2 Establishing a connection with your mobile wallet...
+                                .verifying-creds-text
+                                    i.fas.fa-circle-notch.fa-spin.fa-2x
+                                    span Please accept the connection offer on your device
+                                button.btn.btn-bbcu.vcSignupCancel Cancel
+                                .info-link-container
+                                    a.info-link(href="#") If you don’t have a Mobile Wallet application, click here to learn how to get one.
+
+                            .carousel-item.text-center
+                                h2 Checking your identification
+                                .verifying-creds-text
+                                    i.fas.fa-circle-notch.fa-spin.fa-2x
+                                    span Please accept the verification request on your device
+                                button.btn.btn-bbcu.vcSignupCancel Cancel
+
+                            .carousel-item.text-center
+                                h2 Issuing your account information
+                                .verifying-creds-text
+                                    i.fas.fa-circle-notch.fa-spin.fa-2x
+                                    span Please accept the credential offer on your device
+                                button.btn.btn-bbcu.vcSignupCancel Cancel
+
+                            .carousel-item.text-center
+                                h2 Enrollment Failed
+                                .signup-failed-text
+                                    p You don’t have permission to create a Mobile Wallet account.
+                                button.btn.btn-bbcu.userpassLink(type="button" data-dismiss="modal") Standard Sign On
+
+                            .carousel-item.text-center
+                                h2 Enrollment Failed
+                                .signup-failed-text
+                                    p You already have a Mobile Wallet.
+                                button.btn.btn-bbcu.vcSignonLink(type="button" data-dismiss="modal") Mobile Wallet Sign On
+
+                            .carousel-item
+                                .app-info-title
+                                    h2 Getting your Mobile Wallet
+                                .app-info-text
+                                    p To get your Mobile Wallet:
+                                    ol
+                                        li Contact Us
+                                .text-center
+                                    button.btn.btn-bbcu(type="button" data-dismiss="modal") Ok
+
+block scripts
+    script(src="/javascripts/login.js")
+    script(src="/javascripts/qrcode.min.js")

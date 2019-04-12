@@ -1,0 +1,41 @@
+{
+  "name": "Bartender Verify Age",
+  "version": "1.0",
+  "requested_attributes": {
+    "first_name_referent": {
+      "name": "first_name",
+      "restrictions": [{
+        "schema_name": "Gov DMV Driver License", "schema_version": "1.2"
+      }]
+    },
+    "last_name_referent": {
+      "name": "last_name",
+      "restrictions": [{
+        "schema_name": "Gov DMV Driver License", "schema_version": "1.2"
+      }]
+    },
+    "portrait_referent": {
+      "name": "portrait",
+      "restrictions": [{
+        "schema_name": "Gov DMV Driver License", "schema_version": "1.2"
+      }]
+    },
+    "drink_order": {
+      "name": "drink_order"
+    }
+  },
+  "requested_predicates": {
+    "predicate1_referent": {
+      "name": "dob_timestamp",
+      "p_type": ">=",
+      "p_value": "%date-21yr%",
+      "restrictions": [{"schema_name": "Gov DMV Driver License", "schema_version": "1.2"}]
+    }
+  },
+  "properties": {
+    "attributes": {
+      "drink_order": "What would you like to order?"
+    },
+    "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACwAAAAsCAYAAAAehFoBAAAACXBIWXMAAAsSAAALEgHS3X78AAAB6ElEQVRYCe2YgXGDMAwApV4HYIOyQbJBMwIjZARGyggdgWzgbNBswAbqcSe3PhVjWzJJuaI7H3dEsh5ZtuQgEcGW5GVTtDvwA6QKMCI2iNgjokNEEsPxb02Vz5k2nWUAQAcA4zRVYkw6ndmfEfYsIC/8ASceHb8Ldc5PAWYYD+EA4Lige2Qdr6+OtBa2CdJgAmkybTz0mGNTE7gPohWNbCTS3q5/JLCP1EVh63PaaXxrj7UDPz8Utt7mkNCblWJgcZ6OCp8am2+xFg6Tc40UAxNRCNkqfJoqnjbCN352Cltvc0vozct/Oda2VThoa6U5AFlqfibIv9P8iEhvo70U+dmLZQ/TpdfmrBz7rXltebXOj4jHYKO9R9SuADBMjQ8ROZND42aby9nUcJbNV5zDiNjyURVG884RnManMGmDO95b8P7KR5zUrxfhmSNsKIkW2w+Wo64E9iwcqXoB+ulFRk0xKYlMVhkugFaV65yJ29JGpwBaNkRtDeAhmNAc2UikfUAGE7BIBXXOZkD3uamRmsjlfnkFaL+Si9f/1FKZ+9cC4HA1o6m31Ev4u9ediDT/PxQJ+7gL379kCfjEz2FFTine1ymmsATsS+8zgGNNVFZ7WVbrbZL0NQtc7e/9FWS/cawtO/CqAgBfw3QkaxKV43wAAAAASUVORK5CYII="
+  }
+}

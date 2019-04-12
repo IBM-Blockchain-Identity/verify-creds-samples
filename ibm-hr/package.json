@@ -1,0 +1,36 @@
+{
+  "name": "ibm-hr",
+  "author": "Dale Avery <davery@us.ibm.com>",
+  "contributors": [
+    "Bryce Curtis <bcurtis@us.ibm.com",
+    "Rachel Radulovich <rachel.elizabeth.radulovich@ibm.com>"
+  ],
+  "version": "0.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "node ./bin/www.js",
+    "lint": "./node_modules/.bin/eslint . || true"
+  },
+  "dependencies": {
+    "async": "^2.6.1",
+    "bcrypt": "^3.0.2",
+    "body-parser": "^1.18.3",
+    "compression": "^1.7.2",
+    "cookie-parser": "~1.4.3",
+    "express": "~4.16.0",
+    "express-session": "^1.15.6",
+    "http-errors": "^1.7.1",
+    "morgan": "~1.9.0",
+    "nano": "^7.1.1",
+    "node-fetch": "^2.3.0",
+    "openssi-websdk": "0.0.1-alpha",
+    "pug": "^2.0.3",
+    "request": "^2.88.0",
+    "uuid": "^3.2.1",
+    "winston": "^3.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.9.0"
+  }
+}

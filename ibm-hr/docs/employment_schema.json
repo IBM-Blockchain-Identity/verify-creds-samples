@@ -1,0 +1,17 @@
+{
+  "name": "Employment",
+  "version": "1.0",
+  "attributes": [
+    "First Name",
+    "Last Name",
+    "Date of Birth",
+    "Social Security Number",
+    "Company",
+    "Job Title",
+    "Hire Date",
+    "Base Salary",
+    "card_front",
+    "card_back",
+    "portrait"
+  ]
+}

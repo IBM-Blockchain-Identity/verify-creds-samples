@@ -1,0 +1,44 @@
+a {
+  color: #00B7FF;
+}
+
+.disclaimer {
+  height: 50px;
+  background-color:black;
+  color:white;
+  text-align:center;
+  font-size: 1.5em;
+  width:100%;padding:5px;
+}
+
+.carousel-item {
+  min-height: 500px;
+}
+
+.carousel-caption {
+  color: black;
+}
+
+.item-padding {
+  padding-top: 100px;
+}
+
+.flex-container {
+  display: flex;
+}
+
+.flex-fill-right {
+  flex-direction: row-reverse;
+}
+
+.flex-grow {
+  flex-grow: 8;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.full-height {
+  height: 100%;
+}

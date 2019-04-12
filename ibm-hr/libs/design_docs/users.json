@@ -1,0 +1,11 @@
+{
+  "_id": "_design/hr_users",
+  "_rev": "1-972bdc07c59121e9ef1868ed41215f0f",
+  "views": {
+    "users": {
+      "reduce": "_count",
+      "map": "function (doc) {\n  if(doc.type === 'user' && doc.email)\n    emit(doc.email, 1);\n}"
+    }
+  },
+  "language": "javascript"
+}

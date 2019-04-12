@@ -1,0 +1,599 @@
+html {
+  font-family: "IBM Plex Mono";
+}
+
+body {
+  background: #eeeeee;
+}
+
+footer {
+  background-color: #333333;
+  width: 100%;
+  height: 100px;
+  padding-top: 20px;
+  margin-top: 50px;
+}
+
+a {
+  color: #00B7FF;
+}
+
+.disclaimer {
+  height: 50px;
+  background-color:black;
+  color:white;
+  text-align:center;
+  font-size: 1.5em;
+  width:100%;padding:5px;
+}
+
+.btn-bbcu {
+  background: #0032be;
+  border-radius: 0;
+  height: 50px;
+  font-size: 16px;
+  color: #FFFFFF;
+  text-align: center;
+  line-height: 24px;
+  font-weight: bold;
+}
+
+.btn-primary {
+  background: #004c9e;
+  border-color: #004c9e;
+}
+
+.btn-primary:hover {
+  background: #002a54;
+  border-color: #002a54;
+}
+
+.btn-bbcu:hover {
+  background-color: #002a54;
+}
+
+.carousel-caption {
+  color: black;
+}
+
+.item-padding {
+  padding-top: 100px;
+}
+
+.bbcu-logo {
+  width: 340px;
+}
+
+.dark-strip {
+  height: 22px;
+  width: 100%;
+  background-color: #333333;
+  font-weight: bold;
+  text-align: right;
+  vertical-align: center;
+}
+
+.bbcu-logo-bar {
+  height: 80px;
+  width: 100%;
+  background-image: linear-gradient(90deg, #00a991 0%, #00a991 25%, #0032be 100%);
+  padding: 15px 20px;
+}
+
+.bbcu-search-icon {
+  float: right;
+  margin-top: 5px;
+}
+.bbcu-search-icon img {
+  height: 20px;
+  width: 19px;
+}
+
+.bbcu-nav-bar {
+  height: 60px;
+  width: 100%;
+  border-bottom: 1px solid #eee;
+  background: #fff;
+  box-shadow: 0 1px 5px rgba(0,0,0,.125),0 1px 1px rgba(0,0,0,.125);
+}
+
+.bbcu-nav-bar .nav-item {
+  font-size: 16px;
+  color: #333333;
+  line-height: 16px;
+  padding: 20px 18px;
+  height: 62px;
+}
+
+.bbcu-nav-bar .nav-item:hover {
+  border-bottom: 5px #00a991 solid;
+}
+
+.bbcu-nav-bar a {
+  color: #333333;
+}
+
+.bbcu-nav-bar a:hover {
+  color: #00a991;
+}
+
+.bbcu-nav-bar .active {
+  border-bottom: 5px #00a991 solid;
+}
+
+.bbcu-nav-bar .active  .nav-link{
+  color: #00a991;
+}
+
+.bbcu-banner {
+  padding: 0;
+  background-size: cover;
+  background-position: 50%;
+  background-image: linear-gradient(90deg, #00a991aa 0%, #00a991aa 49.01%, #00000000 49.02%), url("/images/Images/Hero_Image.jpg");
+}
+
+.banner-content {
+  width: 493px;
+  right: 65.76%;
+  color: #ffffff;
+}
+
+.banner-content sub {
+  font-size: 12px;
+  letter-spacing: 2px;
+  line-height: 18px;
+}
+
+.banner-content h3 {
+  font-size: 42px;
+  letter-spacing: 0;
+  line-height: 50px;
+}
+
+.banner-content p {
+  font-size: 18px;
+  letter-spacing: 0;
+  line-height: 24px;
+}
+
+.banner-content a {
+  font-size: 18px;
+  font-weight: bold;
+  color: #ffffff;
+  letter-spacing: 0;
+  background: 0;
+  border-radius: 0;
+  border: 3px solid;
+  width: 200px;
+  text-align: left;
+}
+
+.banner-sign-in {
+  width: 334px;
+  height: 331px;
+  background-color: #ffffff;
+  color: #333333;
+  padding: 20px 20px;
+  margin-top: 30px;
+  margin-bottom: 50px;
+}
+
+.banner-sign-in .btn {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.banner-sign-in .btn:hover {
+  background-color: #002a54;
+}
+
+#mobile-sign-on-button {
+  margin-top: 50px;
+}
+
+.banner-sign-in h3 {
+  font-size: 21px;
+  color: #333333;
+  line-height: 24px;
+}
+
+.sign-in-links {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.sign-in-links .row {
+  padding: 0;
+  margin: 5px 0 0;
+}
+.sign-in-links .row .col {
+  padding: 0;
+  margin: 0;
+}
+
+.sign-in-links a {
+  font-size: 12px;
+  color: #00a991;
+  line-height: 18px;
+  text-decoration: underline;
+}
+
+.sign-in-links a:hover {
+  color: #002A54;
+}
+
+.object-cover {
+  object-fit: cover;
+}
+
+.text-decoration-underline {
+  text-decoration: underline;
+}
+
+.up3-link {
+  font-size: 20px;
+  color: #0068d1;
+}
+
+.up3-link:hover {
+  color: #002a54;
+  text-decoration: none;
+}
+
+#loginCarousel {
+  height: 100%;
+}
+
+#loginCarousel .carousel-inner{
+  height: 100%;
+}
+
+#loginCarousel .carousel-item{
+  height: 100%;
+}
+
+.hidden-form-label {
+  font-size: 12px;
+  color: #333333;
+  letter-spacing: 0;
+  line-height: 18px;
+  visibility: hidden;
+}
+
+.form-control {
+  padding: 10px 20px;
+  height: 50px;
+  border: 1px solid #fff;
+  box-shadow: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  line-height: 1.5;
+  background-color: #eee;
+  color: #333;
+}
+
+.form-control:focus {
+  border: 1px solid #002a54;
+  box-shadow: none;
+  background-color: #eee;
+}
+
+.bbcu-signon h2 {
+  font-size: 26px;
+  color: #333333;
+  letter-spacing: 0;
+  line-height: 32px;
+}
+
+.bbcu-signon .btn {
+  width: 217px;
+}
+
+.bbcu-signon .modal-dialog {
+  margin-top: 242px;
+  max-width: 792px;
+}
+
+.bbcu-signon .modal-header {
+  border: none;
+  position: absolute;
+  right: 0;
+  z-index: 1000;
+}
+
+.bbcu-signon .modal-body {
+  padding-bottom: 40px;
+  padding-top: 40px;
+}
+
+#vcSignonFailed {
+  margin-top: 20px;
+  margin-bottom: 40px;
+}
+
+#vcSignonModal .spinner-container {
+  color: #00a991;
+  margin: 60px 0;
+}
+
+#vcSignonValidation {
+  font-weight: 700;
+  line-height: 16px;
+  font-size: 12px;
+  visibility: hidden;
+  color: #d60000;
+}
+
+.cred-images {
+  height: 180px;
+}
+
+.cred-images img {
+  width: 200px;
+  padding-top: 20px;
+}
+
+.cred-images i {
+  width: 200px;
+  padding-top: 20px;
+}
+
+.cred-buttons .vcSignupCancel {
+  margin-left: 20px;
+  text-decoration: underline;
+}
+
+.info-link-container {
+  margin-top: 20px;
+  font-size: 12px;
+  text-decoration: underline;
+}
+
+.signup-form {
+  margin: 40px 170px;
+}
+
+.qr-code-container {
+  margin-top: 40px;
+  margin-bottom: 40px;
+  width: 100%;
+  height: 190px;
+}
+
+#qr-code {
+  left: calc(50% - 95px);
+  position: absolute;
+  height: 190px;
+  width: 190px;
+  background-color: #eeeeee;
+}
+
+.verifying-creds-text {
+  margin-top: 60px;
+  margin-bottom: 60px;
+  color: #00a991
+}
+
+.verifying-creds-text span {
+  margin-left: 16px;
+  margin-bottom: 2px;
+  color: #333333;
+  font-size: 16px;
+  letter-spacing: 0;
+  line-height: 24px;
+}
+
+.signup-failed-text {
+  margin-top: 20px;
+  margin-bottom: 40px;
+}
+
+.app-info-title {
+  margin-left: 20px;
+}
+
+.app-info-text {
+  margin-left: 20px;
+  margin-bottom: 40px;
+  margin-top: 20px;
+}
+
+.app-info-text ol {
+  list-style: none;
+  padding: 0;
+  counter-reset: my-awesome-counter;
+}
+
+.app-info-text ol li {
+  counter-increment: my-awesome-counter;
+  margin-bottom: 8px;
+}
+
+.app-info-text ol li::before {
+  content: counter(my-awesome-counter) " ";
+  color: #333333;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.bbcu-nav-icon {
+  height: 24px;
+  width: 24px;
+  display: block;
+  background-repeat: none;
+  background-size: contain;
+}
+
+#profile_icon {
+  background-image: url("/images/Icons/Profile_Icon.png");
+}
+
+#notification_icon {
+  background-image: url("/images/Icons/Notification_Icon.png");
+}
+
+#issuanceCarousel .carousel-item {
+  min-height: 500px;
+}
+
+#connectWalletButton {
+  width: 500px;
+}
+
+#settingsPage {
+  color: #333333;
+}
+
+#settingsPage h1 {
+  font-size: 42px;
+  letter-spacing: 0;
+  line-height: 50px;
+}
+
+#settingsPage h3 {
+  font-size: 21px;
+  letter-spacing: 0;
+  line-height: 27px;
+  font-weight: bold;
+}
+
+#settingsPage a {
+  font-size: 16px;
+  color: #00a991;
+  letter-spacing: 0;
+  line-height: 36px;
+  text-decoration: underline;
+  margin-bottom: 10px;
+}
+
+
+#settingsPage .card {
+  border: none;
+  border-radius: 0;
+}
+
+#settingsPage .card-body {
+  padding: 40px 20px 40px 20px;
+}
+
+#accountPage .card {
+  border-radius: 0;
+}
+
+#accountPage h4 {
+  font-size: 16px;
+  letter-spacing: 0;
+  line-height: 24px;
+}
+
+#accountPage .card-footer {
+  background-color: #ffffff;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+#accountPage .border-bottom {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+.account-actions .last {
+  padding-left:20px;
+  border-left: 1px #333333 solid;
+  margin-left: 20px;
+}
+
+.account-status {
+  font-size: 21px;
+  letter-spacing: 0;
+  line-height: 27px;
+  color: #00a991
+}
+
+.card-header {
+  background-color: #00a991;
+  color: white;
+}
+
+.height-200 {
+  height: 200px;
+}
+
+.rewards-background {
+  background-size: cover;
+  background-position: bottom;
+  background-image: linear-gradient(#0032be99, #0032be99), url("/images/Images/3up_Image-3.jpg");
+}
+
+.card-background {
+  background-size: cover;
+  background-position: bottom;
+  background-image: linear-gradient(#0032be99, #0032be99), url("/images/Images/3up_Image-2.jpg");
+}
+
+.box-shadow {
+  box-shadow: 0 1px 5px rgba(0,0,0,.125),0 1px 1px rgba(0,0,0,.125);
+}
+
+.blue {
+  color: #0032be;
+}
+
+.font-22 {
+  font-size: 22px;
+}
+
+#accountPage .greeting {
+  font-size: 16px;
+  letter-spacing: 0;
+  line-height: 24px;
+  font-weight: bold;
+  margin: 0;
+  padding: 0;
+}
+
+.greeting-row {
+  margin-bottom: 20px;
+}
+
+.account-card {
+  border: 2px #00a991 solid;
+}
+
+.account-card .card-body {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.account-card .card-header {
+  padding-left: 20px;
+  padding-right: 20px;
+  border-radius: 0;
+}
+
+.inner-card {
+  padding: 0;
+  border: none;
+}
+
+.inner-card .card-header {
+  padding: 8px;
+  color: black;
+  background-color: #dbdbdb;
+  border: none;
+}
+
+.inner-card .card-header h1,h2,h3,h4,h5,h6 {
+  margin: 0;
+}
+
+.inner-card .card-body {
+  padding: 10px;
+  color: black;
+  border: none;
+}
