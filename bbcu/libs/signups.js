@@ -245,7 +245,7 @@ class Signup {
 			}
 
 			logger.info(`Making sure we have a connection to ${this.agent_name}`);
-			const connection_offer = await this.agent.sendConnectionOffer(connection_to, {
+			const connection_offer = await this.agent.createConnection(connection_to, {
 				icon: icon
 			});
 			try {

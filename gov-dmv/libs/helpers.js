@@ -258,7 +258,7 @@ class AccountSignupHelper {
 			to.name = this.dmv_issuer;
 
 		logger.info(`Setting up a connection to trusted issuer: ${JSON.stringify(to)}`);
-		let connection_offer = await this.agent.sendConnectionOffer(to, {
+		let connection_offer = await this.agent.createConnection(to, {
 			trustedDMV: 'true'
 		});
 		await this.agent.waitForConnection(connection_offer.id);
@@ -271,7 +271,7 @@ class AccountSignupHelper {
 			to.name = this.hr_issuer;
 
 		logger.info(`Setting up a connection to trusted issuer: ${JSON.stringify(to)}`);
-		connection_offer = await this.agent.sendConnectionOffer(to, {
+		connection_offer = await this.agent.createConnection(to, {
 			trustedHR: 'true'
 		});
 		await this.agent.waitForConnection(connection_offer.id);
@@ -485,7 +485,7 @@ class ConnectionResponder {
 						const offer = offers[0];
 						try {
 							logger.info(`Accepting connection offer ${offer.id} from  ${offer.remote.name}`);
-							const r = await this.agent.acceptConnectionOffer(offer.id);
+							const r = await this.agent.acceptConnection(offer.id);
 							logger.info(`Accepted connection offer ${r.id} from ${r.remote.name}`);
 						} catch (error) {
 							logger.error(`Couldn't accept connection offer ${offer.id}. Error: ${error}`);

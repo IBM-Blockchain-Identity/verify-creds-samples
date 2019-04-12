@@ -240,7 +240,7 @@ class Issuance {
 					connection_to = {name: connection_to};
 			}
 			logger.info(`Making sure we have a connection to ${JSON.stringify(connection_to)}`);
-			const connection_offer = await this.agent.sendConnectionOffer(connection_to, {
+			const connection_offer = await this.agent.createConnection(connection_to, {
 				icon: icon
 			});
 			let connection;
