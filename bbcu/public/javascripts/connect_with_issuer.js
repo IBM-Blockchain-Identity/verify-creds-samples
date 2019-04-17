@@ -147,7 +147,7 @@ async function issue_credential (connection_method) {
 				if ('ESTABLISHING_CONNECTION' === response.status) {
 					// TODO render the connection offer as a QR code
 					if (use_extension && response.connection_offer) {
-						console.log('Accepting credential offer via extension');
+						console.log('Accepting connection offer via extension');
 						await window.credentialHandler({connectionOffer: response.connection_offer});
 					}
 
@@ -159,6 +159,7 @@ async function issue_credential (connection_method) {
 				} else if ('ERROR' === response.status) {
 					// TODO render a proper error
 					console.error(`Credential issuance failed: ${JSON.stringify(response.error)}`);
+					carousel.carousel(ISSUANCE_STEPS.ERROR);
 				}
 
 				if ([ 'STOPPED', 'ERROR', 'FINISHED' ].indexOf(response.status) >= 0) {
@@ -167,7 +168,7 @@ async function issue_credential (connection_method) {
 			}
 
 			await new Promise((resolve, reject) => {
-				setInterval(resolve, interval);
+				setTimeout(resolve, interval);
 			});
 		}
 

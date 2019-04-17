@@ -124,7 +124,7 @@ async function issue_credential (connection_method) {
 				if ('ESTABLISHING_CONNECTION' === response.status) {
 					// TODO render the connection offer as a QR code
 					if (use_extension && response.connection_offer) {
-						console.log('Accepting credential offer via extension');
+						console.log('Accepting connection offer via extension');
 						await window.credentialHandler({connectionOffer: response.connection_offer});
 					}
 
