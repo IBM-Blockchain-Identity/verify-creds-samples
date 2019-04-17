@@ -50,15 +50,18 @@ class LoginManager {
 	/**
 	 * Creates an Login flow for the given user.
 	 * @param {string} user The app user we want to log in.
+	 * @param {ConnectionMethod} connection_method The method for connecting to the user.
 	 * @returns {string} A Login instance ID to be used to check the status of the Login later.
 	 */
-	create_login (user) {
+	create_login (user, connection_method) {
 		if (!user || typeof user !== 'string')
 			throw new TypeError('Invalid user was provided to login manager');
+		if (!connection_method || typeof connection_method !== 'string')
+			throw new TypeError('Invalid connection method for logging in');
 
 		const login_id = uuidv4();
 		logger.info(`Creating login ${login_id}`);
-		this.logins[login_id] = new Login(login_id, this.agent, user, this.user_records, this.connection_icon_provider, this.login_helper);
+		this.logins[login_id] = new Login(login_id, this.agent, user, this.user_records, this.connection_icon_provider, this.login_helper, connection_method);
 		this.logins[login_id].start();
 		return login_id;
 	}
@@ -161,14 +164,25 @@ class Login {
 	}
 
 	/**
+	 * Describes a method for establishing a connection with another agent.  Out-of-band connections require a user to
+	 * post a connection offer to their agent to establish a connection.  In-band connections only require a user to
+	 * accept a connection offer that was automatically delivered to their agent.  Invitations are like out-of-band
+	 * connections in that they require the user to post the invitation to their agent, but invitations can be accepted
+	 * by multiple users.
+	 *
+	 * @typedef {'out_of_band'|'in_band'|'invitation'} ConnectionMethod
+	 */
+
+	/**
 	 * @param {string} id The ID for looking up this Login instance.
 	 * @param {Agent} agent An agent to connect to users and send credential offers.
 	 * @param {string} user The user to connect with.
 	 * @param {Users} user_records The database of app Users where personal information is stored.
 	 * @param {ImageProvider} connection_icon_provider Provides the image data for connection offers.
 	 * @param {ProofHelper} login_helper Provides proof schemas and checks proof responses.
+	 * @param {ConnectionMethod} connection_method The method for establishing the connection to the user
 	 */
-	constructor (id, agent, user, user_records, connection_icon_provider, login_helper) {
+	constructor (id, agent, user, user_records, connection_icon_provider, login_helper, connection_method) {
 		this.id = id;
 		this.agent = agent;
 		this.user = user;
@@ -180,6 +194,7 @@ class Login {
 		this.login_helper = login_helper;
 		this.connection_offer = null;
 		this.verification = null;
+		this.connection_method = connection_method;
 	}
 
 	/**
@@ -224,30 +239,57 @@ class Login {
 			logger.debug(`Created proof schema: ${JSON.stringify(account_proof_schema)}`);
 
 			this.status = Login.LOGIN_STEPS.ESTABLISHING_CONNECTION;
-
-			let connection_to = user_doc.opts.agent_name;
-			if (typeof connection_to === 'string') {
-				if (connection_to.toLowerCase().indexOf('http') >= 0)
-					connection_to = {url: connection_to};
-				else
-					connection_to = {name: connection_to};
-			}
-			logger.info(`Making sure we have a connection to ${JSON.stringify(connection_to)}`);
-			this.connection_offer = await this.agent.createConnection(connection_to, {
-				icon: icon
-			});
-
+			logger.info(`Connection to user via the ${this.connection_method} method`);
+			const connection_opts = icon ? {icon: icon} : null;
 			let connection;
+
 			try {
-				connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
+
+				if (this.connection_method === 'in_band') {
+
+					if (!user_doc.opts || !user_doc.opts.agent_name) {
+						const err = new Error('User record does not have an associated agent name');
+						err.code = LOGIN_ERRORS.AGENT_NOT_FOUND;
+						throw err;
+					}
+
+					let connection_to = user_doc.opts.agent_name;
+					if (typeof connection_to === 'string') {
+						if (connection_to.toLowerCase().indexOf('http') >= 0)
+							connection_to = {url: connection_to};
+						else
+							connection_to = {name: connection_to};
+					}
+					logger.info(`Sending connection offer to ${JSON.stringify(connection_to)}`);
+					this.connection_offer = await this.agent.createConnection(connection_to, {
+						icon: icon
+					});
+					logger.info(`Sent connection offer ${this.connection_offer.id} to ${user_doc.opts.agent_name}`);
+					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
+
+				} else if (this.connection_method === 'out_of_band') {
+
+					this.connection_offer = await this.agent.createConnection(null, connection_opts);
+					logger.info(`Created out-of-band connection offer ${this.connection_offer.id}`);
+					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
+
+				} else {
+					const error = new Error(`An invalid connection method was used: ${this.connection_method}`);
+					logger.error(`Credential issuance could not proceed: ${error}`);
+					error.code = LOGIN_ERRORS.LOGIN_INVALID_CONNECTION_METHOD;
+					throw error;
+				}
 
 			} catch (error) {
-				logger.error(`Failed to establish connection offer ${this.connection_offer.id}.  Deleting connection.  error: ${error}`);
-				await this.agent.deleteConnection(this.connection_offer.id);
+				logger.error(`Failed to establish a connection with the user. error: ${error}`);
+				error.code = error.code ? error.code : LOGIN_ERRORS.LOGIN_CONNECTION_FAILED;
+				if (this.connection_offer && this.connection_offer.id) {
+					logger.info(`Cleaning up connection offer ${this.connection_offer.id}`);
+					await this.agent.deleteConnection(this.connection_offer.id);
+				}
 				throw error;
 			}
-			logger.info(`Established connection ${connection.id} to ${JSON.stringify(connection_to)}.  Their DID: ${connection.remote.pairwise.did}`);
-
+			logger.info(`Established connection ${connection.id}.  Their DID: ${connection.remote.pairwise.did}`);
 
 			this.status = Login.LOGIN_STEPS.CHECKING_CREDENTIAL;
 
@@ -368,7 +410,9 @@ const LOGIN_ERRORS = {
 	LOGIN_VERIFICATION_REQUEST_NOT_FOUND: 'LOGIN_VERIFICATION_REQUEST_NOT_FOUND',
 	LOGIN_INVALID_ACCOUNT_NUMBER: 'LOGIN_INVALID_ACCOUNT_NUMBER',
 	LOGIN_UNKNOWN_ERROR: 'LOGIN_UNKNOWN_ERROR',
-	LOGIN_NO_CREDENTIAL_DEFINITIONS: 'LOGIN_NO_CREDENTIAL_DEFINITIONS'
+	LOGIN_NO_CREDENTIAL_DEFINITIONS: 'LOGIN_NO_CREDENTIAL_DEFINITIONS',
+	LOGIN_INVALID_CONNECTION_METHOD: 'LOGIN_INVALID_CONNECTION_METHOD',
+	LOGIN_CONNECTION_FAILED: 'LOGIN_CONNECTION_FAILED'
 };
 
 exports.LOGIN_ERRORS = LOGIN_ERRORS;

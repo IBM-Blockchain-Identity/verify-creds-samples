@@ -318,14 +318,6 @@ a {
   margin: 60px 0;
 }
 
-#vcSignonValidation {
-  font-weight: 700;
-  line-height: 16px;
-  font-size: 12px;
-  visibility: hidden;
-  color: #d60000;
-}
-
 .cred-images {
   height: 180px;
 }

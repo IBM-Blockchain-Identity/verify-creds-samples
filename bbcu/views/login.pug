@@ -45,11 +45,12 @@ block content
                                     .row.ml-0.mr-0
                                         .col.pr-0.pl-0
                                             label#vcUserIDLabel.hidden-form-label(for="vcUserID") User ID
-                                            input#vcUserID.form-control(type="text" name="username" placeholder="User ID")
+                                            input#vcUserID.form-control(type="text" name="username" placeholder="User ID" required)
                                     .form-check
                                         input#rememberInfo.form-check-input(type="checkbox" name="remember_info")
                                         label.form-check-label(for="rememberInfo") Remember my Info
                                     button.btn.btn-bbcu.mt-3(type="submit") Sign On
+                                    span#extensionLoaded.d-none.text-muted.ml-3 Chrome extension detected
                                 .sign-in-links
                                     .row
                                         a.col.userpassLink(href="#") Login with Username and Password

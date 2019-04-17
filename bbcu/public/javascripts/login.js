@@ -112,7 +112,7 @@ $(document).ready(() => {
 	};
 
 	// Sign on using VCs
-	vcSignonForm.submit((event) => {
+	vcSignonForm.submit(async (event) => {
 		event.preventDefault();
 
 		const formArray = vcSignonForm.serializeArray();
@@ -122,87 +122,122 @@ $(document).ready(() => {
 		}
 		console.log(`VC Sign in info: ${JSON.stringify(formObject)}`);
 
-		// Check the username OR phone number
-		if (!formObject.username && !formObject.phone_number) {
-			console.log('A phone number or username must be supplied to use vc signon');
-			$('#vcSignonValidation').css('visibility', 'visible');
-			return;
-		}
-		$('#vcSignonValidation').css('visibility', 'hidden');
-
 		// You can only use the sign on api with a username of phone number
-		const data = {};
-		if (formObject.username) data.username = formObject.username;
-		else if (formObject.phone_number) data.phone_number = formObject.phone_number;
+		const data = {
+			username: formObject.username,
+			connection_method: 'in_band'
+		};
 
 		// Reset the signon carousel
 		vcSignonCarousel.carousel(vcSignonCarouselSlides.LOGGING_IN);
 		// Open the signon modal
 		vcSignonModal.modal('show');
 
-		$.ajax({
-			url: '/login/vc',
-			method: 'POST',
-			dataType: 'json',
-			contentType: 'application/json',
-			data: JSON.stringify(data)
-		}).done((response) => {
+		try {
+			const response = await $.ajax({
+				url: '/login/vc',
+				method: 'POST',
+				dataType: 'json',
+				contentType: 'application/json',
+				data: JSON.stringify(data)
+			});
 
 			console.log(`Created VC login: ${JSON.stringify(response)}`);
 
-			const status_checker = setInterval(() => {
-				$.ajax({
+			let tries_left = 300;
+			const interval = 4000; // milliseconds
+			let last_state = '';
+			const running = true;
+			while (running) {
+
+				console.log(`Tries left: ${tries_left--}`);
+				if (tries_left <= 0) {
+					throw new Error('Credential issuance took too long');
+				}
+
+				let response = await $.ajax({
 					url: '/login/vc/status',
 					method: 'GET',
 					dataType: 'json',
 					contentType: 'application/json'
-				}).done((response) => {
-					console.log(`Signup status response: ${JSON.stringify(response)}`);
-					const signup_status = response.vc_login.status;
+				});
 
-					const REMOTE_LOGIN_STEPS = {
-						CREATED: 'CREATED',
-						ESTABLISHING_CONNECTION: 'ESTABLISHING_CONNECTION',
-						CHECKING_CREDENTIAL: 'CHECKING_CREDENTIAL',
-						FINISHED: 'FINISHED',
-						STOPPED: 'STOPPED',
-						ERROR: 'ERROR'
-					};
+				if (!response || !response.vc_login || !response.vc_login.status)
+					throw new Error(`No status information returned in update response: ${JSON.stringify(response)}`);
+				response = response.vc_login;
+				console.log(`Updated login status: ${JSON.stringify(response.status)}`);
 
-					if (signup_status === REMOTE_LOGIN_STEPS.ERROR || signup_status === REMOTE_LOGIN_STEPS.STOPPED) {
-						clearInterval(status_checker);
-						vcSignonCarousel.carousel(vcSignonCarouselSlides.FAILED);
+				const REMOTE_LOGIN_STEPS = {
+					CREATED: vcSignonCarouselSlides.LOGGING_IN,
+					ESTABLISHING_CONNECTION: vcSignonCarouselSlides.LOGGING_IN,
+					CHECKING_CREDENTIAL: vcSignonCarouselSlides.LOGGING_IN,
+					FINISHED: vcSignonCarouselSlides.LOGGING_IN,
+					STOPPED: vcSignonCarouselSlides.FAILED,
+					ERROR: vcSignonCarouselSlides.FAILED
+				};
+
+
+				// Only need to do something if the state has changed
+				if (response.status !== last_state) {
+					last_state = response.status;
+
+					// Update the carousel to match the current status
+					if (REMOTE_LOGIN_STEPS.hasOwnProperty(response.status))
+						vcSignonCarousel.carousel(REMOTE_LOGIN_STEPS[response.status]);
+					else
+						console.warn(`Unknown issuance status detected: ${response.status}`);
+
+
+					if ('ERROR' === response.status) {
+						// TODO display a proper error message
 						let message = JSON.stringify(response);
 						if (response.vc_login.error) {
 							message = `Error: ${response.vc_login.error}, Reason: ${response.vc_login.reason}`;
 						}
 						console.error(`Failed to complete VC signon: ${message}`);
-					} else if (signup_status === REMOTE_LOGIN_STEPS.FINISHED) {
+						break;
+
+					} else if ('ESTABLISHING_CONNECTION' === response.status) {
+
+						if (use_extension && response.connection_offer) {
+							console.log('Accepting connection offer via extension');
+							await window.credentialHandler({connectionOffer: response.connection_offer});
+						}
+
+					} else if ('CHECKING_CREDENTIAL' === response.status) {
+
+						if (use_extension && response.verification) {
+							console.log('Accepting proof request via extension');
+							await window.credentialHandler({proofRequest: response.verification.id});
+						}
+
+					} else if ('FINISHED' === response.status) {
 						console.log('VC Signon successful.  Redirecting to account page');
 
-						clearInterval(status_checker);
-						// Redirect to account page.  The user's session should be logged in at this point.
-						setTimeout(() => {
-							window.location.href = '/account';
-						}, 3000);
+						await new Promise((resolve, reject) => {
+							setTimeout(resolve, 3000);
+						});
 
-					} else {
-						console.log('Not logged in yet');
+						// Redirect to account page.  The user's session should be logged in at this point.
+						window.location.href = '/account';
 					}
 
-				}).fail((jqXHR, textStatus, errorThrown) => {
+					if ([ 'STOPPED', 'ERROR' ].indexOf(response.status) >= 0) {
+						break;
+					}
+				}
 
-					vcSignonCarousel.carousel(vcSignonCarouselSlides.FAILED);
-					console.error('Failed to check vc login status ', errorThrown, jqXHR.responseText);
-					clearInterval(status_checker);
+				await new Promise((resolve, reject) => {
+					setTimeout(resolve, interval);
 				});
-			}, 4000);
+			}
 
-		}).fail((jqXHR, textStatus, errorThrown) => {
+		} catch (error) {
 
+			// TODO display a proper error;
 			vcSignonCarousel.carousel(vcSignonCarouselSlides.FAILED);
-			console.error('Failed to start VC login', errorThrown, jqXHR.responseText);
-		});
+			console.error(`VC login failed: ${error}`);
+		}
 	});
 
 	const vcSignupModal = $('#vcSignupModal');
@@ -368,4 +403,31 @@ $(document).ready(() => {
 			vcSignupCarousel.carousel(vcSignupCarouselSlides.NOT_ALLOWED);
 		});
 	});
+
+	docReady.resolve();
+});
+
+const docReady = $.Deferred();
+const extensionReady = $.Deferred();
+let use_extension = false;
+
+$(document).on('contentHolder_injected', async () => {
+	console.log(`Extension loaded.  window.credentialHandler: ${typeof window.credentialHandler}`);
+
+	// Get the public DID from the browser's agent
+	const state = await window.credentialHandler({stateRequest: {}});
+	console.log('state request response: ' + state);
+
+
+	const initialized = await window.credentialHandler({init: {}});
+	console.log(`Initialized: ${initialized}`);
+	if (initialized === 'True') {
+		console.log(`My DID: ${await window.credentialHandler({info: 'info'})}`);
+		extensionReady.resolve();
+	}
+});
+
+$.when(docReady, extensionReady).done(async () => {
+	$('#extensionLoaded').removeClass('d-none');
+	use_extension = true;
 });

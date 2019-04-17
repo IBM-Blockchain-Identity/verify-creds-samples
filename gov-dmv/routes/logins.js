@@ -61,7 +61,7 @@ exports.createRouter = function (users_instance, login_manager) {
 	router.post('/login/userpass', async (req, res) => {
 		if (!req.body || !req.body.username || typeof req.body.username !== 'string') {
 			return res.status(400).json({
-				error: LOGIN_API_ERRORS.MISSING_REQUIRED_PARAMETERS,
+				error: LOGIN_API_ERRORS.BAD_REQUEST,
 				reason: 'You must supply a username in order to log in'
 			});
 		}
@@ -69,7 +69,7 @@ exports.createRouter = function (users_instance, login_manager) {
 
 		if (!req.body || typeof req.body.password !== 'string') {
 			return res.status(400).json({
-				error: LOGIN_API_ERRORS.MISSING_REQUIRED_PARAMETERS,
+				error: LOGIN_API_ERRORS.BAD_REQUEST,
 				reason: 'You must supply a password in order to log in'
 			});
 		}
@@ -112,13 +112,19 @@ exports.createRouter = function (users_instance, login_manager) {
 	router.post('/login/vc', (req, res, next) => {
 		if (!req.body || !req.body.username || typeof req.body.username !== 'string') {
 			return res.status(400).json({
-				error: LOGIN_API_ERRORS.MISSING_REQUIRED_PARAMETERS,
+				error: LOGIN_API_ERRORS.BAD_REQUEST,
 				reason: 'You must supply a username in order to log in'
 			});
 		}
 		const username = req.body.username;
 
-		const login_id = login_manager.create_login(username);
+		if (!req.body || !req.body.connection_method || typeof req.body.connection_method !== 'string')
+			return res.status(400).json({
+				error: LOGIN_API_ERRORS.BAD_REQUEST,
+				reason: 'Invalid connection_method for issuing the credential'
+			});
+
+		const login_id = login_manager.create_login(username, req.body.connection_method);
 
 		// Calls to the status API will be determined by the login associated with the session
 		req.session.vc_login = login_id;
@@ -163,7 +169,7 @@ exports.createRouter = function (users_instance, login_manager) {
 };
 
 const LOGIN_API_ERRORS = {
-	MISSING_REQUIRED_PARAMETERS: 'MISSING_REQUIRED_PARAMETERS',
+	BAD_REQUEST: 'BAD_REQUEST',
 	NOT_AUTHORIZED: 'NOT_AUTHORIZED',
 	NOT_LOGGING_IN: 'NOT_LOGGING_IN',
 	UNKNOWN_LOGIN_API_ERROR: 'UNKNOWN_LOGIN_API_ERROR'
