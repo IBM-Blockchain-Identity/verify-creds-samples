@@ -16,102 +16,145 @@
 
 $(document).ready(() => {
 
+	const connectButton = $('.issueButton');
+
 	/**
-	 * Creates a connection invitation, displays the invitation to the user,
+	 * Click handler for credential button. Creates a connection invitation, displays the invitation to the user,
 	 * and waits for the connection to be accepted or rejected.
 	 */
-	$('.issueButton').click(async () => {
-		const modal = $('#issuanceModal');
-		modal.modal('show');
+	connectButton.click(async () => {
+		connectButton.attr('disabled', true);
 
-		const carousel = $('#issuanceCarousel');
-		const ISSUANCE_STEPS = {
-			CREATED: 0,
-			BUILDING_CREDENTIAL: 0,
-			ESTABLISHING_CONNECTION: 1,
-			ISSUING_CREDENTIAL: 2,
-			FINISHED: 3,
-			STOPPED: 5,
-			ERROR: 4
-		};
-
-		carousel.carousel(ISSUANCE_STEPS.BUILDING_CREDENTIAL);
 		try {
-			const issuance_info = await $.ajax({
-				url: '/api/credentials',
-				method: 'POST'
-			});
-
-			console.log(`Issuance process created: ${JSON.stringify(issuance_info)}`);
-
-			await new Promise((resolve, reject) => {
-				let tries_left = 300;
-				const interval = 3000; // milliseconds
-				let querying = false;
-
-				const timer = setInterval(() => {
-
-					console.log(`Tries left: ${tries_left--}`);
-					if (tries_left <= 0) {
-						console.error('Ran out of tries to finish issuing credentials');
-						clearInterval(timer);
-						return reject(new Error('Issuance took too long'));
-					}
-
-					if (querying)
-						return console.log('Still running the previous update.  Skipping');
-
-					querying = true;
-					console.log('Updating issuance');
-					$.ajax({
-						url: '/api/credentials',
-						method: 'GET'
-					}).done((response) => {
-						querying = false;
-
-						if (!response || !response.status) {
-							const error = new Error(`No status information returned in update response: ${JSON.stringify(response)}`);
-							console.error(error);
-							clearInterval(timer);
-							return reject(error);
-						}
-
-						console.log(`Updated issuance status: ${JSON.stringify(response.status)}`);
-						if (ISSUANCE_STEPS[response.status])
-							carousel.carousel(ISSUANCE_STEPS[response.status]);
-						else
-							console.warn(`Unknown issuance status detected: ${response.status}`);
-
-						if ([ 'STOPPED', 'ERROR', 'FINISHED' ].indexOf(response.status) >= 0) {
-							clearInterval(timer);
-							resolve(response.status);
-						}
-
-						if (response.status === 'ERROR') {
-							console.error(`Credential issuance failed: ${JSON.stringify(response.error)}`);
-						}
-
-
-					}).fail((jqXHR, textStatus, errorThrown) => {
-						querying = false;
-						console.error('Failed to update status:', errorThrown, jqXHR.responseText);
-						const alertText = `Failed to update status. status: ${textStatus}, error: ${errorThrown}, jqXHR:${JSON.stringify(jqXHR)}`;
-						clearInterval(timer);
-						reject(new Error(alertText));
-					});
-				}, interval);
-			});
-
+			await issue_credential('in_band');
 		} catch (error) {
-			carousel.carousel(ISSUANCE_STEPS.ERROR);
-			const message = `Credential issuance failed: ${error.message ? error.message : JSON.stringify(error)}`;
-			console.error(message);
-			$('#connectionFlowAlert').html(window.alertHTML(message));
+			console.error(`Credential issuance failed: ${error}`);
 		}
+
+		connectButton.attr('disabled', false);
 	});
 
 	populate_user_info();
+	docReady.resolve();
 });
+
+const docReady = $.Deferred();
+const extensionReady = $.Deferred();
+let use_extension = false;
+
+$(document).on('contentHolder_injected', async () => {
+	console.log(`Extension loaded.  window.credentialHandler: ${typeof window.credentialHandler}`);
+
+	// Get the public DID from the browser's agent
+	const state = await window.credentialHandler({stateRequest: {}});
+	console.log('state request response: ' + state);
+
+
+	const initialized = await window.credentialHandler({init: {}});
+	console.log(`Initialized: ${initialized}`);
+	if (initialized === 'True') {
+		console.log(`My DID: ${await window.credentialHandler({info: 'info'})}`);
+		extensionReady.resolve();
+	}
+});
+
+$.when(docReady, extensionReady).done(async () => {
+	$('#extensionLoaded').removeClass('d-none');
+	use_extension = true;
+});
+
+async function issue_credential (connection_method) {
+	const carousel = $('#issuanceCarousel');
+	const ISSUANCE_STEPS = {
+		CREATED: 0,
+		BUILDING_CREDENTIAL: 0,
+		ESTABLISHING_CONNECTION: 1,
+		ISSUING_CREDENTIAL: 2,
+		FINISHED: 3,
+		STOPPED: 5,
+		ERROR: 4
+	};
+
+	carousel.carousel(ISSUANCE_STEPS.BUILDING_CREDENTIAL);
+	$('#issuanceModal').modal('show');
+
+	try {
+		const issuance_info = await $.ajax({
+			url: '/api/credentials',
+			method: 'POST',
+			contentType: 'application/json',
+			dataType: 'json',
+			data: JSON.stringify({connection_method: connection_method})
+		});
+
+		console.log(`Issuance process created: ${JSON.stringify(issuance_info)}`);
+
+		let tries_left = 300;
+		const interval = 3000; // milliseconds
+		let last_state = '';
+		const running = true;
+		while (running) {
+
+			console.log(`Tries left: ${tries_left--}`);
+			if (tries_left <= 0) {
+				throw new Error('Credential issuance took too long');
+			}
+
+			console.log('Getting updated issuance status');
+			const response = await $.ajax({
+				url: '/api/credentials',
+				method: 'GET'
+			});
+
+			if (!response || !response.status)
+				throw new Error(`No status information returned in update response: ${JSON.stringify(response)}`);
+
+			console.log(`Updated issuance status: ${JSON.stringify(response.status)}`);
+
+			// Only need to do something if the state has changed
+			if (response.status !== last_state) {
+				last_state = response.status;
+
+				// Update the carousel to match the current status
+				if (ISSUANCE_STEPS.hasOwnProperty(response.status))
+					carousel.carousel(ISSUANCE_STEPS[response.status]);
+				else
+					console.warn(`Unknown issuance status detected: ${response.status}`);
+
+				if ('ESTABLISHING_CONNECTION' === response.status) {
+					// TODO render the connection offer as a QR code
+					if (use_extension && response.connection_offer) {
+						console.log('Accepting credential offer via extension');
+						await window.credentialHandler({connectionOffer: response.connection_offer});
+					}
+
+				} else if ('ISSUING_CREDENTIAL' === response.status) {
+					if (use_extension && response.credential && response.credential.id) {
+						console.log('Accepting credential offer via extension');
+						await window.credentialHandler({credentialOffer: response.credential.id});
+					}
+				} else if ('ERROR' === response.status) {
+					// TODO render a proper error
+					console.error(`Credential issuance failed: ${JSON.stringify(response.error)}`);
+				}
+
+				if ([ 'STOPPED', 'ERROR', 'FINISHED' ].indexOf(response.status) >= 0) {
+					break;
+				}
+			}
+
+			await new Promise((resolve, reject) => {
+				setInterval(resolve, interval);
+			});
+		}
+
+	} catch (error) {
+		carousel.carousel(ISSUANCE_STEPS.ERROR);
+		const message = `Credential issuance failed: ${error.message ? error.message : JSON.stringify(error)}`;
+		console.error(message);
+		$('#connectionFlowAlert').html(window.alertHTML(message));
+	}
+}
 
 function populate_user_info () {
 	const dictionary = {

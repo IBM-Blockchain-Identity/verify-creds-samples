@@ -81,6 +81,7 @@ block content
         a(href="#") Apps With Account Access
         br
         a.issuanceLink(href="#") Mobile Wallet Enrollment
+        span#extensionLoaded.d-none.text-muted.ml-3 Chrome extension detected
 
 block extra
 
@@ -95,14 +96,6 @@ block extra
           #issuanceCarousel.carousel.slide(data-ride="false" data-interval="false" data-keyboard="false" data-wrap="false" pause="false")
             .carousel-inner.text-center
               .carousel-item.active
-                .d-block.w-100.item-padding
-                  button#connectWalletButton.btn.btn-primary.shadow
-                    i.fas.fa-id-card.fa-10x.mr-3
-                    i.fas.fa-arrow-right.fa-7x.mr-3
-                    i.fas.fa-mobile-alt.fa-10x
-                .carousel-caption
-                  p Click the button above to deliver your account credential to your mobile device
-              .carousel-item
                 .d-block.w-100.item-padding.text-primary
                   i.fas.fa-store-alt.fa-10x.mr-3
                   i.fas.fa-sync-alt.fa-7x.mr-3.fa-spin
