@@ -91,7 +91,8 @@ async function issue_credential (connection_method) {
 
 		let tries_left = 300;
 		const interval = 3000; // milliseconds
-		let last_state = '';
+		let connection_shown = false;
+		let credential_shown = false;
 		const running = true;
 		while (running) {
 
@@ -111,35 +112,34 @@ async function issue_credential (connection_method) {
 
 			console.log(`Updated issuance status: ${JSON.stringify(response.status)}`);
 
-			// Only need to do something if the state has changed
-			if (response.status !== last_state) {
-				last_state = response.status;
 
-				// Update the carousel to match the current status
-				if (ISSUANCE_STEPS.hasOwnProperty(response.status))
-					carousel.carousel(ISSUANCE_STEPS[response.status]);
-				else
-					console.warn(`Unknown issuance status detected: ${response.status}`);
+			// Update the carousel to match the current status
+			if (ISSUANCE_STEPS.hasOwnProperty(response.status))
+				carousel.carousel(ISSUANCE_STEPS[response.status]);
+			else
+				console.warn(`Unknown issuance status detected: ${response.status}`);
 
-				if ('ESTABLISHING_CONNECTION' === response.status) {
-					// TODO render the connection offer as a QR code
-					if (use_extension && response.connection_offer) {
-						console.log('Accepting connection offer via extension');
-						await window.credentialHandler({connectionOffer: response.connection_offer});
-					}
+			if ('ERROR' === response.status) {
+				// TODO render a proper error
+				console.error(`Credential issuance failed: ${JSON.stringify(response.error)}`);
+			}
 
-				} else if ('ISSUING_CREDENTIAL' === response.status) {
-					if (use_extension && response.credential && response.credential.id) {
-						console.log('Accepting credential offer via extension');
-						await window.credentialHandler({credentialOffer: response.credential.id});
-					}
-				} else if ('ERROR' === response.status) {
-					// TODO render a proper error
-					console.error(`Credential issuance failed: ${JSON.stringify(response.error)}`);
+			if ([ 'STOPPED', 'ERROR', 'FINISHED' ].indexOf(response.status) >= 0) {
+				break;
+			}
+
+			if (use_extension) {
+				// TODO render the connection offer as a QR code
+				if (!connection_shown && response.connection_offer) {
+					connection_shown = true;
+					console.log('Accepting connection offer via extension');
+					await window.credentialHandler({connectionOffer: response.connection_offer});
 				}
 
-				if ([ 'STOPPED', 'ERROR', 'FINISHED' ].indexOf(response.status) >= 0) {
-					break;
+				if (!credential_shown && response.credential && response.credential.id) {
+					credential_shown = true;
+					console.log('Accepting credential offer via extension');
+					await window.credentialHandler({credentialOffer: response.credential.id});
 				}
 			}
 
