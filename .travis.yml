@@ -1,4 +1,4 @@
-language: minimal
+language: bash
 dist: xenial
 
 services:
@@ -12,7 +12,7 @@ before_install:
 
 script:
   - ibmcloud login -a https://api.ng.bluemix.net --apikey $IBMCLOUD_API_KEY > /dev/null
-  - docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASSWORD
+  - echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USER" --password-stdin
   - travis/build_and_push.sh
 
 deploy:
