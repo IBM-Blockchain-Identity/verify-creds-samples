@@ -10,6 +10,9 @@ DMV_AGENT_NAME=${DMV_AGENT_NAME:-gov-dmv}
 IBMHR_AGENT_NAME=${IBMHR_AGENT_NAME:-ibm-hr}
 BBCU_AGENT_NAME=${BBCU_AGENT_NAME:-bbcu}
 
+DMV_AGENT_URL=${DMV_AGENT_URL:-$DMV_AGENT_NAME}
+IBMHR_AGENT_URL=${IBMHR_AGENT_URL:-$IBMHR_AGENT_NAME}
+
 # Configure deployment spec
 DEPLOYMENT_SPEC=$DIR/deployment_spec.yml
 echo "Setting up deployment spec file: $DEPLOYMENT_SPEC"
