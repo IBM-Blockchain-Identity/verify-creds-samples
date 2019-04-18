@@ -73,7 +73,7 @@ exports.createRouter = function (signup_manager) {
 	router.post('/signup', [ middleware ], (req, res) => {
 		if (!req.body || !req.body.username || typeof req.body.username !== 'string') {
 			return res.status(400).json({
-				error: SIGNUP_API_ERRORS.MISSING_REQUIRED_PARAMETERS,
+				error: SIGNUP_API_ERRORS.BAD_REQUEST,
 				reason: 'You must supply a username in order to log in'
 			});
 		}
@@ -81,7 +81,7 @@ exports.createRouter = function (signup_manager) {
 
 		if (!req.body.password || typeof req.body.password !== 'string') {
 			return res.status(400).json({
-				error: SIGNUP_API_ERRORS.MISSING_REQUIRED_PARAMETERS,
+				error: SIGNUP_API_ERRORS.BAD_REQUEST,
 				reason: 'You must supply a password in order to log in'
 			});
 		}
@@ -89,13 +89,19 @@ exports.createRouter = function (signup_manager) {
 
 		if (!req.body.agent_name || typeof req.body.agent_name !== 'string') {
 			return res.status(400).json({
-				error: SIGNUP_API_ERRORS.MISSING_REQUIRED_PARAMETERS,
+				error: SIGNUP_API_ERRORS.BAD_REQUEST,
 				reason: 'You must supply an agent name in order to log in'
 			});
 		}
 		const agent_name = req.body.agent_name;
 
-		const signup_id = signup_manager.create_signup(username, agent_name, password);
+		if (!req.body || !req.body.connection_method || typeof req.body.connection_method !== 'string')
+			return res.status(400).json({
+				error: SIGNUP_API_ERRORS.BAD_REQUEST,
+				reason: 'Invalid connection_method for issuing the credential'
+			});
+
+		const signup_id = signup_manager.create_signup(username, agent_name, password, req.body.connection_method);
 		req.session.signup = signup_id;
 		res.status(201).json({
 			message: 'Signup process initiated',
@@ -124,7 +130,7 @@ function middleware (req, res, next) {
 }
 
 const SIGNUP_API_ERRORS = {
-	MISSING_REQUIRED_PARAMETERS: 'MISSING_REQUIRED_PARAMETERS',
+	BAD_REQUEST: 'BAD_REQUEST',
 	NOT_SIGNING_UP: 'NOT_SIGNING_UP',
 	ALREADY_SIGNED_IN: 'ALREADY_SIGNED_IN',
 	UNKNOWN_SIGNUP_API_ERROR: 'UNKNOWN_SIGNUP_API_ERROR',

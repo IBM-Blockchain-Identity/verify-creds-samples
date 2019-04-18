@@ -50,7 +50,7 @@ block content
                                         input#rememberInfo.form-check-input(type="checkbox" name="remember_info")
                                         label.form-check-label(for="rememberInfo") Remember my Info
                                     button.btn.btn-bbcu.mt-3(type="submit") Sign On
-                                    span#extensionLoaded.d-none.text-muted.ml-3 Chrome extension detected
+                                    span.extension-loaded.d-none.text-muted.ml-3 Chrome extension detected
                                 .sign-in-links
                                     .row
                                         a.col.userpassLink(href="#") Login with Username and Password
@@ -140,6 +140,7 @@ block extra
                                     a.vcSignupCancel(href="#") Cancel
                                 .info-link-container
                                     a.info-link(href="#") If you don’t have a Mobile Wallet application, click here to learn how to get one.
+                                    span.extension-loaded.d-none.text-muted.ml-3 Chrome extension detected
 
                             .carousel-item.text-center
                                 h2 Establishing a connection with your mobile wallet...

@@ -146,13 +146,14 @@ $(document).ready(() => {
 
 			let tries_left = 300;
 			const interval = 4000; // milliseconds
-			let last_state = '';
+			let connection_shown = false;
+			let verification_shown = false;
 			const running = true;
 			while (running) {
 
 				console.log(`Tries left: ${tries_left--}`);
 				if (tries_left <= 0) {
-					throw new Error('Credential issuance took too long');
+					throw new Error('VC login took too long');
 				}
 
 				let response = await $.ajax({
@@ -177,53 +178,49 @@ $(document).ready(() => {
 				};
 
 
-				// Only need to do something if the state has changed
-				if (response.status !== last_state) {
-					last_state = response.status;
-
-					// Update the carousel to match the current status
-					if (REMOTE_LOGIN_STEPS.hasOwnProperty(response.status))
-						vcSignonCarousel.carousel(REMOTE_LOGIN_STEPS[response.status]);
-					else
-						console.warn(`Unknown issuance status detected: ${response.status}`);
+				// Update the carousel to match the current status
+				if (REMOTE_LOGIN_STEPS.hasOwnProperty(response.status))
+					vcSignonCarousel.carousel(REMOTE_LOGIN_STEPS[response.status]);
+				else
+					console.warn(`Unknown issuance status detected: ${response.status}`);
 
 
-					if ('ERROR' === response.status) {
-						// TODO display a proper error message
-						let message = JSON.stringify(response);
-						if (response.vc_login.error) {
-							message = `Error: ${response.vc_login.error}, Reason: ${response.vc_login.reason}`;
-						}
-						console.error(`Failed to complete VC signon: ${message}`);
-						break;
+				if ('ERROR' === response.status) {
+					// TODO display a proper error message
+					let message = JSON.stringify(response);
+					if (response.vc_login.error) {
+						message = `Error: ${response.vc_login.error}, Reason: ${response.vc_login.reason}`;
+					}
+					console.error(`Failed to complete VC signon: ${message}`);
+					break;
 
-					} else if ('ESTABLISHING_CONNECTION' === response.status) {
+				} else if ('FINISHED' === response.status) {
+					console.log('VC Signon successful.  Redirecting to account page');
 
-						if (use_extension && response.connection_offer) {
-							console.log('Accepting connection offer via extension');
-							await window.credentialHandler({connectionOffer: response.connection_offer});
-						}
+					await new Promise((resolve, reject) => {
+						setTimeout(resolve, 3000);
+					});
 
-					} else if ('CHECKING_CREDENTIAL' === response.status) {
+					// Redirect to account page.  The user's session should be logged in at this point.
+					window.location.href = '/account';
+				}
 
-						if (use_extension && response.verification) {
-							console.log('Accepting proof request via extension');
-							await window.credentialHandler({proofRequest: response.verification.id});
-						}
+				if ([ 'STOPPED', 'ERROR' ].indexOf(response.status) >= 0) {
+					break;
+				}
 
-					} else if ('FINISHED' === response.status) {
-						console.log('VC Signon successful.  Redirecting to account page');
-
-						await new Promise((resolve, reject) => {
-							setTimeout(resolve, 3000);
-						});
-
-						// Redirect to account page.  The user's session should be logged in at this point.
-						window.location.href = '/account';
+				if (use_extension) {
+					// TODO render the connection offer as a QR code
+					if (!connection_shown && response.connection_offer) {
+						connection_shown = true;
+						console.log('Accepting connection offer via extension');
+						await window.credentialHandler({connectionOffer: response.connection_offer});
 					}
 
-					if ([ 'STOPPED', 'ERROR' ].indexOf(response.status) >= 0) {
-						break;
+					if (!verification_shown && response.verification) {
+						verification_shown = true;
+						console.log('Accepting proof request via extension');
+						await window.credentialHandler({proofRequest: response.verification.id});
 					}
 				}
 
@@ -314,7 +311,7 @@ $(document).ready(() => {
 			signup_agent_name_label.css('visibility', 'hidden');
 	});
 
-	$('#signupNextButton').on('click', () => {
+	$('#signupNextButton').on('click', async () => {
 
 		console.log('Submit='+$('#signupForm').serialize());
 
@@ -326,7 +323,6 @@ $(document).ready(() => {
 		console.log(`Signup info: ${JSON.stringify(formObject)}`);
 		const username = formObject.username;
 		const password = formObject.password;
-		const phone_number = formObject.phone_number;
 		const agent_name = formObject.agent_name;
 
 		const REMOTE_SIGNUP_STEPS = {
@@ -340,68 +336,107 @@ $(document).ready(() => {
 		};
 		$('#signupNextButton').attr('disabled', 'disabled');
 		console.log(`Creating signup for user ${username}`);
-		$.ajax({
-			url: '/signup',
-			method: 'POST',
-			dataType: 'json',
-			contentType: 'application/json',
-			data: JSON.stringify({
-				password: password,
-				username: username,
-				phone_number: phone_number,
-				agent_name: agent_name
-			})
-		}).done((response) => {
+		try {
+			const response = await $.ajax({
+				url: '/signup',
+				method: 'POST',
+				dataType: 'json',
+				contentType: 'application/json',
+				data: JSON.stringify({
+					password: password,
+					username: username,
+					agent_name: agent_name,
+					connection_method: 'in_band'
+				})
+			});
 			console.log(`Signup response: ${JSON.stringify(response)}`);
 
-			const status_checker = setInterval(() => {
-				$.ajax({
+			let tries_left = 300;
+			const interval = 4000; // milliseconds
+			let connection_shown = false;
+			let verification_shown = false;
+			let credential_shown = false;
+			const running = true;
+			while (running) {
+
+				console.log(`Tries left: ${tries_left--}`);
+				if (tries_left <= 0) {
+					throw new Error('Account signup took too long');
+				}
+
+				let response = await $.ajax({
 					url: '/signup/status',
 					method: 'GET',
 					dataType: 'json',
 					contentType: 'application/json'
-				}).done((response) => {
-					console.log(`Signup status response: ${JSON.stringify(response)}`);
-					const signup_status = response.signup.status;
-					if (signup_status === REMOTE_SIGNUP_STEPS.ESTABLISHING_CONNECTION || signup_status === REMOTE_SIGNUP_STEPS.CREATED) {
-						vcSignupCarousel.carousel(vcSignupCarouselSlides.ESTABLISHING_CONNECTION);
-					} else if (signup_status === REMOTE_SIGNUP_STEPS.CHECKING_CREDENTIAL) {
-						vcSignupCarousel.carousel(vcSignupCarouselSlides.CHECKING_CREDENTIAL);
-					} else if (signup_status === REMOTE_SIGNUP_STEPS.ISSUING_CREDENTIAL) {
-						vcSignupCarousel.carousel(vcSignupCarouselSlides.ISSUING_CREDENTIAL);
-					} else if (signup_status === REMOTE_SIGNUP_STEPS.FINISHED) {
-
-						clearInterval(status_checker);
-
-						// Redirect to account page.  The user's session should be logged in at this point.
-						setTimeout(() => {
-							window.location.href = '/account';
-						}, 3000);
-					} else if (signup_status === REMOTE_SIGNUP_STEPS.STOPPED) {
-						clearInterval(status_checker);
-						vcSignupCarousel.carousel(vcSignupCarouselSlides.NOT_ALLOWED);
-					} else if (signup_status === REMOTE_SIGNUP_STEPS.ERROR) {
-						clearInterval(status_checker);
-
-						if (response.signup.error && response.signup.error === 'SIGNUP_USER_ALREADY_EXISTS') {
-							vcSignupCarousel.carousel(vcSignupCarouselSlides.ALREADY_HAVE_WALLET);
-						} else {
-							vcSignupCarousel.carousel(vcSignupCarouselSlides.NOT_ALLOWED);
-						}
-					}
-				}).fail((jqXHR, textStatus, errorThrown) => {
-
-					console.error('Failed to check signup status ', errorThrown, jqXHR.responseText);
-					vcSignupCarousel.carousel(vcSignupCarouselSlides.NOT_ALLOWED);
-					clearInterval(status_checker);
 				});
-			}, 2000);
 
-		}).fail((jqXHR, textStatus, errorThrown) => {
+				if (!response || !response.signup || !response.signup.status)
+					throw new Error(`No status information returned in update response: ${JSON.stringify(response)}`);
+				console.log(`Signup status response: ${JSON.stringify(response)}`);
+				const signup_status = response.signup.status;
+				response = response.signup;
 
-			console.error('Failed to create signup', errorThrown, jqXHR.responseText);
+				if (signup_status === REMOTE_SIGNUP_STEPS.ESTABLISHING_CONNECTION || signup_status === REMOTE_SIGNUP_STEPS.CREATED) {
+					vcSignupCarousel.carousel(vcSignupCarouselSlides.ESTABLISHING_CONNECTION);
+
+				} else if (signup_status === REMOTE_SIGNUP_STEPS.CHECKING_CREDENTIAL) {
+					vcSignupCarousel.carousel(vcSignupCarouselSlides.CHECKING_CREDENTIAL);
+
+				} else if (signup_status === REMOTE_SIGNUP_STEPS.ISSUING_CREDENTIAL) {
+					vcSignupCarousel.carousel(vcSignupCarouselSlides.ISSUING_CREDENTIAL);
+
+				} else if (signup_status === REMOTE_SIGNUP_STEPS.FINISHED) {
+
+					// Redirect to account page.  The user's session should be logged in at this point.
+					await new Promise((resolve, reject) => {
+						setTimeout(resolve, 3000);
+					});
+					window.location.href = '/account';
+
+				} else if (signup_status === REMOTE_SIGNUP_STEPS.STOPPED) {
+					vcSignupCarousel.carousel(vcSignupCarouselSlides.NOT_ALLOWED);
+					break;
+				} else if (signup_status === REMOTE_SIGNUP_STEPS.ERROR) {
+					if (response.error && response.error === 'SIGNUP_USER_ALREADY_EXISTS') {
+						vcSignupCarousel.carousel(vcSignupCarouselSlides.ALREADY_HAVE_WALLET);
+					} else {
+						vcSignupCarousel.carousel(vcSignupCarouselSlides.NOT_ALLOWED);
+					}
+					break;
+				}
+
+				if (use_extension) {
+					// TODO render the connection offer as a QR code
+					if (!connection_shown && response.connection_offer) {
+						connection_shown = true;
+						console.log('Accepting connection offer via extension');
+						await window.credentialHandler({connectionOffer: response.connection_offer});
+					}
+
+					if (!verification_shown && response.verification) {
+						verification_shown = true;
+						console.log('Accepting proof request via extension');
+						await window.credentialHandler({proofRequest: response.verification.id});
+					}
+
+					if (!credential_shown && response.credential && response.credential.id) {
+						credential_shown = true;
+						console.log('Accepting credential offer via extension');
+						await window.credentialHandler({credentialOffer: response.credential.id});
+					}
+				}
+
+				await new Promise((resolve, reject) => {
+					setTimeout(resolve, interval);
+				});
+			}
+
+		} catch (error) {
+
+			console.error('Failed to create signup', error);
 			vcSignupCarousel.carousel(vcSignupCarouselSlides.NOT_ALLOWED);
-		});
+		}
 	});
 
 	docReady.resolve();
@@ -428,6 +463,6 @@ $(document).on('contentHolder_injected', async () => {
 });
 
 $.when(docReady, extensionReady).done(async () => {
-	$('#extensionLoaded').removeClass('d-none');
+	$('.extension-loaded').removeClass('d-none');
 	use_extension = true;
 });

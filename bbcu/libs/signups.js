@@ -56,19 +56,22 @@ class SignupManager {
 	 * @param {string} user The app user we want to sign up.
 	 * @param {string} agent_name The agent name associated with the user.
 	 * @param {string} password The new user's password.
+	 * @param {ConnectionMethod} connection_method The method for connecting to the user.
 	 * @returns {string} A Signup instance ID to be used to check the status of the Signup later.
 	 */
-	create_signup (user, agent_name, password) {
+	create_signup (user, agent_name, password, connection_method) {
 		if (!user || typeof user !== 'string')
 			throw new TypeError('Invalid user was provided to signup manager');
 		if (!agent_name || typeof agent_name !== 'string')
 			throw new TypeError('Invalid agent name provided to signup manager');
 		if (!password || typeof password !== 'string')
 			throw new TypeError('Invalid password provided to signup manager');
+		if (!connection_method || typeof connection_method !== 'string')
+			throw new TypeError('Invalid connection method for issuing credentials');
 
 		const signup_id = uuidv4();
 		logger.info(`Creating signup ${signup_id}`);
-		this.signups[signup_id] = new Signup(signup_id, agent_name, this.agent, user, password, this.user_records, this.card_renderer, this.connection_icon_provider, this.signup_helper);
+		this.signups[signup_id] = new Signup(signup_id, agent_name, this.agent, user, password, this.user_records, this.card_renderer, this.connection_icon_provider, this.signup_helper, connection_method);
 		this.signups[signup_id].start();
 		return signup_id;
 	}
@@ -171,6 +174,16 @@ class Signup {
 	}
 
 	/**
+	 * Describes a method for establishing a connection with another agent.  Out-of-band connections require a user to
+	 * post a connection offer to their agent to establish a connection.  In-band connections only require a user to
+	 * accept a connection offer that was automatically delivered to their agent.  Invitations are like out-of-band
+	 * connections in that they require the user to post the invitation to their agent, but invitations can be accepted
+	 * by multiple users.
+	 *
+	 * @typedef {'out_of_band'|'in_band'|'invitation'} ConnectionMethod
+	 */
+
+	/**
 	 * @param {string} id The ID for looking up this Signup instance.
 	 * @param {string} agent_name An agent name to associate with the user.
 	 * @param {Agent} agent An agent to connect to users and send credential offers.
@@ -180,8 +193,9 @@ class Signup {
 	 * @param {CardRenderer} card_renderer The renderer for the credentials.
 	 * @param {ImageProvider} connection_icon_provider Provides the image data for connection offers.
 	 * @param {SignupHelper} signup_helper Manages proof schemas and user record creation.
+	 * @param {ConnectionMethod} connection_method The method for establishing the connection to the user
 	 */
-	constructor (id, agent_name, agent, user, password, user_records, card_renderer, connection_icon_provider, signup_helper) {
+	constructor (id, agent_name, agent, user, password, user_records, card_renderer, connection_icon_provider, signup_helper, connection_method) {
 		this.id = id;
 		this.agent = agent;
 		this.user = user;
@@ -196,6 +210,7 @@ class Signup {
 		this.connection_offer = null;
 		this.verification = null;
 		this.credential = null;
+		this.connection_method = connection_method;
 	}
 
 	/**
@@ -239,27 +254,55 @@ class Signup {
 			logger.debug(`Created proof schema: ${JSON.stringify(account_proof_schema)}`);
 
 			this.status = Signup.SIGNUP_STEPS.ESTABLISHING_CONNECTION;
-			let connection_to = this.agent_name;
-			if (typeof connection_to === 'string') {
-				if (connection_to.toLowerCase().indexOf('http') >= 0)
-					connection_to = {url: connection_to};
-				else
-					connection_to = {name: connection_to};
-			}
+			logger.info(`Connection to user via the ${this.connection_method} method`);
+			const connection_opts = icon ? {icon: icon} : null;
+			let connection;
 
-			logger.info(`Making sure we have a connection to ${this.agent_name}`);
-			this.connection_offer = await this.agent.createConnection(connection_to, {
-				icon: icon
-			});
 			try {
-				connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
+
+				if (this.connection_method === 'in_band') {
+
+					if (!this.agent_name) {
+						const err = new Error('User record does not have an associated agent name');
+						err.code = SIGNUP_ERRORS.AGENT_NOT_FOUND;
+						throw err;
+					}
+
+					let connection_to = this.agent_name;
+					if (typeof connection_to === 'string') {
+						if (connection_to.toLowerCase().indexOf('http') >= 0)
+							connection_to = {url: connection_to};
+						else
+							connection_to = {name: connection_to};
+					}
+					logger.info(`Sending connection offer to ${JSON.stringify(connection_to)}`);
+					this.connection_offer = await this.agent.createConnection(connection_to, connection_opts);
+					logger.info(`Sent connection offer ${this.connection_offer.id} to ${JSON.stringify(connection_to)}`);
+					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
+
+				} else if (this.connection_method === 'out_of_band') {
+
+					this.connection_offer = await this.agent.createConnection(null, connection_opts);
+					logger.info(`Created out-of-band connection offer ${this.connection_offer.id}`);
+					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
+
+				} else {
+					const error = new Error(`An invalid connection method was used: ${this.connection_method}`);
+					logger.error(`Credential issuance could not proceed: ${error}`);
+					error.code = SIGNUP_ERRORS.SIGNUP_INVALID_CONNECTION_METHOD;
+					throw error;
+				}
 
 			} catch (error) {
-				logger.error(`Failed to establish connection offer ${this.connection_offer.id}.  Deleting connection.  error: ${error}`);
-				await this.agent.deleteConnection(this.connection_offer.id);
+				logger.error(`Failed to establish a connection with the user. error: ${error}`);
+				error.code = error.code ? error.code : SIGNUP_ERRORS.SIGNUP_CONNECTION_FAILED;
+				if (this.connection_offer && this.connection_offer.id) {
+					logger.info(`Cleaning up connection offer ${this.connection_offer.id}`);
+					await this.agent.deleteConnection(this.connection_offer.id);
+				}
 				throw error;
 			}
-			logger.info(`Established connection ${connection.id} to ${JSON.stringify(connection_to)}.  Their DID: ${connection.remote.pairwise.did}. My DID: ${connection.local.pairwise.did}`);
+			logger.info(`Established connection ${connection.id}.  Their DID: ${connection.remote.pairwise.did}`);
 
 			this.status = Signup.SIGNUP_STEPS.CHECKING_CREDENTIAL;
 
@@ -448,7 +491,9 @@ const SIGNUP_ERRORS = {
 	AGENT_NOT_FOUND: 'AGENT_NOT_FOUND',
 	SIGNUP_VERIFICATION_REQUEST_NOT_FOUND: 'SIGNUP_VERIFICATION_REQUEST_NOT_FOUND',
 	SIGNUP_UNKNOWN_ERROR: 'SIGNUP_UNKNOWN_ERROR',
-	SIGNUP_NO_CREDENTIAL_DEFINITIONS: 'SIGNUP_NO_CREDENTIAL_DEFINITIONS'
+	SIGNUP_NO_CREDENTIAL_DEFINITIONS: 'SIGNUP_NO_CREDENTIAL_DEFINITIONS',
+	SIGNUP_INVALID_CONNECTION_METHOD: 'SIGNUP_INVALID_CONNECTION_METHOD',
+	SIGNUP_CONNECTION_FAILED: 'SIGNUP_CONNECTION_FAILED'
 };
 
 exports.SIGNUP_ERRORS = SIGNUP_ERRORS;
