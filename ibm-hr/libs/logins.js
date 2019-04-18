@@ -212,12 +212,6 @@ class Login {
 			logger.info(`Getting credential data for ${this.user}`);
 			const user_doc = await this.user_records.read_user(this.user);
 
-			if (!user_doc.opts || !user_doc.opts.agent_name) {
-				const err = new Error('User record does not have an associated agent name');
-				err.code = LOGIN_ERRORS.AGENT_NOT_FOUND;
-				throw err;
-			}
-
 			const my_credential_definitions = await this.agent.getCredentialDefinitions();
 			logger.debug(`${this.agent.user}'s list of credential definitions: ${JSON.stringify(my_credential_definitions, 0, 1)}`);
 
@@ -261,9 +255,7 @@ class Login {
 							connection_to = {name: connection_to};
 					}
 					logger.info(`Sending connection offer to ${JSON.stringify(connection_to)}`);
-					this.connection_offer = await this.agent.createConnection(connection_to, {
-						icon: icon
-					});
+					this.connection_offer = await this.agent.createConnection(connection_to, connection_opts);
 					logger.info(`Sent connection offer ${this.connection_offer.id} to ${user_doc.opts.agent_name}`);
 					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
 

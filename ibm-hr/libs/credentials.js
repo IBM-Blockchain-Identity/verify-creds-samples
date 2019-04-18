@@ -266,9 +266,7 @@ class Issuance {
 							connection_to = {name: connection_to};
 					}
 					logger.info(`Sending connection offer to ${JSON.stringify(connection_to)}`);
-					this.connection_offer = await this.agent.createConnection(connection_to, {
-						icon: icon
-					});
+					this.connection_offer = await this.agent.createConnection(connection_to, connection_opts);
 					logger.info(`Sent connection offer ${this.connection_offer.id} to ${user_doc.opts.agent_name}`);
 					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
 
