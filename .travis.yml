@@ -12,7 +12,7 @@ before_install:
 
 script:
   - ibmcloud login -a https://api.ng.bluemix.net --apikey $IBMCLOUD_API_KEY > /dev/null
-  - echo "$DOCKERHUB_PASSWORD" | docker login --username "$DOCKERHUB_USER" --password-stdin
+  - echo "$DOCKERHUB_PASSWORD" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
   - travis/build_and_push.sh
 
 deploy:
