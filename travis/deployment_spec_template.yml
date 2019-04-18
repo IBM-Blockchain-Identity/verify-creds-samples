@@ -1,0 +1,226 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gov-dmv
+spec:
+  type: LoadBalancer
+  selector:
+    app: gov-dmv
+  ports:
+    - protocol: TCP
+      name: http
+      port: 80
+      targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gov-dmv
+  labels:
+    app: gov-dmv
+spec:
+  selector:
+    matchLabels:
+      app: gov-dmv
+  template:
+    metadata:
+      labels:
+        app: gov-dmv
+    spec:
+      containers:
+        - name: gov-dmv
+          image: verifycreds/gov-dmv
+          imagePullPolicy: Always
+          ports:
+            - name: gov-dmv
+              containerPort: 3000
+          env:
+            - name: DB_CONNECTION_STRING
+              value: "http://couchdb:5984"
+            - name: DB_USERS
+              value: "gov_dmv_db"
+            - name: LOG_LEVEL
+              value: "debug"
+            - name: ACCOUNT_URL
+              value: "ACCOUNT_URL_HERE"
+            - name: AGENT_NAME
+              value: "DMV_AGENT_NAME_HERE"
+            - name: FRIENDLY_NAME
+              value: "Gov DMV"
+            - name: AGENT_PASSWORD
+              value: "DMV_AGENT_PASSWORD_HERE"
+            - name: MY_URL
+              value: "https://gov-dmv.credimi-dev.us-south.containers.appdomain.cloud"
+            - name: CARD_IMAGE_RENDERING
+              value: "branding_server"
+            - name: BRANDING_SERVER_ENDPOINT
+              value: "BRANDING_SERVER_ENDPOINT_HERE"
+            - name: BRANDING_SERVER_FRONT_TEMPLATE
+              value: "GovDMVfront"
+            - name: BRANDING_SERVER_BACK_TEMPLATE
+              value: "GovDMVback"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ibm-hr
+spec:
+  type: LoadBalancer
+  selector:
+    app: ibm-hr
+  ports:
+    - protocol: TCP
+      name: http
+      port: 80
+      targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ibm-hr
+  labels:
+    app: ibm-hr
+spec:
+  selector:
+    matchLabels:
+      app: ibm-hr
+  template:
+    metadata:
+      labels:
+        app: ibm-hr
+    spec:
+      containers:
+        - name: ibm-hr
+          image: verifycreds/ibm-hr
+          imagePullPolicy: Always
+          ports:
+            - name: ibm-hr
+              containerPort: 3000
+          env:
+            - name: DB_CONNECTION_STRING
+              value: "http://couchdb:5984"
+            - name: DB_USERS
+              value: "ibm_hr_db"
+            - name: LOG_LEVEL
+              value: "debug"
+            - name: ACCOUNT_URL
+              value: "ACCOUNT_URL_HERE"
+            - name: AGENT_NAME
+              value: "IBMHR_AGENT_NAME_HERE"
+            - name: FRIENDLY_NAME
+              value: "IBM HR"
+            - name: AGENT_PASSWORD
+              value: "IBMHR_AGENT_PASSWORD_HERE"
+            - name: MY_URL
+              value: "https://ibm-hr.credimi-dev.us-south.containers.appdomain.cloud"
+            - name: CARD_IMAGE_RENDERING
+              value: "branding_server"
+            - name: BRANDING_SERVER_ENDPOINT
+              value: "BRANDING_SERVER_ENDPOINT_HERE"
+            - name: BRANDING_SERVER_FRONT_TEMPLATE
+              value: "IBMHRfront"
+            - name: BRANDING_SERVER_BACK_TEMPLATE
+              value: "IBMHRback"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bbcu
+spec:
+  type: LoadBalancer
+  selector:
+    app: bbcu
+  ports:
+    - protocol: TCP
+      name: http
+      port: 80
+      targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bbcu
+  labels:
+    app: bbcu
+spec:
+  selector:
+    matchLabels:
+      app: bbcu
+  template:
+    metadata:
+      labels:
+        app: bbcu
+    spec:
+      containers:
+        - name: bbcu
+          image: verifycreds/bbcu
+          imagePullPolicy: Always
+          ports:
+            - name: bbcu
+              containerPort: 3000
+          env:
+            - name: DB_CONNECTION_STRING
+              value: "http://couchdb:5984"
+            - name: DB_USERS
+              value: "bbcu_db"
+            - name: LOG_LEVEL
+              value: "debug"
+            - name: ACCOUNT_URL
+              value: "ACCOUNT_URL_HERE"
+            - name: AGENT_NAME
+              value: "BBCU_AGENT_NAME_HERE"
+            - name: FRIENDLY_NAME
+              value: "Big Blue Credit Union"
+            - name: AGENT_PASSWORD
+              value: "BBCU_AGENT_PASSWORD_HERE"
+            - name: MY_URL
+              value: "https://bbcu.credimi-dev.us-south.containers.appdomain.cloud"
+            - name: SIGNUP_DMV_ISSUER_AGENT
+              value: "DMV_AGENT_URL_HERE"
+            - name: SIGNUP_HR_ISSUER_AGENT
+              value: "HR_AGENT_URL_HERE"
+            - name: CARD_IMAGE_RENDERING
+              value: "branding_server"
+            - name: BRANDING_SERVER_ENDPOINT
+              value: "BRANDING_SERVER_ENDPOINT_HERE"
+            - name: BRANDING_SERVER_FRONT_TEMPLATE
+              value: "BBCUFront"
+            - name: BRANDING_SERVER_BACK_TEMPLATE
+              value: "BBCUback"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: couchdb
+spec:
+  type: LoadBalancer
+  selector:
+    app: couchdb
+  ports:
+    - protocol: TCP
+      name: couchdb
+      port: 5984
+      targetPort: 5984
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: couchdb
+  labels:
+    app: couchdb
+spec:
+  selector:
+    matchLabels:
+      app: couchdb
+  template:
+    metadata:
+      labels:
+        app: couchdb
+    spec:
+      containers:
+        - name: couchdb
+          image: couchdb
+          imagePullPolicy: Always
+          ports:
+            - name: couchdb
+              containerPort: 5984
