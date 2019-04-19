@@ -298,6 +298,7 @@ class Login {
 				});
 			} catch (error) {
 				logger.error(`Sending login proof request failed.  Deleting connection ${connection.id}. error: ${error}`);
+				error.code = error.code ? error.code : LOGIN_ERRORS.LOGIN_VERIFICATION_FAILED;
 				await this.agent.deleteConnection(connection.id);
 				throw error;
 			}
@@ -309,6 +310,7 @@ class Login {
 				proof = await this.agent.waitForVerification(this.verification.id, 30, 3000);
 			} catch (error) {
 				logger.error(`Failed to complete verification ${this.verification.id}. Deleting verification. error: ${error}`);
+				error.code = error.code ? error.code : LOGIN_ERRORS.LOGIN_VERIFICATION_FAILED;
 				await this.agent.deleteVerification(this.verification.id);
 				throw error;
 			}
@@ -318,6 +320,7 @@ class Login {
 				logger.info(`Verification ${proof.id} to ${connection.remote.pairwise.did} passed crypto validation`);
 			} else {
 				const error = new Error(`Verification ${proof.id} did not pass validation.  Deleting verification`);
+				error.code = LOGIN_ERRORS.LOGIN_PROOF_VALIDATION_FAILED;
 				logger.error(error.message);
 				await this.agent.deleteVerification(proof.id);
 				throw error;
@@ -327,13 +330,19 @@ class Login {
 			await this.agent.deleteVerification(proof.id);
 
 			logger.info(`Checking the validity of the proof in verification ${proof.id}`);
-			await this.login_helper.checkProof(proof, user_doc);
+			try {
+				await this.login_helper.checkProof(proof, user_doc);
+			} catch (error) {
+				error.code = error.code ? error.code : LOGIN_ERRORS.LOGIN_PROOF_VALIDATION_FAILED;
+				throw error;
+			}
 
 			logger.info(`Login flow ${this.id} completed successfully`);
 			this.status = Login.LOGIN_STEPS.FINISHED;
 
 		} catch (error) {
-			logger.error(`Login failed: ${error.code ? error.code : ' '}${error}`);
+			error.code = error.code ? error.code : LOGIN_ERRORS.LOGIN_UNKNOWN_ERROR;
+			logger.error(`Login failed: ${error.code} ${error.message}`);
 			this.status = Login.LOGIN_STEPS.ERROR;
 			this.error = error;
 		}
@@ -363,6 +372,7 @@ class Login {
 		const ret = {
 			status: this.status
 		};
+
 		if (this.error) {
 			ret.error = this.error.code ? this.error.code : LOGIN_ERRORS.LOGIN_UNKNOWN_ERROR;
 			ret.reason = this.error.reason;
@@ -395,12 +405,9 @@ function sortSchemas (a, b) {
 exports.LOGIN_STEPS = Login.LOGIN_STEPS;
 
 const LOGIN_ERRORS = {
-	INVALID_ATTRIBUTES: 'INVALID_ATTRIBUTES',
-	LOGIN_PROOF_FAILED: 'LOGIN_PROOF_FAILED',
-	SCHEMA_LOOKUP_FAILED: 'SCHEMA_LOOKUP_FAILED',
-	AGENT_NOT_FOUND: 'AGENT_NOT_FOUND',
-	LOGIN_VERIFICATION_REQUEST_NOT_FOUND: 'LOGIN_VERIFICATION_REQUEST_NOT_FOUND',
-	LOGIN_INVALID_ACCOUNT_NUMBER: 'LOGIN_INVALID_ACCOUNT_NUMBER',
+	LOGIN_PROOF_VALIDATION_FAILED: 'LOGIN_PROOF_VALIDATION_FAILED',
+	LOGIN_VERIFICATION_FAILED: 'LOGIN_VERIFICATION_FAILED',
+	AGENT_NOT_FOUND: 'SIGNUP_HOLDER_AGENT_NOT_FOUND',
 	LOGIN_UNKNOWN_ERROR: 'LOGIN_UNKNOWN_ERROR',
 	LOGIN_NO_CREDENTIAL_DEFINITIONS: 'LOGIN_NO_CREDENTIAL_DEFINITIONS',
 	LOGIN_INVALID_CONNECTION_METHOD: 'LOGIN_INVALID_CONNECTION_METHOD',

@@ -215,7 +215,7 @@ class Issuance {
 			const schema = await this.agent.getCredentialSchema(schema_id);
 			if (!schema) {
 				const err = new Error('Failed to lookup the selected schema');
-				err.code = CREDENTIAL_ERRORS.CREDENTIAL_CREATION_FAILED;
+				err.code = CREDENTIAL_ERRORS.CREDENTIAL_SCHEMA_LOOKUP_FAILED;
 				throw err;
 			}
 
@@ -233,7 +233,7 @@ class Issuance {
 					// Make sure the user has data for this attribute
 					if (!user_doc.personal_info || [ 'string', 'number' ].indexOf(typeof user_doc.personal_info[attr_name]) < 0) {
 						const err = new Error(`User record was missing data '${attr_name}', which is required for creating a credential`);
-						err.code = CREDENTIAL_ERRORS.INVALID_ATTRIBUTES;
+						err.code = CREDENTIAL_ERRORS.CREDENTIAL_INVALID_USER_ATTRIBUTES;
 						throw err;
 					}
 					if (typeof user_doc.personal_info[attr_name] === 'number')
@@ -254,7 +254,7 @@ class Issuance {
 
 					if (!user_doc.opts || !user_doc.opts.agent_name) {
 						const err = new Error('User record does not have an associated agent name');
-						err.code = CREDENTIAL_ERRORS.AGENT_NOT_FOUND;
+						err.code = CREDENTIAL_ERRORS.CREDENTIAL_USER_AGENT_NOT_FOUND;
 						throw err;
 					}
 
@@ -308,6 +308,7 @@ class Issuance {
 				});
 			} catch (error) {
 				logger.error(`Failed to offer credential. Deleting connection ${connection.id}. error: ${error}`);
+				error.code = error.code ? error.code : CREDENTIAL_ERRORS.CREDENTIAL_CONNECTION_FAILED;
 				await this.agent.deleteConnection(connection.id);
 				throw error;
 			}
@@ -318,6 +319,7 @@ class Issuance {
 				finished_credential = await this.agent.waitForCredential(this.credential.id, 30, 3000);
 			} catch (error) {
 				logger.error(`Failed to deliver credential ${this.credential.id}.  Deleting credential. error: ${error}`);
+				error.code = error.code ? error.code : CREDENTIAL_ERRORS.CREDENTIAL_OFFER_FAILED;
 				await this.agent.deleteCredential(this.credential.id);
 				throw error;
 			}
@@ -328,6 +330,7 @@ class Issuance {
 				this.status = Issuance.ISSUANCE_STEPS.FINISHED;
 			} else {
 				const error = new Error(`Offered credential ${finished_credential.id} was not accepted by ${connection.remote.pairwise.did}. Deleting credential.`);
+				error.code = CREDENTIAL_ERRORS.CREDENTIAL_NOT_ACCEPTED;
 				logger.error(error.message);
 				await this.agent.deleteCredential(finished_credential.id);
 				throw error;
@@ -353,8 +356,12 @@ class Issuance {
 	/**
 	 * @typedef {object} IssuanceStatus
 	 * @property {ISSUANCE_STEPS} status The status of the Issuance.
-	 * @property {error} [error] The error that occurred, if the issuance status is ERROR.
+	 * @property {error} [error] An error code, only present if the status is ERROR.
+	 * @property {string} [reason] A description of the error code.  Only present if the status is ERROR.
+	 * @property {object} [connection_offer] A connection offer.  Only present if the status is ESTABLISHING_CONNECTION.
+	 * @property {string} [credential] A credential offer ID. Only present if the status is ISSUING_CREDENTIAL.
 	 */
+
 	/**
 	 * Gets the status of the Issuance.
 	 * @returns {IssuanceStatus} Information on the status of the issuance
@@ -364,15 +371,18 @@ class Issuance {
 		const ret = {
 			status: this.status
 		};
-		if (this.error)
-			ret.error = this.error;
+
+		if (this.error) {
+			ret.error = this.error.code ? this.error.code : CREDENTIAL_ERRORS.CREDENTIAL_UNKNOWN_ERROR;
+			ret.reason = this.error.message;
+		}
 
 		if (this.status === Issuance.ISSUANCE_STEPS.ESTABLISHING_CONNECTION && this.connection_offer)
 			ret.connection_offer = this.connection_offer;
 
 		// Just pass the ID until we know we need more.  Credential objects are large.
 		if (this.status === Issuance.ISSUANCE_STEPS.ISSUING_CREDENTIAL && this.credential)
-			ret.credential = {id: this.credential.id};
+			ret.credential = this.credential.id;
 
 		return ret;
 	}
@@ -394,21 +404,15 @@ function sortSchemas (a, b) {
 exports.ISSUANCE_STEPS = Issuance.ISSUANCE_STEPS;
 
 const CREDENTIAL_ERRORS = {
-	INVALID_ATTRIBUTES: 'INVALID_ATTRIBUTES',
-	CREDENTIAL_DESIGN_DOC_PUBLISHING_FAILED: 'CREDENTIAL_DESIGN_DOC_PUBLISHING_FAILED',
-	CREDENTIAL_CREATION_FAILED: 'CREDENTIAL_CREATION_FAILED',
-	CREDENTIAL_READ_FAILED: 'CREDENTIAL_READ_FAILED',
+	CREDENTIAL_INVALID_USER_ATTRIBUTES: 'CREDENTIAL_INVALID_USER_ATTRIBUTES',
 	CREDENTIAL_OFFER_FAILED: 'CREDENTIAL_OFFER_FAILED',
-	CREDENTIAL_NOT_FOUND: 'CREDENTIAL_NOT_FOUND',
-	CREDENTIAL_NOT_OFFERED_YET: 'CREDENTIAL_NOT_OFFERED_YET',
-	CREDENTIAL_NOT_ACCEPTED_YET: 'CREDENTIAL_NOT_ACCEPTED_YET',
-	CREDENTIAL_SEND_FAILED: 'CREDENTIAL_SEND_FAILED',
-	CREDENTIAL_DELETE_FAILED: 'CREDENTIAL_DELETE_FAILED',
-	CREDENTIAL_UPDATE_FAILED: 'CREDENTIAL_UPDATE_FAILED',
+	CREDENTIAL_NOT_ACCEPTED: 'CREDENTIAL_NOT_ACCEPTED',
 	CREDENTIAL_NO_CREDENTIAL_DEFINITIONS: 'CREDENTIAL_NO_CREDENTIAL_DEFINITIONS',
 	CREDENTIAL_CONNECTION_FAILED: 'CREDENTIAL_CONNECTION_FAILED',
 	CREDENTIAL_INVALID_CONNECTION_METHOD: 'CREDENTIAL_INVALID_CONNECTION_METHOD',
-	AGENT_NOT_FOUND: 'AGENT_NOT_FOUND'
+	CREDENTIAL_USER_AGENT_NOT_FOUND: 'CREDENTIAL_USER_AGENT_NOT_FOUND',
+	CREDENTIAL_UNKNOWN_ERROR: 'CREDENTIAL_UNKNOWN_ERROR',
+	CREDENTIAL_SCHEMA_LOOKUP_FAILED: 'CREDENTIAL_SCHEMA_LOOKUP_FAILED'
 };
 
 exports.CREDENTIAL_ERRORS = CREDENTIAL_ERRORS;

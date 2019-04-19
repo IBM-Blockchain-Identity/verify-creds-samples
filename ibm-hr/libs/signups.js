@@ -374,7 +374,7 @@ class Signup {
 					// Make sure the user has data for this attribute
 					if (!user_doc.personal_info || [ 'string', 'number' ].indexOf(typeof user_doc.personal_info[attr_name]) < 0) {
 						const err = new Error(`User record was missing data '${attr_name}', which is required for creating a credential`);
-						err.code = SIGNUP_ERRORS.INVALID_ATTRIBUTES;
+						err.code = SIGNUP_ERRORS.LOGIN_INVALID_USER_ATTRIBUTES;
 						throw err;
 					}
 					if (typeof user_doc.personal_info[attr_name] === 'number')
@@ -484,11 +484,11 @@ function sortSchemas (a, b) {
 exports.SIGNUP_STEPS = Signup.SIGNUP_STEPS;
 
 const SIGNUP_ERRORS = {
-	INVALID_ATTRIBUTES: 'INVALID_ATTRIBUTES',
+	SIGNUP_INVALID_ATTRIBUTES: 'CREDENTIAL_INVALID_USER_ATTRIBUTES',
 	SIGNUP_NOT_A_US_RESIDENT: 'SIGNUP_NOT_A_US_RESIDENT',
 	SIGNUP_PROOF_FAILED: 'SIGNUP_PROOF_FAILED',
 	SCHEMA_LOOKUP_FAILED: 'SCHEMA_LOOKUP_FAILED',
-	AGENT_NOT_FOUND: 'AGENT_NOT_FOUND',
+	SIGNUP_HOLDER_AGENT_NOT_FOUND: 'SIGNUP_HOLDER_AGENT_NOT_FOUND',
 	SIGNUP_VERIFICATION_REQUEST_NOT_FOUND: 'SIGNUP_VERIFICATION_REQUEST_NOT_FOUND',
 	SIGNUP_UNKNOWN_ERROR: 'SIGNUP_UNKNOWN_ERROR',
 	SIGNUP_NO_CREDENTIAL_DEFINITIONS: 'SIGNUP_NO_CREDENTIAL_DEFINITIONS',
