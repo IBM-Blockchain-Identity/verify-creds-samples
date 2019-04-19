@@ -57,7 +57,6 @@ block content
         .modal-header
           h3.modal-title Download My Credential
         .modal-body
-          #connectionFlowAlert
           #issuanceCarousel.carousel.slide(data-ride="false" data-interval="false" data-keyboard="false" data-wrap="false" pause="false")
             .carousel-inner.text-center
               .carousel-item.active
@@ -92,10 +91,12 @@ block content
                   p Your credential has been delivered to your wallet.
               .carousel-item
                 .d-block.w-100.item-padding.text-danger
-                  i.fas.fa-exclamation-circle.fa-10x
                 .carousel-caption.text-danger
+                  i.fas.fa-exclamation-circle.fa-10x
                   h5 Oh no!
-                  p Something went wrong! Please refresh the page and try again.
+                  p Please refresh the page and try again.
+                  p#errorCode
+                  p#errorMessage
               .carousel-item
                 .d-block.w-100.item-padding.text-danger
                   i.fas.fa-exclamation-circle.fa-10x

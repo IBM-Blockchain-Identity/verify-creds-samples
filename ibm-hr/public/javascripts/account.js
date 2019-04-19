@@ -119,7 +119,10 @@ async function issue_credential (connection_method) {
 				console.warn(`Unknown issuance status detected: ${response.status}`);
 
 			if ('ERROR' === response.status) {
-				// TODO render a proper error
+				if (response.error)
+					$('#errorCode').html(`Code: ${response.error}`);
+				if (response.reason)
+					$('#errorMessage').html(`Reason: ${response.reason}`);
 				console.error(`Credential issuance failed: ${JSON.stringify(response.error)}`);
 			}
 
@@ -151,7 +154,7 @@ async function issue_credential (connection_method) {
 		carousel.carousel(ISSUANCE_STEPS.ERROR);
 		const message = `Credential issuance failed: ${error.message ? error.message : JSON.stringify(error)}`;
 		console.error(message);
-		$('#connectionFlowAlert').html(window.alertHTML(message));
+		$('#errorMessage').html(message);
 	}
 }
 
