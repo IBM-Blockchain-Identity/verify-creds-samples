@@ -130,8 +130,11 @@ $(document).ready(() => {
 
 		// Reset the signon carousel
 		vcSignonCarousel.carousel(vcSignonCarouselSlides.LOGGING_IN);
-		// Open the signon modal
-		vcSignonModal.modal('show');
+		// Open the signon modal and keep it open
+		vcSignonModal.modal({
+			backdrop: 'static',
+			keyboard: false
+		});
 
 		try {
 			const response = await $.ajax({
@@ -251,10 +254,13 @@ $(document).ready(() => {
 		GETTING_THE_APP: 7
 	};
 
-	// Open the signup modal if the user wants to signup for a mobile wallet account
+	// Open the signup modal if the user wants to signup for a mobile wallet account and keep it open
 	$('.vcSignupLink').on('click', () => {
 		vcSignupCarousel.carousel(vcSignupCarouselSlides.BEFORE_REGISTERING);
-		vcSignupModal.modal('show');
+		vcSignupModal.modal({
+			backdrop: 'static',
+			keyboard: false
+		});
 	});
 
 	// Handle all the cancel buttons/links in the signup flow

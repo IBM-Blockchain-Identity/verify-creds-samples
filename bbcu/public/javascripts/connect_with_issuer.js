@@ -99,7 +99,10 @@ async function issue_credential (connection_method) {
 	};
 
 	carousel.carousel(ISSUANCE_STEPS.BUILDING_CREDENTIAL);
-	$('#issuanceModal').modal('show');
+	$('#issuanceModal').modal({
+		backdrop: 'static',
+		keyboard: false
+	});
 
 	try {
 		const issuance_info = await $.ajax({
