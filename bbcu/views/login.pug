@@ -89,7 +89,8 @@ block extra
                                 h2 Logging in with your Mobile Wallet...
                                 .spinner-container
                                     i.fas.fa-circle-notch.fa-spin.fa-2x
-                                button#vcSignonCancel.btn.btn-bbcu(type="button" data-dismiss="modal") Cancel
+                                .verifying-creds-text
+                                    span Please accept the verification request on your device
                             .carousel-item.text-center
                                 h2 Login Failed
                                 p.mt-2.mb-2 We were unable to authenticate your mobile wallet.
@@ -149,7 +150,6 @@ block extra
                                 .verifying-creds-text
                                     i.fas.fa-circle-notch.fa-spin.fa-2x
                                     span Please accept the connection offer on your device
-                                button.btn.btn-bbcu.vcSignupCancel Cancel
                                 .info-link-container
                                     a.info-link(href="#") If you don’t have a Mobile Wallet application, click here to learn how to get one.
 
@@ -158,14 +158,12 @@ block extra
                                 .verifying-creds-text
                                     i.fas.fa-circle-notch.fa-spin.fa-2x
                                     span Please accept the verification request on your device
-                                button.btn.btn-bbcu.vcSignupCancel Cancel
 
                             .carousel-item.text-center
                                 h2 Issuing your account information
                                 .verifying-creds-text
                                     i.fas.fa-circle-notch.fa-spin.fa-2x
                                     span Please accept the credential offer on your device
-                                button.btn.btn-bbcu.vcSignupCancel Cancel
 
                             .carousel-item.text-center
                                 h2 Enrollment Failed
