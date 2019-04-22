@@ -450,7 +450,7 @@ class Signup {
 		};
 		if (this.error) {
 			ret.error = this.error.code ? this.error.code : SIGNUP_ERRORS.SIGNUP_UNKNOWN_ERROR;
-			ret.reason = this.error.reason;
+			ret.reason = this.error.message;
 		}
 
 		if (this.status === Signup.SIGNUP_STEPS.ESTABLISHING_CONNECTION && this.connection_offer)

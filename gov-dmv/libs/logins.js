@@ -375,7 +375,7 @@ class Login {
 
 		if (this.error) {
 			ret.error = this.error.code ? this.error.code : LOGIN_ERRORS.LOGIN_UNKNOWN_ERROR;
-			ret.reason = this.error.reason;
+			ret.reason = this.error.message;
 		}
 
 		if (this.status === Login.LOGIN_STEPS.ESTABLISHING_CONNECTION && this.connection_offer)
