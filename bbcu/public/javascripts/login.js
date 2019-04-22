@@ -186,12 +186,11 @@ $(document).ready(() => {
 
 
 				if ('ERROR' === response.status) {
-					// TODO display a proper error message
-					let message = JSON.stringify(response);
-					if (response.vc_login.error) {
-						message = `Error: ${response.vc_login.error}, Reason: ${response.vc_login.reason}`;
-					}
-					console.error(`Failed to complete VC signon: ${message}`);
+					if (response.error)
+						$('#loginErrorCode').html(`Code: ${response.error}`);
+					if (response.reason)
+						$('#loginErrorMessage').html(`Reason: ${response.reason}`);
+					console.error(`Failed to complete VC signon: ${JSON.stringify(response)}`);
 					break;
 
 				} else if ('FINISHED' === response.status) {
@@ -230,8 +229,10 @@ $(document).ready(() => {
 			}
 
 		} catch (error) {
+			if (error.code)
+				$('#loginErrorCode').html(`Code: ${error.code}`);
+			$('#loginErrorMessage').html(`Reason: ${error.message}`);
 
-			// TODO display a proper error;
 			vcSignonCarousel.carousel(vcSignonCarouselSlides.FAILED);
 			console.error(`VC login failed: ${error}`);
 		}
@@ -398,7 +399,12 @@ $(document).ready(() => {
 					vcSignupCarousel.carousel(vcSignupCarouselSlides.NOT_ALLOWED);
 					break;
 				} else if (signup_status === REMOTE_SIGNUP_STEPS.ERROR) {
-					if (response.error && response.error === 'SIGNUP_USER_ALREADY_EXISTS') {
+					if (response.error)
+						$('#signupErrorCode').html(`Code: ${response.error}`);
+					if (response.reason)
+						$('#signupErrorMessage').html(`Reason: ${response.reason}`);
+
+					if (response.error && response.error === 'USER_ALREADY_EXISTS') {
 						vcSignupCarousel.carousel(vcSignupCarouselSlides.ALREADY_HAVE_WALLET);
 					} else {
 						vcSignupCarousel.carousel(vcSignupCarouselSlides.NOT_ALLOWED);
@@ -433,7 +439,9 @@ $(document).ready(() => {
 			}
 
 		} catch (error) {
-
+			if (error.code)
+				$('#signupErrorCode').html(`Code: ${error.code}`);
+			$('#signupErrorMessage').html(`Reason: ${error.message}`);
 			console.error('Failed to create signup', error);
 			vcSignupCarousel.carousel(vcSignupCarouselSlides.NOT_ALLOWED);
 		}

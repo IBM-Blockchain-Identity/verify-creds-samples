@@ -92,7 +92,9 @@ block extra
                                 button#vcSignonCancel.btn.btn-bbcu(type="button" data-dismiss="modal") Cancel
                             .carousel-item.text-center
                                 h2 Login Failed
-                                p#vcSignonFailed We were unable to authenticate your mobile wallet.
+                                p.mt-2.mb-2 We were unable to authenticate your mobile wallet.
+                                #loginErrorCode.text-danger
+                                #loginErrorMessage.text-danger.mb-2
                                 button.btn.btn-bbcu.userpassLink(type="button" data-dismiss="modal") Standard Sign On
 
     #vcSignupModal.bbcu-signon.modal(tabindex="-1" role="dialog")
@@ -168,7 +170,9 @@ block extra
                             .carousel-item.text-center
                                 h2 Enrollment Failed
                                 .signup-failed-text
-                                    p You don’t have permission to create a Mobile Wallet account.
+                                    p.mb-2 You don’t have permission to create a Mobile Wallet account.
+                                    #signupErrorCode.text-danger
+                                    #signupErrorMessage.text-danger.mb-2
                                 button.btn.btn-bbcu.userpassLink(type="button" data-dismiss="modal") Standard Sign On
 
                             .carousel-item.text-center

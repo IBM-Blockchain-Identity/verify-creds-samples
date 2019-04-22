@@ -308,11 +308,6 @@ a {
   padding-top: 40px;
 }
 
-#vcSignonFailed {
-  margin-top: 20px;
-  margin-bottom: 40px;
-}
-
 #vcSignonModal .spinner-container {
   color: #00a991;
   margin: 60px 0;
