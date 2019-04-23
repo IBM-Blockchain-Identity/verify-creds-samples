@@ -49,30 +49,13 @@ $(document).ready(() => {
 			$('#passwordLabel').css('visibility', 'hidden');
 	});
 
-	// Show the vc signon input labels when the user id or phone number form inputs are clicked
+	// Show the vc signon input labels when the user id form input is clicked
 	$('#vcUserID').focus(() => {
 		$('#vcUserIDLabel').css('visibility', 'visible');
 	});
 	$('#vcUserID').focusout(() => {
 		if (!$('#vcUserID').val().trim())
 			$('#vcUserIDLabel').css('visibility', 'hidden');
-	});
-	$('#vcPhone').focus(() => {
-		$('#vcPhoneLabel').css('visibility', 'visible');
-	});
-	$('#vcPhone').focusout(() => {
-		if (!$('#vcPhone').val().trim())
-			$('#vcPhoneLabel').css('visibility', 'hidden');
-	});
-
-	// Allow users to enter either a user id or phone number for vc sign in, but not both
-	$('#vcUserID').on('input', () => {
-		$('#vcPhone').val('');
-		$('#vcPhoneLabel').css('visibility', 'hidden');
-	});
-	$('#vcPhone').on('input', () => {
-		$('#vcUserID').val('');
-		$('#vcUserIDLabel').css('visibility', 'hidden');
 	});
 
 	// Login form
@@ -122,7 +105,7 @@ $(document).ready(() => {
 		}
 		console.log(`VC Sign in info: ${JSON.stringify(formObject)}`);
 
-		// You can only use the sign on api with a username of phone number
+		// You can only use the sign on api with a username
 		const data = {
 			username: formObject.username,
 			connection_method: 'in_band'
@@ -284,8 +267,6 @@ $(document).ready(() => {
 	const signup_user_label = $('label[for="signupUserID"]');
 	const signup_password = $('#signupPassword');
 	const signup_password_label = $('label[for="signupPassword"]');
-	const signup_phone = $('#signupPhone');
-	const signup_phone_label = $('label[for="signupPhone"]');
 	const signup_agent_name = $('#signupAgentName');
 	const signup_agent_name_label = $('label[for="signupAgentName"]');
 
@@ -302,13 +283,6 @@ $(document).ready(() => {
 	signup_password.focusout(() => {
 		if (!signup_password.val().trim())
 			signup_password_label.css('visibility', 'hidden');
-	});
-	signup_phone.focus(() => {
-		signup_phone_label.css('visibility', 'visible');
-	});
-	signup_phone.focusout(() => {
-		if (!signup_phone.val().trim())
-			signup_phone_label.css('visibility', 'hidden');
 	});
 	signup_agent_name.focus(() => {
 		signup_agent_name_label.css('visibility', 'visible');

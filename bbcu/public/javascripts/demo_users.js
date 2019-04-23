@@ -20,7 +20,6 @@ const demo_users = [
 		attributes: {
 			first_name: 'Alice',
 			last_name: 'Garcia',
-			phone_number: '123-456-7000',
 			email: 'alice@example.com',
 			agent_name: 'alice',
 			password: 'alicepw',
@@ -36,7 +35,6 @@ const demo_users = [
 		attributes: {
 			first_name: 'Andrew',
 			last_name: 'Adams',
-			phone_number: '123-456-7891',
 			email: 'aadams@example.com'
 		}
 	},
@@ -45,7 +43,6 @@ const demo_users = [
 		attributes: {
 			first_name: 'Allison',
 			last_name: 'Hunter',
-			phone_number: '123-456-7892',
 			email: 'ahunter@example.com'
 		}
 	},
@@ -54,7 +51,6 @@ const demo_users = [
 		attributes: {
 			first_name: 'Alvin',
 			last_name: 'Hwang',
-			phone_number: '123-456-7893',
 			email: 'ahwang@example.com'
 		}
 	},
@@ -63,7 +59,6 @@ const demo_users = [
 		attributes: {
 			first_name: 'Adrian',
 			last_name: 'Martin',
-			phone_number: '123-456-7894',
 			email: 'amartin@example.com'
 		}
 	},
@@ -72,7 +67,6 @@ const demo_users = [
 		attributes: {
 			first_name: 'Brandon',
 			last_name: 'Harris',
-			phone_number: '123-456-7895',
 			email: 'bharris@example.com'
 		}
 	}
@@ -81,7 +75,6 @@ const demo_users = [
 const default_attributes = {
 	'email': 'jdoe@example.com',
 	'password': 'password',
-	'phone_number': '123-456-7890',
 
 	'first_name': 'John',
 	'middle_name': '_',
