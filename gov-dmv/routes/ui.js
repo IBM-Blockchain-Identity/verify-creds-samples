@@ -74,7 +74,7 @@ exports.createRouter = function (users_instance, ev) {
 		try {
 			const user_doc = await users_instance.read_user(user_id);
 			//res.render('account', {title: 'My Account', user_id: user_id, user_doc: user_doc});
-			res.render('user', {title: 'My DMV', user_id: user_id, user_doc: user_doc, ev_FRIENDLY_NAME: ev.FRIENDLY_NAME, ev_MY_URL: ev.MY_URL});
+			res.render('user', {title: 'My DMV', user_id: user_id, user_doc: user_doc});
 
 		} catch (error) {
 			let status = 500;

@@ -3,8 +3,6 @@ extends layout
 block content
   script.
     window.user_id = '#{user_id}'
-    window.ev_FRIENDLY_NAME = '#{ev_FRIENDLY_NAME}'
-    window.ev_MY_URL = '#{ev_MY_URL}'
   .card.mb-3.pl-4.pr-4
     .card-body
       #personalInfoAlert
@@ -120,17 +118,9 @@ block content
               label(for="infoSignature") Signature
               input#infoSignature.form-control(type="text" disabled readonly)
       hr
-      h3 Download Digital License
-      p You can use either method:
-      ol
-        li Click to Download your license to your phone
-          p
-          button#connectWalletButton.btn.btn-primary Download your digital license
-          span#extensionLoaded.d-none.text-muted.ml-3 Chrome extension detected
-          p
-        li Scan with the Verify Credentials Mobile App to Download your license to your phone
-          p
-          div#qrcodePlaceHolder
+      h3 Your Digital License
+      button#connectWalletButton.btn.btn-primary.mt-3 Click to receive your digital license
+      span#extensionLoaded.d-none.text-muted.ml-3 Chrome extension detected
 
 block extra
   #issuanceModal.modal(tabindex="-1" role="dialog")

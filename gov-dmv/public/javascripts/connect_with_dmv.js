@@ -304,17 +304,6 @@ function populate_user_info () {
 		$('.first-name').html(user_doc.personal_info['first_name']);
 		$('.last-name').html(user_doc.personal_info['last_name']);
 
-		// Render QR code to get credential
-		const data = {};
-		data['to'] = user_doc.personal_info['agent_name'];
-		data['type'] = 'credential';
-		data['data'] = {};
-		data.data['id'] = user_id;
-		data.data['name'] = ev_FRIENDLY_NAME;// eslint-disable-line
-		data.data['url'] = ev_MY_URL + '/api/issue_credential/' + user_id;// eslint-disable-line
-		console.log('QR Code data = '+JSON.stringify(data, 0, 1));
-		new QRCode(document.getElementById('qrcodePlaceHolder'), JSON.stringify(data));// eslint-disable-line
-
 	}).fail((jqXHR, textStatus, errorThrown) => {
 		// Stop the loader
 		loader.html(loader.data('original-text'));
