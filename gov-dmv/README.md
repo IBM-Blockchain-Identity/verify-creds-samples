@@ -26,11 +26,11 @@ license.
 ### Issuing the license
 
 Now you're going to switch roles, pretending to be the DMV customer.  You're going to sign in to your DMV account and
-download your digital driver's license to your agent.
+deliver your digital driver's license to your agent.
 
 1. Click on the user's User Name in the User List table to "sign in" as that user and open their DMV profile page.
   ![open_profile.png](docs/open_profile.png)
-2. On the user's profile page, scroll to the bottom of the page and click the `Download your digital license` button.
+2. On the user's profile page, scroll to the bottom of the page and click the `Receive your digital license` button.
   ![issue_credential.png](docs/issue_credential.png)
 3. Accept the connection offer from `Gov DMV` on your mobile app.
 4. Accept the credential offer from `Gov DMV` on your mobile app.

@@ -25,7 +25,7 @@ employment.
 
 ### Issuing the proof of employment
 
-Now you're going to switch roles, pretending to be the employee.  You're going to sign in to IBM HR portal and download
+Now you're going to switch roles, pretending to be the employee.  You're going to sign in to IBM HR portal and deliver
 your proof of employment credential to your agent.
 
 1. Click on the user's User Name in the User List table to "sign in" as that user and open their employee profile page.
