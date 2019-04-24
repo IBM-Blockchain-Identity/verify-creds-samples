@@ -313,20 +313,6 @@ a {
   margin: 60px 0;
 }
 
-.cred-images {
-  height: 180px;
-}
-
-.cred-images img {
-  width: 200px;
-  padding-top: 20px;
-}
-
-.cred-images i {
-  width: 200px;
-  padding-top: 20px;
-}
-
 .cred-buttons .vcSignupCancel {
   margin-left: 20px;
   text-decoration: underline;

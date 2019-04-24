@@ -109,16 +109,15 @@ block extra
                         .carousel-inner
 
                             .carousel-item.active.text-center
-                                h2 Before registering for an account, you will need the following credentials:
-                                .cred-images.row
-                                    .col.d-flex.flex-column.justify-content-center
-                                        a.pt-2(href="#" target="_blank")
-                                            i.fas.fa-id-card.fa-5x
-                                        p Driver's License
-                                    .col.d-flex.flex-column.justify-content-center
-                                        a.pt-2(href="#" target="_blank")
-                                            i.fas.fa-id-card.fa-5x
-                                        p Proof of Employment
+                                h2 Before registering for an account..
+                                .row.mt-4.mb-4.text-left
+                                    .col-sm-3
+                                    .col-sm-6
+                                        p.text-decoration-bolder You will need the following credentials:
+                                        ol
+                                            li Driver's License
+                                            li Proof of Employment
+                                    .col-sm-3
                                 .cred-buttons
                                     button#credsNextButton.btn.btn-bbcu Next
                                     a.vcSignupCancel(href="#") Cancel
