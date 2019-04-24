@@ -10,7 +10,7 @@ This project contains the code necessary to run a mock-up of the **BBCU Online**
 
 ### Signing up for an account
 
-1. Click on `Sign up for Mobile Wallet` button on the login page.
+1. Click on `Sign up for an account` button on the login page.
 2. Click the `Next` button on the modal that appears.
   ![signup_1.png](docs/signup_1.png)
 3. Fill out the signup form and click the `Next` button. The Agent URL entered here will be used to connect to the
@@ -25,7 +25,7 @@ account.
 
 1. Log out of your BBCU account page.
   ![login_1.png](docs/login_1.png)
-2. Click the `Login with Mobile wallet` button.
+2. Click the `Login with a digital credential` button.
 3. Enter the user name for your account and click the `Sign On` button.
   ![login_2.png](docs/login_2.png)
 4. Respond to the proof request on your mobile app.

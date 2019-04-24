@@ -5,17 +5,17 @@ block content
         .container
             .d-flex.justify-content-between
                 .banner-content.align-self-center
-                    h3 What's a Mobile Wallet?
-                    p A Mobile Wallet will allow you to sign into your accounts securely without having to remember your password.
+                    h3 What's a digital credential?
+                    p A digital credential will allow you to sign into your accounts securely without having to remember your password.
                     a.btn(href="#") Learn More
 
                 .banner-sign-in.align-self-center
                     #loginCarousel.carousel.slide(data-ride="false" data-interval="false" data-keyboard="false" data-wrap="false" pause="false")
                         .carousel-inner
                             .carousel-item.active
-                                h3 Mobile Wallet Sign On
-                                button#mobile-sign-on-button.btn.btn-bbcu.vcSignonLink Login with Mobile Wallet
-                                button.btn.btn-bbcu.vcSignupLink(href="/signup") Sign up for Mobile Wallet
+                                h3 Digital Credential Sign On
+                                button#mobile-sign-on-button.btn.btn-bbcu.vcSignonLink Login with a digital credential
+                                button.btn.btn-bbcu.vcSignupLink(href="/signup") Sign up for an account
                                 .sign-in-links
                                     a.userpassLink(href="#") Login with Email and Password
                             .carousel-item
@@ -40,7 +40,7 @@ block content
                                         a.col(href="#") Forgot Password?
                                         a.col.vcSignonLink(href="#") Register for Online Access
                             .carousel-item
-                                h3 Mobile Wallet Sign On
+                                h3 Digital Credential Sign On
                                 form#vcSignonForm
                                     .row.ml-0.mr-0
                                         .col.pr-0.pl-0
@@ -55,7 +55,7 @@ block content
                                     .row
                                         a.col.userpassLink(href="#") Login with Username and Password
                                     .row
-                                        a.col.vcSignupLink(href="#") Sign up for Mobile Wallet
+                                        a.col.vcSignupLink(href="#") Sign up for an account
 
     .container.mt-5
         .row
@@ -86,14 +86,14 @@ block extra
                     #vcSignonCarousel.carousel.slide(data-ride="false" data-interval="false" data-keyboard="false" data-wrap="false" pause="false")
                         .carousel-inner
                             .carousel-item.active.text-center
-                                h2 Logging in with your Mobile Wallet...
+                                h2 Logging in with your digital credential...
                                 .spinner-container
                                     i.fas.fa-circle-notch.fa-spin.fa-2x
                                 .verifying-creds-text
-                                    span Please accept the verification request on your device
+                                    span Please accept the verification request
                             .carousel-item.text-center
                                 h2 Login Failed
-                                p.mt-2.mb-2 We were unable to authenticate your mobile wallet.
+                                p.mt-2.mb-2 We were unable to authenticate your digital credential.
                                 #loginErrorCode.text-danger
                                 #loginErrorMessage.text-danger.mb-2
                                 button.btn.btn-bbcu.userpassLink(type="button" data-dismiss="modal") Standard Sign On
@@ -109,7 +109,7 @@ block extra
                         .carousel-inner
 
                             .carousel-item.active.text-center
-                                h2 Before registering for a Mobile Wallet, you will need the following credentials:
+                                h2 Before registering for an account, you will need the following credentials:
                                 .cred-images.row
                                     .col.d-flex.flex-column.justify-content-center
                                         a.pt-2(href="#" target="_blank")
@@ -123,7 +123,7 @@ block extra
                                     button#credsNextButton.btn.btn-bbcu Next
                                     a.vcSignupCancel(href="#") Cancel
                                 .info-link-container
-                                    a.info-link(href="#") If you don’t have a Mobile Wallet application, click here to learn how to get one.
+                                    a.info-link(href="#") If you don’t have a digital wallet, click here to learn how to get one.
 
                             .carousel-item.text-center
                                 h2 Please enter an email, password, and agent URL to create a BBCU account
@@ -142,33 +142,33 @@ block extra
                                     button#signupNextButton.btn.btn-bbcu(disabled) Next
                                     a.vcSignupCancel(href="#") Cancel
                                 .info-link-container
-                                    a.info-link(href="#") If you don’t have a Mobile Wallet application, click here to learn how to get one.
+                                    a.info-link(href="#") If you don’t have a digital wallet, click here to learn how to get one.
                                     span.extension-loaded.d-none.text-muted.ml-3 Chrome extension detected
 
                             .carousel-item.text-center
-                                h2 Establishing a connection with your mobile wallet...
+                                h2 Establishing a connection with your agent...
                                 .verifying-creds-text
                                     i.fas.fa-circle-notch.fa-spin.fa-2x
-                                    span Please accept the connection offer on your device
+                                    span Please accept the connection offer.
                                 .info-link-container
-                                    a.info-link(href="#") If you don’t have a Mobile Wallet application, click here to learn how to get one.
+                                    a.info-link(href="#") If you don’t have a digital wallet, click here to learn how to get one.
 
                             .carousel-item.text-center
                                 h2 Checking your identification
                                 .verifying-creds-text
                                     i.fas.fa-circle-notch.fa-spin.fa-2x
-                                    span Please accept the verification request on your device
+                                    span Please accept the verification request
 
                             .carousel-item.text-center
                                 h2 Issuing your account information
                                 .verifying-creds-text
                                     i.fas.fa-circle-notch.fa-spin.fa-2x
-                                    span Please accept the credential offer on your device
+                                    span Please accept the credential offer
 
                             .carousel-item.text-center
                                 h2 Enrollment Failed
                                 .signup-failed-text
-                                    p.mb-2 You don’t have permission to create a Mobile Wallet account.
+                                    p.mb-2 You don’t have permission to create an account.
                                     #signupErrorCode.text-danger
                                     #signupErrorMessage.text-danger.mb-2
                                 button.btn.btn-bbcu.userpassLink(type="button" data-dismiss="modal") Standard Sign On
@@ -176,14 +176,14 @@ block extra
                             .carousel-item.text-center
                                 h2 Enrollment Failed
                                 .signup-failed-text
-                                    p You already have a Mobile Wallet.
-                                button.btn.btn-bbcu.vcSignonLink(type="button" data-dismiss="modal") Mobile Wallet Sign On
+                                    p You already have an account.
+                                button.btn.btn-bbcu.vcSignonLink(type="button" data-dismiss="modal") Digital Credential Sign On
 
                             .carousel-item
                                 .app-info-title
-                                    h2 Getting your Mobile Wallet
+                                    h2 Getting your digital wallet
                                 .app-info-text
-                                    p To get your Mobile Wallet:
+                                    p To get your digital wallet:
                                     ol
                                         li Contact Us
                                 .text-center

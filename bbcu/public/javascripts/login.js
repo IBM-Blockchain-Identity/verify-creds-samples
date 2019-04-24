@@ -28,7 +28,7 @@ $(document).ready(() => {
 		loginCarousel.carousel(loginCarouselSlides.USERPASS_SIGN_ON);
 	});
 
-	// Show the mobile wallet sign-on form if the appropriate links are clicked
+	// Show the digital wallet sign-on form if the appropriate links are clicked
 	$('.vcSignonLink').on('click', () => {
 		loginCarousel.carousel(loginCarouselSlides.VC_SIGN_ON);
 	});
@@ -251,7 +251,7 @@ $(document).ready(() => {
 		GETTING_THE_APP: 7
 	};
 
-	// Open the signup modal if the user wants to signup for a mobile wallet account and keep it open
+	// Open the signup modal if the user wants to signup for an account and keep it open
 	$('.vcSignupLink').on('click', () => {
 		vcSignupCarousel.carousel(vcSignupCarouselSlides.BEFORE_REGISTERING);
 		vcSignupModal.modal({
@@ -265,7 +265,7 @@ $(document).ready(() => {
 		vcSignupModal.modal('hide');
 	});
 
-	// There's a slide for getting more information on the mobile wallet app and links to reach it in the signup flow
+	// There's a slide for getting more information on the mobile app and links to reach it in the signup flow
 	$('.info-link').on('click', () => {
 		vcSignupCarousel.carousel(vcSignupCarouselSlides.GETTING_THE_APP);
 	});
