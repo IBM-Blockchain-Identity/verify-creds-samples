@@ -118,9 +118,9 @@ block extra
                                             li Driver's License
                                             li Proof of Employment
                                     .col-sm-3
-                                .cred-buttons
+                                div
                                     button#credsNextButton.btn.btn-bbcu Next
-                                    a.vcSignupCancel(href="#") Cancel
+                                    a.vcSignupCancel.ml-2.text-decoration-underline(href="#") Cancel
 
                             .carousel-item.text-center
                                 h2 Please enter an email, password, and agent URL to create a BBCU account
@@ -135,9 +135,9 @@ block extra
                                         .form-group
                                             label.hidden-form-label(for="signupAgentName") Agent URL
                                             input#signupAgentName.form-control(type="text" name="agent_name" placeholder="Agent URL" required)
-                                .cred-buttons
+                                div
                                     button#signupNextButton.btn.btn-bbcu(disabled) Next
-                                    a.vcSignupCancel(href="#") Cancel
+                                    a.vcSignupCancel.ml-2.text-decoration-underline(href="#") Cancel
                                     span.extension-loaded.d-none.text-muted.ml-3 Chrome extension detected
 
                             .carousel-item.text-center
