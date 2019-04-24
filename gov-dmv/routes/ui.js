@@ -73,7 +73,6 @@ exports.createRouter = function (users_instance, ev) {
 		const user_id = req.session.user_id;
 		try {
 			const user_doc = await users_instance.read_user(user_id);
-			//res.render('account', {title: 'My Account', user_id: user_id, user_doc: user_doc});
 			res.render('user', {title: 'My DMV', user_id: user_id, user_doc: user_doc});
 
 		} catch (error) {
