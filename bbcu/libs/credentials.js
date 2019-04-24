@@ -382,7 +382,9 @@ class Issuance {
 
 		// Just pass the ID until we know we need more.  Credential objects are large.
 		if (this.status === Issuance.ISSUANCE_STEPS.ISSUING_CREDENTIAL && this.credential)
-			ret.credential = this.credential.id;
+			ret.credential = {
+				id: this.credential.id
+			};
 
 		return ret;
 	}
