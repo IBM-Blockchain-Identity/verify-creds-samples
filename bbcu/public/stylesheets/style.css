@@ -332,12 +332,6 @@ a {
   text-decoration: underline;
 }
 
-.info-link-container {
-  margin-top: 20px;
-  font-size: 12px;
-  text-decoration: underline;
-}
-
 .signup-form {
   margin: 40px 170px;
 }
@@ -375,34 +369,6 @@ a {
 .signup-failed-text {
   margin-top: 20px;
   margin-bottom: 40px;
-}
-
-.app-info-title {
-  margin-left: 20px;
-}
-
-.app-info-text {
-  margin-left: 20px;
-  margin-bottom: 40px;
-  margin-top: 20px;
-}
-
-.app-info-text ol {
-  list-style: none;
-  padding: 0;
-  counter-reset: my-awesome-counter;
-}
-
-.app-info-text ol li {
-  counter-increment: my-awesome-counter;
-  margin-bottom: 8px;
-}
-
-.app-info-text ol li::before {
-  content: counter(my-awesome-counter) " ";
-  color: #333333;
-  font-weight: bold;
-  margin-right: 10px;
 }
 
 .bbcu-nav-icon {

@@ -247,8 +247,7 @@ $(document).ready(() => {
 		CHECKING_CREDENTIAL: 3,
 		ISSUING_CREDENTIAL: 4,
 		NOT_ALLOWED: 5,
-		ALREADY_HAVE_WALLET: 6,
-		GETTING_THE_APP: 7
+		ALREADY_HAVE_WALLET: 6
 	};
 
 	// Open the signup modal if the user wants to signup for an account and keep it open
@@ -263,11 +262,6 @@ $(document).ready(() => {
 	// Handle all the cancel buttons/links in the signup flow
 	$('.vcSignupCancel').on('click', () => {
 		vcSignupModal.modal('hide');
-	});
-
-	// There's a slide for getting more information on the mobile app and links to reach it in the signup flow
-	$('.info-link').on('click', () => {
-		vcSignupCarousel.carousel(vcSignupCarouselSlides.GETTING_THE_APP);
 	});
 
 	// Takes us from the "Creds you need" screen to the user signup form

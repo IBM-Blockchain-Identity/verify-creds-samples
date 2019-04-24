@@ -122,8 +122,6 @@ block extra
                                 .cred-buttons
                                     button#credsNextButton.btn.btn-bbcu Next
                                     a.vcSignupCancel(href="#") Cancel
-                                .info-link-container
-                                    a.info-link(href="#") If you don’t have a digital wallet, click here to learn how to get one.
 
                             .carousel-item.text-center
                                 h2 Please enter an email, password, and agent URL to create a BBCU account
@@ -141,8 +139,6 @@ block extra
                                 .cred-buttons
                                     button#signupNextButton.btn.btn-bbcu(disabled) Next
                                     a.vcSignupCancel(href="#") Cancel
-                                .info-link-container
-                                    a.info-link(href="#") If you don’t have a digital wallet, click here to learn how to get one.
                                     span.extension-loaded.d-none.text-muted.ml-3 Chrome extension detected
 
                             .carousel-item.text-center
@@ -150,8 +146,6 @@ block extra
                                 .verifying-creds-text
                                     i.fas.fa-circle-notch.fa-spin.fa-2x
                                     span Please accept the connection offer.
-                                .info-link-container
-                                    a.info-link(href="#") If you don’t have a digital wallet, click here to learn how to get one.
 
                             .carousel-item.text-center
                                 h2 Checking your identification
@@ -178,16 +172,6 @@ block extra
                                 .signup-failed-text
                                     p You already have an account.
                                 button.btn.btn-bbcu.vcSignonLink(type="button" data-dismiss="modal") Digital Credential Sign On
-
-                            .carousel-item
-                                .app-info-title
-                                    h2 Getting your digital wallet
-                                .app-info-text
-                                    p To get your digital wallet:
-                                    ol
-                                        li Contact Us
-                                .text-center
-                                    button.btn.btn-bbcu(type="button" data-dismiss="modal") Ok
 
 block scripts
     script(src="/javascripts/login.js")
