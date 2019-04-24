@@ -66,18 +66,17 @@ const extensionReady = $.Deferred();
 let use_extension = false;
 
 $(document).on('contentHolder_injected', async () => {
-	console.log(`Extension loaded.  window.credentialHandler: ${typeof window.credentialHandler}`);
+	console.log(`Extension loaded.  window.verifyCreds: ${typeof window.verifyCreds}`);
 
-	// Get the public DID from the browser's agent
-	const state = await window.credentialHandler({stateRequest: {}});
-	console.log('state request response: ' + state);
-
-
-	const initialized = await window.credentialHandler({init: {}});
-	console.log(`Initialized: ${initialized}`);
-	if (initialized === 'True') {
-		console.log(`My DID: ${await window.credentialHandler({info: 'info'})}`);
-		extensionReady.resolve();
+	try {
+		const initialized = await window.verifyCreds({operation: 'init'});
+		console.log(`Extension initialized: ${initialized}`);
+		if (initialized === 'True') {
+			console.log(`Holder's agent info: ${await window.verifyCreds({operation: 'info'})}`);
+			extensionReady.resolve();
+		}
+	} catch (error) {
+		console.error(`Extension failed: ${JSON.stringify(error)}`);
 	}
 });
 
@@ -162,13 +161,27 @@ async function issue_credential (connection_method) {
 				if (!connection_shown && response.connection_offer) {
 					connection_shown = true;
 					console.log('Accepting connection offer via extension');
-					await window.credentialHandler({connectionOffer: response.connection_offer});
+					try {
+						await window.verifyCreds({
+							operation: 'respondToConnectionOffer',
+							connectionOffer: response.connection_offer
+						});
+					} catch (error) {
+						console.error(`Extension failed to show connection offer: ${JSON.stringify(error)}`);
+					}
 				}
 
 				if (!credential_shown && response.credential && response.credential.id) {
 					credential_shown = true;
 					console.log('Accepting credential offer via extension');
-					await window.credentialHandler({credentialOffer: response.credential.id});
+					try {
+						await window.verifyCreds({
+							operation: 'respondToCredentialOffer',
+							credentialOfferId: response.credential.id
+						});
+					} catch (error) {
+						console.error(`Extension failed to show credential offer: ${JSON.stringify(error)}`);
+					}
 				}
 			}
 
