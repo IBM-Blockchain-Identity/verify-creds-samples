@@ -133,6 +133,10 @@ block extra
                                             label.hidden-form-label(for="signupPassword") Password
                                             input#signupPassword.form-control(type="password" name="password" placeholder="Password" required)
                                         .form-group
+                                            label.hidden-form-label(for="signupConfirmPassword") Confirm Password
+                                            input#signupConfirmPassword.form-control(type="password" name="confirm_password" placeholder="Confirm Password" required)
+                                            span#signupPasswordMessage
+                                        .form-group
                                             label.hidden-form-label(for="signupAgentName") Agent URL
                                             input#signupAgentName.form-control(type="text" name="agent_name" placeholder="Agent URL" required)
                                 div

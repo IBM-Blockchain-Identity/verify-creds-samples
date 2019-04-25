@@ -275,6 +275,8 @@ $(document).ready(() => {
 	const signup_user_label = $('label[for="signupUserID"]');
 	const signup_password = $('#signupPassword');
 	const signup_password_label = $('label[for="signupPassword"]');
+	const signup_confirm_password = $('#signupConfirmPassword');
+	const signup_confirm_password_label = $('label[for="signupConfirmPassword"]');
 	const signup_agent_name = $('#signupAgentName');
 	const signup_agent_name_label = $('label[for="signupAgentName"]');
 
@@ -292,12 +294,32 @@ $(document).ready(() => {
 		if (!signup_password.val().trim())
 			signup_password_label.css('visibility', 'hidden');
 	});
+	signup_confirm_password.focus(() => {
+		signup_confirm_password_label.css('visibility', 'visible');
+	});
+	signup_confirm_password.focusout(() => {
+		if (!signup_confirm_password.val().trim())
+			signup_confirm_password_label.css('visibility', 'hidden');
+	});
 	signup_agent_name.focus(() => {
 		signup_agent_name_label.css('visibility', 'visible');
 	});
 	signup_agent_name.focusout(() => {
 		if (!signup_agent_name.val().trim())
 			signup_agent_name_label.css('visibility', 'hidden');
+	});
+
+	// Make sure new users are being given the password we think they are
+	const password_message = $('#signupPasswordMessage');
+	$('#signupPassword, #signupConfirmPassword').on('keyup', () => {
+		if (signup_password.val() === signup_confirm_password.val()) {
+			if (signup_password.val().trim())
+				password_message.html('Matching').css('color', 'green');
+			else
+				password_message.html('');
+		} else {
+			password_message.html('Not Matching').css('color', 'red');
+		}
 	});
 
 	$('#signupNextButton').on('click', async () => {
@@ -313,6 +335,9 @@ $(document).ready(() => {
 		const username = formObject.username;
 		const password = formObject.password;
 		const agent_name = formObject.agent_name;
+
+		if (formObject.password !== formObject.confirm_password)
+			return console.error('Passwords must match!');
 
 		const REMOTE_SIGNUP_STEPS = {
 			CREATED: 'CREATED',
