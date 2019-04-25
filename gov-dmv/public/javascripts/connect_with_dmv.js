@@ -256,9 +256,6 @@ function populate_user_info () {
 		},
 		'email': {
 			element: '#userEmail'
-		},
-		'agent_name': {
-			element: '#userIdentity'
 		}
 	};
 
