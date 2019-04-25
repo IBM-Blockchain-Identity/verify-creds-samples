@@ -1,0 +1,10 @@
+{
+  "name": "DMV Login Request",
+  "version": "1.0",
+  "requested_attributes": {
+    "customer_identifier": {
+      "name": "customer_identifier",
+      "restrictions": []
+    }
+  }
+}

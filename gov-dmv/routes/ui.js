@@ -37,7 +37,7 @@ exports.createRouter = function (users_instance, ev) {
 	router.use(compression());
 
 	router.get('/', (req, res, next) => {
-		res.redirect('/admin');
+		res.redirect('/login');
 	});
 
 	// Status url for monitoring
@@ -48,7 +48,15 @@ exports.createRouter = function (users_instance, ev) {
 		});
 	});
 
-	/* Admin page */
+	// Login page
+	router.get('/login', (req, res, next) => {
+		if (req.session && req.session.user_id)
+			return res.redirect('/logout');
+
+		res.render('login', {title: 'Gov DMV'});
+	});
+
+	// Admin page
 	router.get('/admin', (req, res, next) => {
 		res.render('admin', {title: 'DMV Administration'});
 	});

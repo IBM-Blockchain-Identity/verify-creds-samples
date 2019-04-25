@@ -1,5 +1,6 @@
 html {
   font-family: "IBM Plex Mono";
+  min-height: 100%;
 }
 
 body {

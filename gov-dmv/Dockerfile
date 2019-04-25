@@ -19,7 +19,9 @@ ENV STATIC_CARD_BACK_IMAGE=/opt/app/public/images/card_back_sample.jpg
 ENV CONNECTION_IMAGE_PROVIDER=static
 ENV CONNECTION_ICON_PATH=/opt/app/docs/gov_dmv.png
 
-ENV LOGIN_PROOF_PROVIDER=none
+ENV LOGIN_PROOF_PROVIDER=file
+ENV LOGIN_PROOF_PATH=/opt/app/docs/dmv_login_proof_schema.json
+
 ENV SIGNUP_PROOF_PROVIDER=none
 
 ENV SCHEMA_TEMPLATE_PATH=/opt/app/docs/gov_dmv_driver_license.json

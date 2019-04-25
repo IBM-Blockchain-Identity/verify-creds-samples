@@ -1,3 +1,7 @@
+html {
+  min-height: 100%;
+}
+
 a {
   color: #00B7FF;
 }

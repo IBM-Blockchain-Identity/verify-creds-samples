@@ -24,7 +24,6 @@ const images = {
 const demo_users = [
 	{
 		name: 'Alice Garcia',
-		email: 'alice@example.com',
 		attributes: {
 			'last_name': 'Garcia',
 			'height': '5\'3"',
@@ -35,13 +34,11 @@ const demo_users = [
 			'address_line_1': '716 Duck Creek Road',
 			'zip_code': '94104',
 			'password': 'alicepw',
-			'agent_name': 'alice',
 			portrait: images.female1
 		}
 	},
 	{
 		name: 'Andrew Adams',
-		email: 'aadams@example.com',
 		attributes: {
 			'last_name': 'Adams',
 			'height': '5\'8"',
@@ -55,7 +52,6 @@ const demo_users = [
 	},
 	{
 		name: 'Allison Hunter',
-		email: 'ahunter@example.com',
 		attributes: {
 			'last_name': 'Hunter',
 			'height': '5\'7"',
@@ -69,7 +65,6 @@ const demo_users = [
 		}
 	}, {
 		name: 'Alvin Hwang',
-		email: 'ahwang@example.com',
 		attributes: {
 			'last_name': 'Hwang',
 			'height': '5\'6"',
@@ -83,7 +78,6 @@ const demo_users = [
 		}
 	}, {
 		name: 'Adrian Martin',
-		email: 'amartin@example.com',
 		attributes: {
 			'last_name': 'Martin',
 			'height': '6\'2"',
@@ -98,7 +92,6 @@ const demo_users = [
 		}
 	}, {
 		name: 'Brandon Harris',
-		email: 'bharris@example.com',
 		attributes: {
 			'last_name': 'Harris',
 			'height': '4\'11"',
@@ -113,12 +106,21 @@ const demo_users = [
 	}
 ];
 
+window.makeid = function (length) {
+	let result = '';
+	const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	const charactersLength = characters.length;
+	for (let i = 0; i < length; i++) {
+		result += characters.charAt(Math.floor(Math.random() * charactersLength));
+	}
+	return result;
+};
+
 const default_attributes = {
 	'eye_color': 'brown',
 	'vehicle_class': 'A',
-	'last_name': 'Doe',
 	'document_discriminator': '1a2b3c4d',
-	'customer_identifier': '123457123',
+	'customer_identifier': window.makeid(16),
 	'height': '5\'7"',
 	'cardholder_sex': 'Male',
 	'dob': '04-15-1982',
@@ -128,7 +130,6 @@ const default_attributes = {
 	'hair_color': 'brown',
 	'expiration_date': new Date(Date.now() + 1000 * 3600 * 24 * 365 * 8).toLocaleDateString(),
 	'rci_codes': '123456',
-	'first_name': 'John',
 	'portrait': images.male1,
 	'weight': '140 lbs',
 	'date_of_issue': new Date(Date.now()).toLocaleDateString(),
@@ -138,10 +139,8 @@ const default_attributes = {
 	'state': 'AZ',
 	'zip_code': 98109,
 	'country': 'United States',
-	'password': 'password',
-	'agent_name': ''
 };
-
+window.default_attributes = default_attributes;
 
 $(document).ready(() => {
 	let html = '';
@@ -166,7 +165,7 @@ $(document).ready(() => {
 		}
 		$('#userPortraitPreview')[0].src = user_data.attributes.portrait;
 		$('#userPortraitPreview').removeClass('d-none');
-		$('input[name="email"]').val(user_data.email ? user_data.email : 'jdoe@example.com');
+		$('input[name="email"]').val(user_data.email ? user_data.email : '');
 		$('input[name="confirm_password"]').val(user_data.attributes.password ? default_attributes.attributes.password : default_attributes.password);
 		$('#autofillModal').modal('hide');
 	});
