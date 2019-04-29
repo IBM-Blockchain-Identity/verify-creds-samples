@@ -8,7 +8,7 @@ license.
 
 [Click here](../README.md#passwordless-authentication-demo) to start the demo over.
 
-[Visit this page](https://gov-dmv.credimi-dev.us-south.containers.appdomain.cloud) to play with a running instance of this sample.
+[Visit this page](https://gov.livedemo.verify-creds.com) to play with a running instance of this sample.
 
 ### Creating a DMV user account
 

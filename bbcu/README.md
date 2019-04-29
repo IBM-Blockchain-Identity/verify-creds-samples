@@ -6,7 +6,7 @@ This project contains the code necessary to run a mock-up of the **BBCU Online**
 
 [Click here](../README.md#passwordless-authentication-demo) to start the demo over.
 
-[Visit this page](https://bbcu.credimi-dev.us-south.containers.appdomain.cloud) to play with a running instance of this sample.
+[Visit this page](https://bbcu.livedemo.verify-creds.com) to play with a running instance of this sample.
 
 ### Signing up for an account
 

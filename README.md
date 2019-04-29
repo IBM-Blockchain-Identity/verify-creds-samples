@@ -7,9 +7,9 @@ Play with these samples to learn how to integrate the [openssi-websdk](https://g
 We've provided some live samples that you can play with without needing to download or build any code.  Use these if
 you're going through these demos for the first time.
 
-- [Gov DMV](https://gov-dmv.credimi-dev.us-south.containers.appdomain.cloud)
-- [IBM HR](https://ibm-hr.credimi-dev.us-south.containers.appdomain.cloud)
-- [Big Blue Credit Union](https://bbcu.credimi-dev.us-south.containers.appdomain.cloud)
+- [Gov DMV](https://gov.livedemo.verify-creds.com)
+- [IBM HR](https://employer.livedemo.verify-creds.com)
+- [Big Blue Credit Union](https://bbcu.livedemo.verify-creds.com)
 
 ### Passwordless Authentication
 

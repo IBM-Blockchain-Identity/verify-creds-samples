@@ -50,7 +50,7 @@ spec:
             - name: AGENT_PASSWORD
               value: "DMV_AGENT_PASSWORD_HERE"
             - name: MY_URL
-              value: "https://gov-dmv.credimi-dev.us-south.containers.appdomain.cloud"
+              value: "https://gov.livedemo.verify-creds.com"
             - name: CARD_IMAGE_RENDERING
               value: "branding_server"
             - name: BRANDING_SERVER_ENDPOINT
@@ -112,7 +112,7 @@ spec:
             - name: AGENT_PASSWORD
               value: "IBMHR_AGENT_PASSWORD_HERE"
             - name: MY_URL
-              value: "https://ibm-hr.credimi-dev.us-south.containers.appdomain.cloud"
+              value: "https://employer.livedemo.verify-creds.com"
             - name: CARD_IMAGE_RENDERING
               value: "branding_server"
             - name: BRANDING_SERVER_ENDPOINT
@@ -174,7 +174,7 @@ spec:
             - name: AGENT_PASSWORD
               value: "BBCU_AGENT_PASSWORD_HERE"
             - name: MY_URL
-              value: "https://bbcu.credimi-dev.us-south.containers.appdomain.cloud"
+              value: "https://bbcu.livedemo.verify-creds.com"
             - name: SIGNUP_DMV_ISSUER_AGENT
               value: "DMV_AGENT_URL_HERE"
             - name: SIGNUP_HR_ISSUER_AGENT

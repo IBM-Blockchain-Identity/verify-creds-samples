@@ -8,7 +8,7 @@ The mock application is a Node.js [express](https://expressjs.com/) web app that
 
 [Click here](../README.md#passwordless-authentication-demo) to start the demo over.
 
-[Visit this page](https://ibm-hr.credimi-dev.us-south.containers.appdomain.cloud) to play with a running instance of this sample.
+[Visit this page](https://employer.livedemo.verify-creds.com) to play with a running instance of this sample.
 
 ### Creating a HR user account
 

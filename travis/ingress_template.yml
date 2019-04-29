@@ -32,3 +32,41 @@ spec:
             backend:
               serviceName: bbcu
               servicePort: 80
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: vanityingressresource
+  annotations:
+    ingress.bluemix.net/redirect-to-https: "True"
+    ingress.bluemix.net/client-max-body-size: size=10m
+    ingress.bluemix.net/large-client-header-buffers: number=4 size=5m
+spec:
+  tls:
+    - hosts:
+        - gov.livedemo.verify-creds.com
+        - bbcu.livedemo.verify-creds.com
+        - employer.livedemo.verify-creds.com
+      secretName: vanity
+  rules:
+    - host: bbcu.livedemo.verify-creds.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: bbcu
+              servicePort: 80
+    - host: gov.livedemo.verify-creds.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: gov-dmv
+              servicePort: 80
+    - host: employer.livedemo.verify-creds.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: ibm-hr
+              servicePort: 80
