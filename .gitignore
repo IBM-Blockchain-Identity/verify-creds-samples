@@ -19,3 +19,5 @@ couchdb
 # Deployment files
 travis/deployment_spec.yml
 travis/ingress.yml
+
+ignore
