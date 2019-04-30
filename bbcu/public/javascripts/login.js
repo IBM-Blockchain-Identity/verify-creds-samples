@@ -168,7 +168,7 @@ $(document).ready(() => {
 				if (REMOTE_LOGIN_STEPS.hasOwnProperty(response.status))
 					vcSignonCarousel.carousel(REMOTE_LOGIN_STEPS[response.status]);
 				else
-					console.warn(`Unknown issuance status detected: ${response.status}`);
+					console.warn(`Unknown login status detected: ${response.status}`);
 
 
 				if ('ERROR' === response.status) {
@@ -234,7 +234,7 @@ $(document).ready(() => {
 			$('#loginErrorMessage').html(`Reason: ${error.message}`);
 
 			vcSignonCarousel.carousel(vcSignonCarouselSlides.FAILED);
-			console.error(`VC login failed: ${error}`);
+			console.error(`VC login failed: ${JSON.stringify(error)}`);
 		}
 	});
 
@@ -476,7 +476,7 @@ $(document).ready(() => {
 			if (error.code)
 				$('#signupErrorCode').html(`Code: ${error.code}`);
 			$('#signupErrorMessage').html(`Reason: ${error.message}`);
-			console.error('Failed to create signup', error);
+			console.error(`Failed to create signup: ${JSON.stringify(error)}`);
 			vcSignupCarousel.carousel(vcSignupCarouselSlides.NOT_ALLOWED);
 		}
 	});
