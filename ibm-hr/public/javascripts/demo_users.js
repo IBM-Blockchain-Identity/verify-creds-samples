@@ -24,19 +24,15 @@ const images = {
 const demo_users = [
 	{
 		name: 'Alice Garcia',
-		email: 'alice@example.com',
 		attributes: {
 			'Last Name': 'Garcia',
 			'Date of Birth': '04/10/1971',
 			'First Name': 'Alice',
-			'password': 'alicepw',
-			'agent_name': 'alice',
 			portrait: images.female1
 		}
 	},
 	{
 		name: 'Andrew Adams',
-		email: 'aadams@example.com',
 		attributes: {
 			'Last Name': 'Adams',
 			'Date of Birth': '04/10/1971',
@@ -46,7 +42,6 @@ const demo_users = [
 	},
 	{
 		name: 'Allison Hunter',
-		email: 'ahunter@example.com',
 		attributes: {
 			'Last Name': 'Hunter',
 			'Date of Birth': '07/15/1947',
@@ -55,7 +50,6 @@ const demo_users = [
 		}
 	}, {
 		name: 'Alvin Hwang',
-		email: 'ahwang@example.com',
 		attributes: {
 			'Last Name': 'Hwang',
 			'Date of Birth': '05/10/1970',
@@ -64,7 +58,6 @@ const demo_users = [
 		}
 	}, {
 		name: 'Adrian Martin',
-		email: 'amartin@example.com',
 		attributes: {
 			'Last Name': 'Martin',
 			'Date of Birth': '09/04/1975',
@@ -73,7 +66,6 @@ const demo_users = [
 		}
 	}, {
 		name: 'Brandon Harris',
-		email: 'bharris@example.com',
 		attributes: {
 			'Last Name': 'Harris',
 			'Date of Birth': '06/22/1974',
@@ -84,16 +76,12 @@ const demo_users = [
 ];
 
 const default_attributes = {
-	'First Name': 'John',
-	'Last Name': 'Doe',
 	'Date of Birth': '04-15-1982',
 	'Social Security Number': '123456789',
 	'Company': 'IBM',
 	'Job Title': 'Software Developer',
 	'Hire Date': new Date(Date.now() - 1000 * 3600 * 24 * 365 * 4).toLocaleDateString(),
 	'Base Salary': '90000',
-	'password': 'password',
-	'agent_name': '',
 	'portrait': images.male1,
 };
 
@@ -120,7 +108,7 @@ $(document).ready(() => {
 			$(`input[name="${attr_name}"]`).val(value);
 		}
 		$('#userPortraitPreview')[0].src = user_data.attributes.portrait;
-		$('input[name="email"]').val(user_data.email ? user_data.email : 'jdoe@example.com');
+		$('input[name="email"]').val(user_data.email ? user_data.email : '');
 		$('input[name="confirm_password"]').val(user_data.attributes.password ? user_data.attributes.password : default_attributes.password);
 		$('#autofillModal').modal('hide');
 	});
