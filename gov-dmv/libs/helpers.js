@@ -142,7 +142,7 @@ class LoginHelper {
 		logger.info('Checking the proof for the proper attributes');
 		const attributes = verification['info']['attributes'];
 
-		// ake sure the proof schema attributes are present
+		// Make sure the proof schema attributes are present
 		for (const key in this.proof_schema_template.requested_attributes) {
 			const schema_attr = this.proof_schema_template.requested_attributes[key];
 
@@ -151,7 +151,8 @@ class LoginHelper {
 			for (const proof_index in attributes) {
 				const proof_attr = attributes[proof_index];
 
-				if (!proof_attr.name || proof_attr.name !== schema_attr.name) continue;
+				// Indy removes spaces and capital letters in proof response attribute names for some reason
+				if (!proof_attr.name || proof_attr.name !== schema_attr.name.toLowerCase().split(' ').join('')) continue;
 
 				// Make sure the requested attributes that had restrictions have a credential associated with them
 				if (schema_attr.restrictions && schema_attr.restrictions.length && !proof_attr.cred_def_id)
@@ -161,8 +162,8 @@ class LoginHelper {
 				accepted_proof_attr = proof_attr;
 			}
 
-			if (user_record.personal_info[accepted_proof_attr.name] !== accepted_proof_attr.value)
-				throw new Error(`Verified attribute ${accepted_proof_attr.name} did not match the user record`);
+			if (!accepted_proof_attr || !accepted_proof_attr.name || user_record.personal_info[schema_attr.name] !== accepted_proof_attr.value)
+				throw new Error(`Verified attribute ${JSON.stringify(schema_attr.name)} did not match the user record`);
 
 			logger.debug(`Proof attribute ${accepted_proof_attr.name} matches the user record`);
 		}
