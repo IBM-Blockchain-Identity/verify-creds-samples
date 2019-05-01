@@ -75,15 +75,26 @@ const demo_users = [
 	}
 ];
 
+window.makeid = function (length) {
+	let result = '';
+	const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	const charactersLength = characters.length;
+	for (let i = 0; i < length; i++) {
+		result += characters.charAt(Math.floor(Math.random() * charactersLength));
+	}
+	return result;
+};
+
 const default_attributes = {
 	'Date of Birth': '04-15-1982',
-	'Social Security Number': '123456789',
+	'Social Security Number': window.makeid(10),
 	'Company': 'IBM',
 	'Job Title': 'Software Developer',
 	'Hire Date': new Date(Date.now() - 1000 * 3600 * 24 * 365 * 4).toLocaleDateString(),
 	'Base Salary': '90000',
 	'portrait': images.male1,
 };
+window.default_attributes = default_attributes;
 
 
 $(document).ready(() => {

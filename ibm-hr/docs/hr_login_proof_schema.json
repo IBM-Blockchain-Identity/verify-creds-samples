@@ -1,0 +1,10 @@
+{
+  "name": "IBM HR Login Request",
+  "version": "1.0",
+  "requested_attributes": {
+    "ssn": {
+      "name": "Social Security Number",
+      "restrictions": []
+    }
+  }
+}
