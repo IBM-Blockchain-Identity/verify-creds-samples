@@ -1,6 +1,10 @@
 html, body, main {
-    background-color: #edeff0;
+    background-color: #0b77e3;
     height: 100%;
+}
+
+.gray-background {
+    background-color: #edeff0;
 }
 
 .container-fluid {
@@ -157,4 +161,45 @@ h1, h2, h3, h4, h5, h6, label {
     0% { background-color: #0b77e3; box-shadow: 0 0 3px #0b77e3; }
     50% { background-color: #73abe3; box-shadow: 0 0 40px #73abe3; }
     100% { background-color: #0b77e3; box-shadow: 0 0 3px #0b77e3; }
+}
+
+.blue-background {
+    color: #fff;
+}
+
+.blue-background .btn-primary {
+    background-color: #fff;
+    border: 1px solid #fff;
+    color: #0b77e3;
+    text-decoration: none;
+}
+
+.blue-background .btn-primary:hover {
+    background-color: #0b91ff;
+    color: #fff;
+}
+
+.blue-background .btn-outline-primary {
+    background: none;
+    border: 1px solid #fff;
+    color: #fff;
+    text-decoration: none;
+}
+
+.blue-background a {
+    color: #fff;
+    text-decoration: underline;
+}
+
+.blue-background a:hover {
+    color: #fff;
+}
+
+.blue-background .btn-outline-primary:hover {
+    background-color: #fff;
+    color: #0b77e3;
+}
+
+.form-control {
+    border-radius: 0;
 }

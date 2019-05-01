@@ -1,0 +1,153 @@
+extends layout
+
+block navbar
+    a.btn.btn-secondary.pl-4.pr-4(href="/admin") Admin
+
+block content
+    .container.mt-4.blue-background
+        .row.mt-4
+            .col-md-2
+            .col-md-8
+                #loginCarousel.carousel.slide(data-ride="false" data-interval="false" data-keyboard="false" data-wrap="false" pause="false")
+                    .carousel-inner
+                        .carousel-item
+                            .form-row
+                                .col-md-6
+                                    h3 Create an account
+                                .col-md-6.mt-2.text-right
+                                    a.open-vc-login(href='#') Already have an account? Sign in here
+                            hr.hr-thick
+                            form#signupForm
+                                .form-row
+                                    .form-group.col-sm-6
+                                        label(for="signupFirstName") First Name
+                                        input#signupFirstName.form-control(type="text" name="First Name" required)
+                                    .form-group.col-sm-6
+                                        label(for="signupLastName") Last Name
+                                        input#signupLastName.form-control(type="text" name="Last Name" required)
+                                .form-row
+                                    .form-group.col
+                                        label(for="signupAgentURL") Agent URL
+                                        input#signupAgentURL.form-control(type="text" name="agent_url" required)
+                                .form-row
+                                    .form-group.col-md-6
+                                        label(for="signupEmail") Email Address
+                                        input#signupEmail.form-control(type="email" name="email" required)
+                                .form-row
+                                    .form-group.col-sm-6
+                                        label(for="signupPassword") Password
+                                        input#signupPassword.form-control(type="password" name="password" required)
+                                        #signupPasswordMessage
+                                    .form-group.col-sm-6
+                                        label(for="signupConfirmPassword") Confirm Password
+                                        input#signupConfirmPassword.form-control(type="password" name="confirm_password" required)
+                                .form-row
+                                    .col-sm-6.col-md-5
+                                        div
+                                            input#signupPortrait.inputfile(type="file" name="portrait_selection")
+                                            label.btn.btn-primary.btn-lg.btn-block.text-left(for="signupPortrait") Upload Photo
+                                            input(type="hidden" name="portrait" required)
+                                        img#userPortraitPreview.img-thumbnail.d-none(src="" height="200" alt="Profile Image")
+                                        span#profilePicRequired.text-danger.d-none A profile picture is required.
+                                    .d-none.d-md-block.col-md-2
+                                    .col-sm-6.col-md-5
+                                        button#signupCreateButton.btn.btn-outline-primary.btn-lg.btn-block.text-left.float-right(type="submit" data-original-text="Create Account" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Creating") Create Account
+                            #signupAlert
+                        .carousel-item
+                            h3 Sign in
+                            hr.hr-thick
+                            form#vcLoginForm
+                                .form-row
+                                    .form-group.col-lg-8
+                                        label(for="vcEmail") Email Address
+                                        input#vcEmail.form-control(type="email" name="email" required)
+                                .form-row.mt-1
+                                    .col
+                                        a.open-signup(href="#") OR create an account
+                                .form-row.mt-4
+                                    .col-lg-7
+                                        button.btn.btn-primary.btn-lg.btn-block.text-left(type="submit") Sign in
+                                        span.extension-loaded.d-none.text-light.ml-3 Chrome extension detected
+                                .form-row.mt-3
+                                    .col-lg-7
+                                        a.btn.btn-outline-primary.btn-lg.btn-block.text-left.open-userpass-login(href="#") Sign in manually
+                        .carousel-item.active
+                            h3 Sign in
+                            hr.hr-thick
+                            form#passwordLoginForm
+                                .form-row
+                                    .form-group.col-lg-8
+                                        label(for="userpassEmail") Email Address
+                                        input#userpassEmail.form-control(type="email" name="email" required)
+                                .form-row
+                                    .form-group.col-lg-8
+                                        label(for="userpassPassword") Password
+                                        input#userpassPassword.form-control(type="password" name="password" required)
+                                .form-row.mt-1
+                                    .col
+                                        a.open-signup(href="#") OR create an account
+                                .form-row.mt-4
+                                    .col-lg-7
+                                        button.btn.btn-primary.btn-lg.btn-block.text-left(type="submit" data-original-text="Sign in" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Submitting") Sign in
+                                .form-row.mt-3
+                                    .col-lg-7
+                                        a.btn.btn-outline-primary.btn-lg.btn-block.text-left.open-vc-login(href="#") Sign in with Verifiable Credential
+
+block extra
+    #signupAgreementModal.modal(tabindex="-1" role="dialog")
+        .modal-dialog(role="document")
+            .modal-content.rounded-0.border-0
+                .modal-body.p-4.m-4
+                    h5 Usage agreement
+                    p The data you are submitting is collected in preparation for the generation of a digital credential upon your request.
+                    p This service is for demonstration and test purposes only and you must not submit actual personal data. By submitting data, you agree that the data you are submitting is test data and not actual personal data.
+                    p If you have entered personal data in error, please CANCEL. If you agree with our collection of the submitted data, press CONFIRM.
+                    label.custom-checkbox-group.mt-4(for="signupAgreementCheckbox") I agree to these terms
+                        input#signupAgreementCheckbox(type="checkbox" value="")
+                        span.checkmark
+                .modal-footer.border-0.p-0
+                    .form-row.w-100.m-0
+                        .col-md-6
+                        .col-md-6.p-0
+                            .btn-group.btn-group-lg.w-100.rounded-0
+                                button#signupCancelButton.btn.btn-danger.btn-block.text-left.m-0.rounded-0 CANCEL
+                                button#signupAcceptButton.btn.btn-primary.btn-block.text-left.m-0.rounded-0(disabled) CONFIRM
+
+    #vcLoginModal.modal(tabindex="-1" role="dialog")
+        .modal-dialog(role="document")
+            .modal-content
+                .modal-header
+                    button.close(type="button" data-dismiss="modal")
+                        span &times;
+                .modal-body
+                    #vcLoginCarousel.carousel.slide(data-ride="false" data-interval="false" data-keyboard="false" data-wrap="false" pause="false")
+                        .carousel-inner.text-center
+                            .carousel-item.active
+                                .d-block.w-100.item-padding.text-primary
+                                    i.fas.fa-sync-alt.fa-10x.fa-spin
+                                .carousel-caption
+                                    h5 Establishing a connection with your agent
+                                    p Please accept the connection offer.
+                            .carousel-item
+                                .d-block.w-100.item-padding.text-primary
+                                    i.fas.fa-redo-alt.fa-10x.fa-spin
+                                .carousel-caption
+                                    h5 Checking your employment badge
+                                    p Please accept the proof request.
+                            .carousel-item
+                                .d-block.w-100.item-padding.text-success
+                                    i.fas.fa-check.fa-10x
+                                .carousel-caption.text-success
+                                    h5 All done!
+                                    p Redirecting to your account...
+                            .carousel-item
+                                .carousel-caption.text-danger
+                                    i.fas.fa-exclamation-circle.fa-10x
+                                    h5 Oh no!
+                                    p Please refresh the page and try again.
+                                    p#loginErrorCode
+                                    p#loginErrorMessage
+
+block scripts
+    script(src="/javascripts/login.js")
+    script(src="/javascripts/demo_users.js")
