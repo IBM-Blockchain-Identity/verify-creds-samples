@@ -21,12 +21,13 @@ const compression = require('compression');
 const USER_ERRORS = require('../libs/users.js').USERS_ERRORS;
 
 /**
- * Creates an express router representing a Users REST API for managing users.
+ * Creates an express router for displaying all the web pages a user can browse to.
  * @param {object} users_instance An instance of the Users class with a backend user database.
+ * @param {object} ev Information about the app to pass to the UI.
  * @param {Middleware} middleware Authentication middleware used to protect API endpoints.
  * @returns {object} An express router for the users API.
  */
-exports.createRouter = function (users_instance, middleware) {
+exports.createRouter = function (users_instance, ev, middleware) {
 
 	const router = express.Router();
 	router.use(bodyParser.urlencoded({extended: true}));
