@@ -47,7 +47,7 @@ build your own sample websites from the templates we've provided.
 
 ### Setting up
 
-1. Visit your agent account management page and provision three new agents, `gov-dmv`, `ibm-hr`,
+1. Visit your agent account management page and provision three new agents, `govdmv`, `ibmhr`,
 and `bbcu`.  Save the passwords the you create for each agent; you'll need them later.
 
 2. Get the url for your account.  This would have been emailed to you when you created your agent account.
@@ -87,15 +87,15 @@ docker-compose build
     AGENT_ADMIN_NAME=admin
     AGENT_ADMIN_PASSWORD=****
     
-    DMV_AGENT_NAME=gov-dmv
+    DMV_AGENT_NAME=govdmv
     DMV_AGENT_PASSWORD=****
     DMV_URL=http://192.168.1.15:8090
     
-    IBMHR_AGENT_NAME=ibm-hr
+    IBMHR_AGENT_NAME=ibmhr
     IBMHR_AGENT_PASSWORD=****
     IBMHR_URL=http://192.168.1.15:8091
     
-    BBCU_AGENT_NAME=BBCU
+    BBCU_AGENT_NAME=bbcu
     BBCU_AGENT_PASSWORD=****
     BBCU_URL=http://192.168.1.15:8092
     ```

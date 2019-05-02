@@ -59,6 +59,10 @@ spec:
               value: "GovDMVfront"
             - name: BRANDING_SERVER_BACK_TEMPLATE
               value: "GovDMVback"
+            - name: ADMIN_API_USERNAME
+              value: "ADMIN_API_USERNAME_HERE"
+            - name: ADMIN_API_PASSWORD
+              value: "ADMIN_API_PASSWORD_HERE"
 ---
 apiVersion: v1
 kind: Service
@@ -121,6 +125,10 @@ spec:
               value: "IBMHRfront"
             - name: BRANDING_SERVER_BACK_TEMPLATE
               value: "IBMHRback"
+            - name: ADMIN_API_USERNAME
+              value: "ADMIN_API_USERNAME_HERE"
+            - name: ADMIN_API_PASSWORD
+              value: "ADMIN_API_PASSWORD_HERE"
 ---
 apiVersion: v1
 kind: Service
@@ -187,6 +195,10 @@ spec:
               value: "BBCUFront"
             - name: BRANDING_SERVER_BACK_TEMPLATE
               value: "BBCUback"
+            - name: ADMIN_API_USERNAME
+              value: "ADMIN_API_USERNAME_HERE"
+            - name: ADMIN_API_PASSWORD
+              value: "ADMIN_API_PASSWORD_HERE"
 ---
 apiVersion: v1
 kind: Service
