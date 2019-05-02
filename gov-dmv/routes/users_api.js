@@ -123,19 +123,13 @@ exports.createRouter = function (users_instance, agent, middleware) {
 	});
 
 	/* PUT updates to a user */
-	router.put('/users/:user_id', [ middleware.is_logged_in ], async (req, res, next) => {
+	router.put('/users/:user_id', [ middleware.is_admin ], async (req, res, next) => {
 		const personal_info = req.body.personal_info;
 		if (typeof personal_info !== 'object')
 			return res.status(400).json({error: USER_API_ERRORS.USER_PERSONAL_INFO_NOT_FOUND,
 				reason: 'Update requests must supply updated personal information'});
 
 		const user = req.params.user_id;
-
-		if (user !== req.session.user_id)
-			res.status(401).json({
-				error: 'NOT_AUTHORIZED',
-				reason: 'You cannot update other users'
-			});
 
 		if (!req.body || typeof req.body.opts !== 'object') {
 			return res.status(400).json({
