@@ -23,9 +23,10 @@ const compression = require('compression');
  * Creates an express router representing a REST API for managing schemas.
  * @param {Agent} agent An instance of the Schemas class with a backend schema database.
  * @param {string} schema_path A path to the default schema for this issuer.
+ * @param {Middleware} middleware Authentication middleware used to protect API endpoints.
  * @returns {object} An express router for the schemas API.
  */
-exports.createRouter = function (agent, schema_path) {
+exports.createRouter = function (agent, schema_path, middleware) {
 
 	if (!agent || typeof agent.getCredentialSchemas !== 'function')
 		throw new TypeError('Schemas API was not given an Agent');
@@ -58,7 +59,7 @@ exports.createRouter = function (agent, schema_path) {
 	});
 
 	/* POST a new schema */
-	router.post('/schemas', async (req, res, next) => {
+	router.post('/schemas', [ middleware.is_admin ], async (req, res, next) => {
 
 		const name = req.body.name;
 		if (!name || typeof name !== 'string')

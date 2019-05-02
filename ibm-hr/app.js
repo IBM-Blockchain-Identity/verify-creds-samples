@@ -24,6 +24,7 @@ const IssuanceManager = require('./libs/credentials.js').IssuanceManager;
 const LoginManager = require('./libs/logins.js').LoginManager;
 const SignupManager = require('./libs/signups.js').SignupManager;
 
+const Middleware = require('./routes/middleware.js').Middleware;
 const UserUI = require('./routes/ui.js');
 const LoginAPI = require('./routes/logins.js');
 const SignupAPI = require('./routes/signups.js');
@@ -78,17 +79,20 @@ function createApp (ev, nano, agent, card_renderer, users, connection_icon_provi
 	if (signup_helper)
 		signup_manager = new SignupManager(agent, users, card_renderer, connection_icon_provider, signup_helper);
 
+	// Setup authentication middleware
+	const middleware = new Middleware(ev.ADMIN_API_USERNAME, ev.ADMIN_API_PASSWORD, ev.FRIENDLY_NAME);
+
 	// UI routers
-	app.use('/', UserUI.createRouter(users, ev));
+	app.use('/', UserUI.createRouter(users, ev, middleware));
 	app.use('/', LoginAPI.createRouter(users, login_manager));
 	if (signup_helper)
 		app.use('/', SignupAPI.createRouter(signup_manager));
 
 	// API routers
-	app.use('/api', UserAPI.createRouter(users, agent));
-	app.use('/api', SchemaAPI.createRouter(agent, ev.SCHEMA_TEMPLATE_PATH));
-	app.use('/api', CredDefsAPI.createRouter(agent));
-	app.use('/api', CredentialsAPI.createRouter(issuance_manager));
+	app.use('/api', UserAPI.createRouter(users, agent, middleware));
+	app.use('/api', SchemaAPI.createRouter(agent, ev.SCHEMA_TEMPLATE_PATH, middleware));
+	app.use('/api', CredDefsAPI.createRouter(agent, middleware));
+	app.use('/api', CredentialsAPI.createRouter(issuance_manager, middleware));
 
 	// catch 404 and forward to error handler
 	app.use((req, res, next) => {

@@ -20,14 +20,13 @@ const compression = require('compression');
 
 const USER_ERRORS = require('../libs/users.js').USERS_ERRORS;
 
-const middleware = require('./middleware.js');
-
 /**
  * Creates an express router for displaying all the web pages a user can browse to.
  * @param {object} users_instance An instance of the Users class with a backend user database.
+ * @param {Middleware} middleware Authentication middleware used to protect API endpoints.
  * @returns {object} An express router for the users API.
  */
-exports.createRouter = function (users_instance) {
+exports.createRouter = function (users_instance, middleware) {
 
 	const router = express.Router();
 	router.use(bodyParser.urlencoded({extended: true}));
@@ -56,12 +55,12 @@ exports.createRouter = function (users_instance) {
 	});
 
 	// Admin page
-	router.get('/admin', (req, res, next) => {
+	router.get('/admin', [ middleware.is_admin ], (req, res, next) => {
 		res.render('admin', {title: 'Employee Administration'});
 	});
 
 	// Edit info for a single user
-	router.get('/users/:user_id/edit', async (req, res, next) => {
+	router.get('/users/:user_id/edit', [ middleware.is_admin ], async (req, res, next) => {
 		const user_id = req.params.user_id;
 		try {
 			const user_doc = await users_instance.read_user(user_id);

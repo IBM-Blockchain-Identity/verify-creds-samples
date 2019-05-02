@@ -19,41 +19,99 @@ const Logger = require('../libs/logger.js').Logger;
 const logger = Logger.makeLogger(Logger.logPrefix(__filename));
 
 /**
- * Redirects a user to the login page unless they are logged in, meaning the `user_id` field is filled out in their
- * session (login endpoints should do this).
- * @param {object} req An express request object.  Holds the session.
- * @param {object} res An express response object.  Used to redirect users that aren't logged in.
- * @param {function} next The next handler in the express chain.  Generally, it's the endpoint that requires user authentication.
- * @returns {void}
+ * Captures all the middleware functions needed to secure the APIs for the app.
  */
-module.exports.user_authentication = function (req, res, next) {
-	logger.debug(`User session: ${JSON.stringify(req.session)}`);
-	if (req && req.session && req.session.user_id && typeof req.session.user_id === 'string') {
-		logger.info(`User ${req.session.user_id} is logged in`);
-		next();
-	} else {
-		logger.info('User is not logged in. Redirecting to /login');
-		res.redirect('/login');
-	}
-};
+class Middleware {
 
-/**
- * Only sessions with logged in users will get past this middle.
- * @param {object} req An express request object.  Holds the session.
- * @param {object} res An express response object.
- * @param {function} next The next handler in the express chain.  Generally, it's the endpoint that requires user authentication.
- * @returns {void}
- */
-module.exports.is_logged_in = function (req, res, next) {
-	logger.debug(`User session: ${JSON.stringify(req.session)}`);
-	if (req && req.session && req.session.user_id && typeof req.session.user_id === 'string') {
-		logger.info(`User ${req.session.user_id} is logged in`);
-		next();
-	} else {
-		logger.info('User is not logged in.');
+	/**
+	 * Creates a middleware provider with the given authentication credentials.
+	 * @param {string} admin_user The admin username.
+	 * @param {string} admin_password The admin password.
+	 * @param {string} realm The basic auth login realm.
+	 */
+	constructor (admin_user, admin_password, realm) {
+		this.admin_user = admin_user;
+		this.admin_password = admin_password;
+		this.realm = realm;
+
+		// Bind function contexts so the functions will have access to `this`
+		this.is_admin = this.is_admin.bind(this);
+	}
+
+	/**
+	 * Makes sure the request is from a user with administrator privileges.
+	 * @param {object} req An express request object.  Holds the session.
+	 * @param {object} res An express response object.
+	 * @param {function} next The next handler in the express chain.  Generally, it's the endpoint that requires user authentication.
+	 * @returns {void}
+	 */
+	is_admin (req, res, next) {
+		logger.debug('Checking for admin privileges');
+
+		if (!this.admin_password || !this.admin_user) {
+			logger.warn('Admin username and password are not set.  Letting the user through');
+			next();
+			return;
+		}
+
+		// parse login and password from headers
+		const b64auth = (req.headers.authorization || '').split(' ')[1] || '';
+		const [ login, password ] = new Buffer(b64auth, 'base64').toString().split(':');
+
+		// Verify login and password are set and correct
+		if (login && password && login === this.admin_user && password === this.admin_password) {
+			// Access granted...
+			logger.info('User has admin privileges');
+			next();
+			return;
+		}
+
+		logger.info('User does not have admin privileges');
+		res.setHeader('WWW-Authenticate', `Basic realm="${this.realm}"`);
 		res.status(401).json({
 			error: 'NOT_AUTHORIZED',
-			reason: 'You must be logged in to use this API endpoint'
+			reason: 'You do not have admin access'
 		});
 	}
-};
+
+	/**
+	 * Only sessions with logged in users will get past this middleware.
+	 * @param {object} req An express request object.  Holds the session.
+	 * @param {object} res An express response object.
+	 * @param {function} next The next handler in the express chain.  Generally, it's the endpoint that requires user authentication.
+	 * @returns {void}
+	 */
+	is_logged_in (req, res, next) {
+		logger.debug(`User session: ${JSON.stringify(req.session)}`);
+		if (req && req.session && req.session.user_id && typeof req.session.user_id === 'string') {
+			logger.info(`User ${req.session.user_id} is logged in`);
+			next();
+		} else {
+			logger.info('User is not logged in.');
+			res.status(401).json({
+				error: 'NOT_AUTHORIZED',
+				reason: 'You must be logged in to use this API endpoint'
+			});
+		}
+	}
+
+	/**
+	 * Redirects a user to the login page unless they are logged in, meaning the `user_id` field is filled out in their
+	 * session (login endpoints should do this).
+	 * @param {object} req An express request object.  Holds the session.
+	 * @param {object} res An express response object.  Used to redirect users that aren't logged in.
+	 * @param {function} next The next handler in the express chain.  Generally, it's the endpoint that requires user authentication.
+	 * @returns {void}
+	 */
+	user_authentication (req, res, next) {
+		logger.debug(`User session: ${JSON.stringify(req.session)}`);
+		if (req && req.session && req.session.user_id && typeof req.session.user_id === 'string') {
+			logger.info(`User ${req.session.user_id} is logged in`);
+			next();
+		} else {
+			logger.info('User is not logged in. Redirecting to /login');
+			res.redirect('/login');
+		}
+	}
+}
+module.exports.Middleware = Middleware;

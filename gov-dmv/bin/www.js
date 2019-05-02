@@ -83,7 +83,9 @@ const ev = {
 	SIGNUP_DMV_ISSUER_AGENT: process.env.SIGNUP_DMV_ISSUER_AGENT,
 	SIGNUP_HR_ISSUER_AGENT: process.env.SIGNUP_HR_ISSUER_AGENT,
 	SCHEMA_TEMPLATE_PATH: process.env.SCHEMA_TEMPLATE_PATH,
-	ACCEPT_INCOMING_CONNECTIONS: process.env.ACCEPT_INCOMING_CONNECTIONS === 'true'
+	ACCEPT_INCOMING_CONNECTIONS: process.env.ACCEPT_INCOMING_CONNECTIONS === 'true',
+	ADMIN_API_USERNAME: process.env.ADMIN_API_USERNAME,
+	ADMIN_API_PASSWORD: process.env.ADMIN_API_PASSWORD
 };
 
 for (const key in ev) {
@@ -300,6 +302,17 @@ async function start () {
 		responder.start();
 	} else {
 		logger.info(`Not listening for connection offers to my agent, ${agent.name}`);
+	}
+
+	/*************************
+	 * Make sure admin api info makes sense
+	 *************************/
+	if (!ev.ADMIN_API_PASSWORD && !ev.ADMIN_API_USERNAME) {
+		logger.warn('No admin API username or password set.  Admin APIs will be WIDE OPEN');
+	} else if (ev.ADMIN_API_PASSWORD && ev.ADMIN_API_USERNAME) {
+		logger.info('ADMIN APIS ARE PROTECTED');
+	} else {
+		throw new Error('You must provide both ADMIN_API_USERNAME and ADMIN_API_PASSWORD, not just one or the other');
 	}
 
 	/*************************

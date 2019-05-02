@@ -28,6 +28,8 @@ services:
       - MY_URL=${DMV_URL}
       - CONNECTION_IMAGE_PROVIDER=none
       - CARD_IMAGE_RENDERING=none
+      - ADMIN_API_USERNAME
+      - ADMIN_API_PASSWORD
     links:
       - couchdb
 
@@ -52,6 +54,8 @@ services:
       - MY_URL=${IBMHR_URL}
       - CONNECTION_IMAGE_PROVIDER=none
       - CARD_IMAGE_RENDERING=none
+      - ADMIN_API_USERNAME
+      - ADMIN_API_PASSWORD
     links:
       - couchdb
 
@@ -78,5 +82,7 @@ services:
       - MY_URL=${BBCU_URL}
       - CONNECTION_IMAGE_PROVIDER=none
       - CARD_IMAGE_RENDERING=none
+      - ADMIN_API_USERNAME
+      - ADMIN_API_PASSWORD
     links:
       - couchdb

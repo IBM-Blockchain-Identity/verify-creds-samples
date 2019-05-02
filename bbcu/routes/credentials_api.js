@@ -17,15 +17,15 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const compression = require('compression');
-const middleware = require('./middleware.js');
 
 /**
  * Creates an express router representing a Credentials REST API for managing user credentials.
  * @param {IssuanceManager} issuance_manager An instance of the Credentials class which provides backend functionality for
  * credential api endpoints.
+ * @param {Middleware} middleware Authentication middleware used to protect API endpoints.
  * @returns {object} An express router for the users API.
  */
-exports.createRouter = function (issuance_manager) {
+exports.createRouter = function (issuance_manager, middleware) {
 
 	if (!issuance_manager || typeof issuance_manager.create_issuance !== 'function')
 		throw new TypeError('Credentials API was not given a Credentials instance');

@@ -21,9 +21,10 @@ const compression = require('compression');
 /**
  * Creates an express router representing a REST API for managing credential definitions.
  * @param {Agent} agent An instance of the CredentialDefs class with a backend credential definition database.
+ * @param {Middleware} middleware Authentication middleware used to protect API endpoints.
  * @returns {object} An express router for the credential definitions API.
  */
-exports.createRouter = function (agent) {
+exports.createRouter = function (agent, middleware) {
 
 	if (!agent || typeof agent.getCredentialDefinitions !== 'function')
 		throw new TypeError('Credential Definitions API was not given an Agent');
@@ -35,7 +36,7 @@ exports.createRouter = function (agent) {
 	router.use(compression());
 
 	/* POST a new credential definition */
-	router.post('/creddefs', async (req, res, next) => {
+	router.post('/creddefs', [ middleware.is_admin ], async (req, res, next) => {
 
 		const schema_id = req.body.schema_id;
 		if (!schema_id || typeof schema_id !== 'string')

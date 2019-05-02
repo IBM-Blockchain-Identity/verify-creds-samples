@@ -24,9 +24,10 @@ const USER_ERRORS = require('../libs/users.js').USERS_ERRORS;
  * Creates an express router representing a Users REST API for managing users.
  * @param {object} users_instance An instance of the Users class with a backend user database.
  * @param {Agent} agent An cloud agent.
+ * @param {Middleware} middleware Authentication middleware used to protect API endpoints.
  * @returns {object} An express router for the users API.
  */
-exports.createRouter = function (users_instance, agent) {
+exports.createRouter = function (users_instance, agent, middleware) {
 
 	if (!users_instance || typeof users_instance.read_user !== 'function')
 		throw new TypeError('Users API was not given a Users instance');
@@ -40,7 +41,7 @@ exports.createRouter = function (users_instance, agent) {
 	router.use(compression());
 
 	/* GET all users */
-	router.get('/users', async (req, res, next) => {
+	router.get('/users', [ middleware.is_admin ], async (req, res, next) => {
 		try {
 			const users = await users_instance.read_users();
 			res.json({users: users});
@@ -52,7 +53,13 @@ exports.createRouter = function (users_instance, agent) {
 	});
 
 	/* GET a user */
-	router.get('/users/:user_id', async (req, res, next) => {
+	router.get('/users/:user_id', [ middleware.is_logged_in ], async (req, res, next) => {
+		if (req.params.user_id !== req.session.user_id)
+			res.status(401).json({
+				error: 'NOT_AUTHORIZED',
+				reason: 'You cannot request information on other users'
+			});
+
 		try {
 			const user_doc = await users_instance.read_user(req.params.user_id);
 			const response = {};
@@ -116,13 +123,19 @@ exports.createRouter = function (users_instance, agent) {
 	});
 
 	/* PUT updates to a user */
-	router.put('/users/:user_id', async (req, res, next) => {
+	router.put('/users/:user_id', [ middleware.is_logged_in ], async (req, res, next) => {
 		const personal_info = req.body.personal_info;
 		if (typeof personal_info !== 'object')
 			return res.status(400).json({error: USER_API_ERRORS.USER_PERSONAL_INFO_NOT_FOUND,
 				reason: 'Update requests must supply updated personal information'});
 
 		const user = req.params.user_id;
+
+		if (user !== req.session.user_id)
+			res.status(401).json({
+				error: 'NOT_AUTHORIZED',
+				reason: 'You cannot update other users'
+			});
 
 		if (!req.body || typeof req.body.opts !== 'object') {
 			return res.status(400).json({
@@ -149,7 +162,7 @@ exports.createRouter = function (users_instance, agent) {
 	});
 
 	/* DELETE a user */
-	router.delete('/users/:user_id', async (req, res, next) => {
+	router.delete('/users/:user_id', [ middleware.is_admin ], async (req, res, next) => {
 		const username = req.params.user_id;
 
 		let userDoc;
