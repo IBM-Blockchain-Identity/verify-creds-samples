@@ -90,8 +90,11 @@ $(document).ready(() => {
 	const vcSignonModal = $('#vcSignonModal');
 	const vcSignonCarousel = $('#vcSignonCarousel');
 	const vcSignonCarouselSlides = {
-		LOGGING_IN: 0,
-		FAILED: 1
+		CREATED: 0,
+		ESTABLISHING_CONNECTION: 1,
+		CHECKING_CREDENTIAL: 2,
+		SUCCEEDED: 3,
+		FAILED: 4
 	};
 
 	// Sign on using VCs
@@ -112,7 +115,7 @@ $(document).ready(() => {
 		};
 
 		// Reset the signon carousel
-		vcSignonCarousel.carousel(vcSignonCarouselSlides.LOGGING_IN);
+		vcSignonCarousel.carousel(vcSignonCarouselSlides.CREATED);
 		// Open the signon modal and keep it open
 		vcSignonModal.modal({
 			backdrop: 'static',
@@ -155,10 +158,10 @@ $(document).ready(() => {
 				console.log(`Updated login status: ${JSON.stringify(response.status)}`);
 
 				const REMOTE_LOGIN_STEPS = {
-					CREATED: vcSignonCarouselSlides.LOGGING_IN,
-					ESTABLISHING_CONNECTION: vcSignonCarouselSlides.LOGGING_IN,
-					CHECKING_CREDENTIAL: vcSignonCarouselSlides.LOGGING_IN,
-					FINISHED: vcSignonCarouselSlides.LOGGING_IN,
+					CREATED: vcSignonCarouselSlides.CREATED,
+					ESTABLISHING_CONNECTION: vcSignonCarouselSlides.ESTABLISHING_CONNECTION,
+					CHECKING_CREDENTIAL: vcSignonCarouselSlides.CHECKING_CREDENTIAL,
+					FINISHED: vcSignonCarouselSlides.SUCCEEDED,
 					STOPPED: vcSignonCarouselSlides.FAILED,
 					ERROR: vcSignonCarouselSlides.FAILED
 				};
@@ -243,11 +246,13 @@ $(document).ready(() => {
 	const vcSignupCarouselSlides = {
 		BEFORE_REGISTERING: 0,
 		ENTER_USER_INFO: 1,
-		ESTABLISHING_CONNECTION: 2,
-		CHECKING_CREDENTIAL: 3,
-		ISSUING_CREDENTIAL: 4,
-		NOT_ALLOWED: 5,
-		ALREADY_HAVE_WALLET: 6
+		COLLECTING_INFO: 2,
+		ESTABLISHING_CONNECTION: 3,
+		CHECKING_CREDENTIAL: 4,
+		ISSUING_CREDENTIAL: 5,
+		FINISHED: 6,
+		NOT_ALLOWED: 7,
+		ALREADY_HAVE_WALLET: 8
 	};
 
 	// Open the signup modal if the user wants to signup for an account and keep it open
@@ -391,7 +396,10 @@ $(document).ready(() => {
 				const signup_status = response.signup.status;
 				response = response.signup;
 
-				if (signup_status === REMOTE_SIGNUP_STEPS.ESTABLISHING_CONNECTION || signup_status === REMOTE_SIGNUP_STEPS.CREATED) {
+				if (signup_status === REMOTE_SIGNUP_STEPS.CREATED) {
+					vcSignupCarousel.carousel(vcSignupCarouselSlides.COLLECTING_INFO);
+
+				} else if (signup_status === REMOTE_SIGNUP_STEPS.ESTABLISHING_CONNECTION || signup_status === REMOTE_SIGNUP_STEPS.CREATED) {
 					vcSignupCarousel.carousel(vcSignupCarouselSlides.ESTABLISHING_CONNECTION);
 
 				} else if (signup_status === REMOTE_SIGNUP_STEPS.CHECKING_CREDENTIAL) {
@@ -401,6 +409,7 @@ $(document).ready(() => {
 					vcSignupCarousel.carousel(vcSignupCarouselSlides.ISSUING_CREDENTIAL);
 
 				} else if (signup_status === REMOTE_SIGNUP_STEPS.FINISHED) {
+					vcSignupCarousel.carousel(vcSignupCarouselSlides.FINISHED);
 
 					// Redirect to account page.  The user's session should be logged in at this point.
 					await new Promise((resolve, reject) => {

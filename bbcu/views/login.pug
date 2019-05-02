@@ -86,13 +86,31 @@ block extra
                     #vcSignonCarousel.carousel.slide(data-ride="false" data-interval="false" data-keyboard="false" data-wrap="false" pause="false")
                         .carousel-inner
                             .carousel-item.active.text-center
-                                h2 Logging in with your digital credential...
+                                h2 Collecting information
+                                .spinner-container
+                                    i.fas.fa-circle-notch.fa-spin.fa-2x
+                                .verifying-creds-text
+                                    span Please wait
+                            .carousel-item.text-center
+                                h2 Establishing a connection with your agent
+                                .spinner-container
+                                    i.fas.fa-circle-notch.fa-spin.fa-2x
+                                .verifying-creds-text
+                                    span Please accept the connection offer
+                            .carousel-item.text-center
+                                h2 Checking your account credential
                                 .spinner-container
                                     i.fas.fa-circle-notch.fa-spin.fa-2x
                                 .verifying-creds-text
                                     span Please accept the verification request
                             .carousel-item.text-center
-                                h2 Login Failed
+                                h2 Login succeeded
+                                .spinner-container.text-success
+                                    i.fas.fa-check.fa-5x
+                                .verifying-creds-text
+                                    span Redirecting to your account...
+                            .carousel-item.text-center
+                                h2 Login failed
                                 p.mt-2.mb-2 We were unable to authenticate your digital credential.
                                 #loginErrorCode.text-danger
                                 #loginErrorMessage.text-danger.mb-2
@@ -145,7 +163,13 @@ block extra
                                     span.extension-loaded.d-none.text-muted.ml-3 Chrome extension detected
 
                             .carousel-item.text-center
-                                h2 Establishing a connection with your agent...
+                                h2 Collecting information
+                                .verifying-creds-text
+                                    i.fas.fa-circle-notch.fa-spin.fa-2x
+                                    span Please wait
+
+                            .carousel-item.text-center
+                                h2 Establishing a connection with your agent
                                 .verifying-creds-text
                                     i.fas.fa-circle-notch.fa-spin.fa-2x
                                     span Please accept the connection offer.
@@ -161,6 +185,13 @@ block extra
                                 .verifying-creds-text
                                     i.fas.fa-circle-notch.fa-spin.fa-2x
                                     span Please accept the credential offer
+
+                            .carousel-item.text-center
+                                .text-success
+                                    i.fas.fa-check.fa-5x
+                                .verifying-creds-text.text-success
+                                    h5 All done!
+                                    p Redirecting to your account...
 
                             .carousel-item.text-center
                                 h2 Enrollment Failed
