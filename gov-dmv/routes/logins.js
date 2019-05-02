@@ -18,8 +18,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const compression = require('compression');
 
-const USER_ERRORS = require('../libs/users.js').USERS_ERRORS;
-
 const LOGIN_STEPS = require('../libs/logins.js').LOGIN_STEPS;
 
 // Logging setup
@@ -45,17 +43,6 @@ exports.createRouter = function (users_instance, login_manager) {
 	router.use(bodyParser.json());
 	router.use(bodyParser.text());
 	router.use(compression());
-
-	// Log in as any user from the admin panel
-	router.get('/login/as_user/:user_id', async (req, res) => {
-		try {
-			await users_instance.read_user(req.params.user_id);
-			req.session.user_id = req.params.user_id;
-			res.redirect('/account');
-		} catch (error) {
-			return res.status(error.code === USER_ERRORS.USER_DOES_NOT_EXIST ? 404 : 500).send({error: error.code, reason: `Could not authenticate as ${req.params.user_id}`});
-		}
-	});
 
 	// Log in using username and password
 	router.post('/login/userpass', async (req, res) => {

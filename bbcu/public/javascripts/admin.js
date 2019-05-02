@@ -401,7 +401,7 @@ function populate_user_table () {
 		 * @returns {string} HTML representing the value for the cell of the table.
 		 */
 		function emailLinkFormatter (email) {
-			return `<a href="/login/as_user/${email}">${email}</a>`;
+			return `<a href="mailto:${email}">${email}</a>`;
 		}
 
 		/**
