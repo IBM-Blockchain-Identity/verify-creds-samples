@@ -20,10 +20,6 @@ const demo_users = [
 		attributes: {
 			first_name: 'Alice',
 			last_name: 'Garcia',
-			email: 'alice@example.com',
-			agent_name: 'alice',
-			password: 'alicepw',
-			confirm_password: 'alicepw'
 		}
 	},
 	{
@@ -35,7 +31,6 @@ const demo_users = [
 		attributes: {
 			first_name: 'Andrew',
 			last_name: 'Adams',
-			email: 'aadams@example.com'
 		}
 	},
 	{
@@ -43,7 +38,6 @@ const demo_users = [
 		attributes: {
 			first_name: 'Allison',
 			last_name: 'Hunter',
-			email: 'ahunter@example.com'
 		}
 	},
 	{
@@ -51,7 +45,6 @@ const demo_users = [
 		attributes: {
 			first_name: 'Alvin',
 			last_name: 'Hwang',
-			email: 'ahwang@example.com'
 		}
 	},
 	{
@@ -59,7 +52,6 @@ const demo_users = [
 		attributes: {
 			first_name: 'Adrian',
 			last_name: 'Martin',
-			email: 'amartin@example.com'
 		}
 	},
 	{
@@ -67,18 +59,12 @@ const demo_users = [
 		attributes: {
 			first_name: 'Brandon',
 			last_name: 'Harris',
-			email: 'bharris@example.com'
 		}
 	}
 ];
 
 const default_attributes = {
-	'email': 'jdoe@example.com',
-	'password': 'password',
-
-	'first_name': 'John',
 	'middle_name': '_',
-	'last_name': 'Doe',
 
 	'dob': '12-12-2012',
 	'ssn': '123456789',
@@ -91,8 +77,6 @@ const default_attributes = {
 	'account_number': 'abcdefgh12345567890',
 	'institution_number': '123123abcabc',
 	'transit_number': 'abc123abc123',
-
-	'agent_name': ''
 };
 
 $(document).ready(() => {
@@ -115,7 +99,7 @@ $(document).ready(() => {
 			user_data.attributes[attr_name] = user_data.attributes[attr_name] ? user_data.attributes[attr_name] : default_attributes[attr_name];
 			$(`input[name="${attr_name}"]`).val(user_data.attributes[attr_name]);
 		}
-		$('input[name="email"]').val(user_data.attributes.email ? user_data.attributes.email : 'jdoe@example.com');
+		$('input[name="email"]').val(user_data.attributes.email ? user_data.attributes.email : '');
 		$('input[name="confirm_password"]').val(user_data.attributes.password ? user_data.attributes.password : '');
 		$('#autofillModal').modal('hide');
 	});
