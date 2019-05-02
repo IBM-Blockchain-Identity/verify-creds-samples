@@ -56,13 +56,6 @@ exports.createRouter = function (issuance_manager, middleware) {
 		});
 	});
 
-	/* Start credential issue process */
-	router.get('/issue_credential/:user_id', [], (req, res, next) => {
-		const user_id = req.params.user_id;
-		issuance_manager.create_issuance(user_id);
-		res.status(200).send('Your user_id='+user_id);
-	});
-
 	/* GET check the status of a credential issuance flow */
 	router.get('/credentials/', [ middleware.is_logged_in ], (req, res, next) => {
 
