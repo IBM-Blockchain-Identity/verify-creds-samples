@@ -179,6 +179,7 @@ $(document).ready(async () => {
 			return;
 		}
 
+		formObject.email = `${formObject.email.trim()}@example.com`;
 		const userEmail = formObject.email;
 
 		if (formObject.password !== formObject.confirm_password)

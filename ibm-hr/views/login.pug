@@ -30,9 +30,12 @@ block content
                                         label(for="signupAgentURL") Agent URL
                                         input#signupAgentURL.form-control(type="text" name="agent_url" required)
                                 .form-row
-                                    .form-group.col-md-6
+                                    .form-group.col-md-8
                                         label(for="signupEmail") Email Address
-                                        input#signupEmail.form-control(type="email" name="email" required)
+                                        .input-group
+                                            input#signupEmail.form-control(type="text" name="email" required)
+                                            .input-group-append
+                                                span.input-group-text.rounded-0 @example.com
                                 .form-row
                                     .form-group.col-sm-6
                                         label(for="signupPassword") Password

@@ -179,7 +179,7 @@ $(document).ready(async () => {
 			return;
 		}
 
-		const userEmail = formObject.email;
+		const userEmail = `${formObject.email.trim()}@example.com`;
 
 		if (formObject.password !== formObject.confirm_password)
 			return console.error('Passwords must match!');

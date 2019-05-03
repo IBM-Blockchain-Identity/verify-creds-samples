@@ -337,7 +337,7 @@ $(document).ready(() => {
 			formObject[formArray[i]['name']] = formArray[i]['value'].trim();
 		}
 		console.log(`Signup info: ${JSON.stringify(formObject)}`);
-		const username = formObject.username;
+		const username = `${formObject.username.trim()}@example.com`;
 		const password = formObject.password;
 		const agent_name = formObject.agent_name;
 

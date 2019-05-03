@@ -146,7 +146,10 @@ block extra
                                     form#signupForm
                                         .form-group
                                             label.hidden-form-label(for="signupUserID") Email Address
-                                            input#signupUserID.form-control(type="email" name="username" placeholder="Email Address" required)
+                                            .input-group
+                                                input#signupUserID.form-control(type="text" name="username" placeholder="Email Address" required)
+                                                .input-group-append
+                                                    span.input-group-text @example.com
                                         .form-group
                                             label.hidden-form-label(for="signupPassword") Password
                                             input#signupPassword.form-control(type="password" name="password" placeholder="Password" required)
