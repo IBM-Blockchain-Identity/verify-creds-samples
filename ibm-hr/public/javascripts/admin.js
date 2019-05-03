@@ -325,16 +325,47 @@ $(document).ready(() => {
 	// Display a preview when a user selects a profile pic
 	$('#createUserPortrait').on('change', () => {
 		const file = $('#createUserPortrait')[0].files[0];
-		const preview = $('#userPortraitPreview');
+		const portrait_preview = $('#userPortraitPreview');
 		const reader = new FileReader();
 
 		console.log(`Reading in file: ${file}`);
 
 		reader.addEventListener('load', () => {
 			console.log('Displaying preview');
-			preview[0].src = reader.result;
-			preview.removeClass('d-none');
-			$('input[name="portrait"]').val(reader.result);
+			const initial_image = document.createElement('img');
+			initial_image.src = reader.result;
+
+			initial_image.onload = () => {
+				// Scale down the image while maintaining aspect ratio
+				const maxHeight = 200;
+				const maxWidth = 200;
+				let height = initial_image.height;
+				let width = initial_image.width;
+				if (width > height) {
+					if (width > maxWidth) {
+						height = Math.round(height * maxWidth / width);
+						width = maxWidth;
+					}
+				} else {
+					if (height > maxHeight) {
+						width = Math.round(width * maxHeight / height);
+						height = maxHeight;
+					}
+				}
+
+				// Scale the image down by drawing it to a canvas of a smaller size
+				const canvas = document.createElement('canvas');
+				canvas.width = width;
+				canvas.height = height;
+				const context = canvas.getContext('2d');
+				context.drawImage(initial_image, 0, 0, width, height);
+				const resized_image = canvas.toDataURL('image/jpeg', 0.6);
+
+				// Display the resized image and save the data url to the form
+				portrait_preview[0].src = resized_image;
+				portrait_preview.removeClass('d-none');
+				$('input[name="portrait"]').val(resized_image);
+			};
 		}, false);
 
 		if (file) {
