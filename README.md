@@ -50,7 +50,7 @@ build your own sample websites from the templates we've provided.
 1. Visit your agent account management page and provision three new agents, `govdmv`, `ibmhr`,
 and `bbcu`.  Save the passwords the you create for each agent; you'll need them later.
 
-2. Get the url for your account.  This would have been emailed to you when you created your agent account.
+2. Get the url for your account.  This was emailed to you when you created your agent account.
 
 3. Make sure all of your agents have their `role` set to `TRUST_ANCHOR`.  This is a requirement for the agents to be
 able to issue credentials.  You can use the following `curl` command to set this property on each of the above agents:
