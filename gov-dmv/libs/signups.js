@@ -355,6 +355,7 @@ class Signup {
 
 			logger.info(`Creating user record for ${this.user}`);
 			const personal_info = await this.signup_helper.proofToUserRecord(proof);
+			personal_info.email = this.user;
 
 			const user_doc = await this.user_records.create_user(this.user, this.password, personal_info, {
 				agent_name: this.agent_name

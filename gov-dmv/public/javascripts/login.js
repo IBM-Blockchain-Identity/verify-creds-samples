@@ -233,6 +233,8 @@ $(document).ready(async () => {
 		for (const key in formObject) {
 			user_record[key] = formObject[key];
 		}
+		// Add email to the credential for login convenience
+		user_record['email'] = userEmail;
 
 		// Set dob_timestamp (in days)
 		if (user_record.dob) {

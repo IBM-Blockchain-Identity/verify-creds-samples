@@ -1,6 +1,6 @@
 {
   "name": "Gov DMV Driver License",
-  "version": "1.2",
+  "version": "1.3",
   "attributes": [
     "last_name",
     "first_name",
@@ -27,6 +27,7 @@
     "eye_color",
     "hair_color",
     "card_front",
-    "card_back"
+    "card_back",
+    "email"
   ]
 }

@@ -1,6 +1,6 @@
 {
   "name": "Employment",
-  "version": "1.0",
+  "version": "1.1",
   "attributes": [
     "First Name",
     "Last Name",
@@ -12,6 +12,7 @@
     "Base Salary",
     "card_front",
     "card_back",
-    "portrait"
+    "portrait",
+    "email"
   ]
 }

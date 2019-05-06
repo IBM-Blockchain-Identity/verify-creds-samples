@@ -1,6 +1,6 @@
 {
   "name": "BBCU Account",
-  "version": "1.0",
+  "version": "1.1",
   "attributes": [
     "first_name",
     "middle_name",
@@ -15,6 +15,7 @@
     "transit_number",
     "account_number",
     "card_front",
-    "card_back"
+    "card_back",
+    "email"
   ]
 }
