@@ -89,15 +89,15 @@ docker-compose build
     
     DMV_AGENT_NAME=govdmv
     DMV_AGENT_PASSWORD=****
-    DMV_URL=http://192.168.1.15:8090
+    DMV_URL=http://<your_local_ip>:8090
     
     IBMHR_AGENT_NAME=ibmhr
     IBMHR_AGENT_PASSWORD=****
-    IBMHR_URL=http://192.168.1.15:8091
+    IBMHR_URL=http://<your_local_ip>:8091
     
     BBCU_AGENT_NAME=bbcu
     BBCU_AGENT_PASSWORD=****
-    BBCU_URL=http://192.168.1.15:8092
+    BBCU_URL=http://<your_local_ip>:8092
     ```
     > For the `<APP>_URL` parameters, you'll generally use the IP address of your machine.  This must be an IP address that
     your mobile device can reach, as the mobile app will need to be able to make requests to the sample apps.
