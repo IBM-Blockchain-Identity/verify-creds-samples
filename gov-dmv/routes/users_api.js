@@ -53,8 +53,9 @@ exports.createRouter = function (users_instance, agent, middleware) {
 	});
 
 	/* GET a user */
-	router.get('/users/:user_id', [ middleware.is_logged_in ], async (req, res, next) => {
-		if (req.params.user_id !== req.session.user_id)
+	router.get('/users/:user_id', [ middleware.is_admin_or_user ], async (req, res, next) => {
+
+		if (!req.is_admin && req.params.user_id !== req.session.user_id)
 			res.status(401).json({
 				error: 'NOT_AUTHORIZED',
 				reason: 'You cannot request information on other users'
@@ -156,8 +157,14 @@ exports.createRouter = function (users_instance, agent, middleware) {
 	});
 
 	/* DELETE a user */
-	router.delete('/users/:user_id', [ middleware.is_admin ], async (req, res, next) => {
+	router.delete('/users/:user_id', [ middleware.is_admin_or_user ], async (req, res, next) => {
 		const username = req.params.user_id;
+
+		if (!req.is_admin && req.params.user_id !== req.session.user_id)
+			res.status(401).json({
+				error: 'NOT_AUTHORIZED',
+				reason: 'You cannot delete other users'
+			});
 
 		let userDoc;
 		try {
