@@ -21,16 +21,14 @@ block content
                             .carousel-item
                                 h3 Sign On
                                 form#loginForm
-                                    .row.ml-0.mr-0
-                                        .form-group.col.pl-0
+                                    .form-row.m-0
+                                        .form-group.col.p-0.m-0
                                             label#userIDLabel.hidden-form-label(for="userID") Email
                                             input#userID.form-control(type="text" name="username" placeholder="Email" required)
-                                        .form-group.col.pr-0
+                                    .form-row.m-0
+                                        .form-group.col.p-0.m-0
                                             label#passwordLabel.hidden-form-label(for="password") Password
                                             input#password.form-control(type="password" name="password" placeholder="Password" required)
-                                    .form-check
-                                        input#rememberUsername.form-check-input(type="checkbox" name="remember_username")
-                                        label.form-check-label(for="rememberUsername") Remember me
                                     button.btn.btn-bbcu.mt-3(type="submit") Sign On
                                 .sign-in-links
                                     .row
@@ -46,9 +44,6 @@ block content
                                         .col.pr-0.pl-0
                                             label#vcUserIDLabel.hidden-form-label(for="vcUserID") Email
                                             input#vcUserID.form-control(type="text" name="username" placeholder="Email" required)
-                                    .form-check
-                                        input#rememberInfo.form-check-input(type="checkbox" name="remember_info")
-                                        label.form-check-label(for="rememberInfo") Remember my Info
                                     button.btn.btn-bbcu.mt-3(type="submit") Sign On
                                     span.extension-loaded.d-none.text-muted.ml-3 Chrome extension detected
                                 .sign-in-links
