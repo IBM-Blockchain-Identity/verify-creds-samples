@@ -140,7 +140,9 @@ block content
     .card.mb-3
         .card-header.clearfix
             h3.card-title.float-left User List
-            button#refreshUsersButton.btn.btn-primary.float-right(type="button" data-original-text="Refresh" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Loading") Refresh
+            .btn-toolbar.float-right
+                button.btn.btn-danger.delete-account.mr-2(data-original-text="Delete All Users" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Deleting") Delete All Users
+                button#refreshUsersButton.btn.btn-primary(type="button" data-original-text="Refresh" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Loading") Refresh
         .card-body
             #userTableAlert
             table#userTable.table.table-striped

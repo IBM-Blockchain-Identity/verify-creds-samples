@@ -342,6 +342,69 @@ $(document).ready(() => {
 		}
 	});
 
+	// Deletes the user's account
+	const deleteButton = $('.delete-account');
+	deleteButton.click(async () => {
+
+		// Start the loading animation
+		const loader = deleteButton;
+		loader.html(loader.data('loading-text'));
+		loader.attr('disabled', 'disabled');
+
+		if (confirm('Are you sure you want to delete all users?')) {
+
+			let users;
+			try {
+				console.log('Getting a list of all users');
+				users = await $.ajax({
+					url: '/api/users',
+					contentType: 'application/json'
+				});
+				// unwrap the list of users
+				if (users.users) users = users.users;
+			} catch (error) {
+				loader.removeAttr('disabled');
+				loader.html(loader.data('original-text'));
+
+				console.error(`Failed to get the list of users to delete: ${JSON.stringify(error)}`);
+				alert(`Failed to get the list of users to delete: ${JSON.stringify(error, 0, 1)}`);
+			}
+			console.log(`Got a list of ${Object.keys(users).length} to delete`);
+
+			try {
+				for (const username in users) {
+					console.log(`Deleting account ${username}`);
+					const delete_response = await $.ajax({
+						url: `/api/users/${username}`,
+						method: 'DELETE',
+						contentType: 'application/json'
+					});
+					console.log(`Deleted ${username}: ${JSON.stringify(delete_response)}`);
+				}
+
+				alert('Successfully deleted all users');
+				loader.removeAttr('disabled');
+				loader.html(loader.data('original-text'));
+				populate_user_table();
+
+			} catch (error) {
+
+				loader.removeAttr('disabled');
+				loader.html(loader.data('original-text'));
+
+				console.error(`Failed to delete a user: ${JSON.stringify(error)}`);
+				alert(`Failed to delete a user: ${JSON.stringify(error, 0, 1)}`);
+			}
+
+		} else {
+
+			loader.removeAttr('disabled');
+			loader.html(loader.data('original-text'));
+
+			console.log('User changed their mind.  We won\'t delete anything.');
+		}
+	});
+
 	populate_user_table();
 	getSchemaList();
 	getCredDefs();
