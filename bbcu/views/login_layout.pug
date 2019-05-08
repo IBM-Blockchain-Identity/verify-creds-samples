@@ -9,14 +9,17 @@ block banner
                 img.bbcu-logo(src="/images/logo.png")
             a.bbcu-search-icon(href="/admin")
                 img(src="/images/Icons/Search_Icon.png")
-    nav.navbar.navbar-expand-lg.bbcu-nav-bar
+    nav.navbar.navbar-expand-lg.bbcu-nav-bar.navbar-light.p-0
         .container
-            ul.navbar-nav
-                li.nav-item
-                    a.nav-link(href="#") Accounts
-                li.nav-item
-                    a.nav-link(href="#") Loans
-                li.nav-item
-                    a.nav-link(href="#") BBCUPlatinum
-                li.nav-item
-                    a.nav-link(href="#") Help
+            button.navbar-toggler(type="button" data-toggle="collapse" data-target="#navbarNav")
+                span.navbar-toggler-icon
+            #navbarNav.collapse.navbar-collapse
+                ul.navbar-nav
+                    li.nav-item
+                        a.nav-link(href="#") Accounts
+                    li.nav-item
+                        a.nav-link(href="#") Loans
+                    li.nav-item
+                        a.nav-link(href="#") BBCUPlatinum
+                    li.nav-item
+                        a.nav-link(href="#") Help

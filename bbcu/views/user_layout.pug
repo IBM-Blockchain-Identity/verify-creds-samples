@@ -7,19 +7,17 @@ block banner
                 img.bbcu-logo(src="/images/logo.png")
             a.bbcu-search-icon(href="/admin")
                 img(src="/images/Icons/Search_Icon.png")
-    nav.navbar.navbar-expand-lg.bbcu-nav-bar.mb-3
+    nav.navbar.navbar-expand-lg.bbcu-nav-bar.navbar-light.mb-3.p-0
         .container
-            ul.navbar-nav
-                li#accountsNav.nav-item
-                    a.nav-link(href="#") Accounts
-                li.nav-item
-                    a.nav-link(href="#") Transfers
-                li.nav-item
-                    a.nav-link(href="#") Rewards
-            ul.navbar-nav.navbar-right
-                li.nav-item
-                    a#notification_icon.bbcu-nav-icon(href="#")
-                li#profileNav.nav-item
-                    a#profile_icon.bbcu-nav-icon(href="#")
-                li.nav-item
-                    a.nav-link#sign-off-link(href="/logout") Sign Off
+            button.navbar-toggler(type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation")
+                span.navbar-toggler-icon
+            div#navbarNav.collapse.navbar-collapse
+                ul.navbar-nav
+                    li#accountsNav.nav-item.active
+                        a.nav-link(href="#") Accounts
+                    li#profileNav.nav-item
+                        a.nav-link(href="#") Options
+            .mb-2.mt-2
+                .btn-group
+                    button.btn.btn-danger.delete-account(data-original-text="Delete Account" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Deleting") Delete Account
+                    a.btn.btn-secondary#sign-off-link(href="/logout") Logout

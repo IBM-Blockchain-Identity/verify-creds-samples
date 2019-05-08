@@ -2,7 +2,9 @@ extends layout
 
 block navbar
   div
-    a.btn.btn-primary(href="/logout") Logout
+    .btn-group
+      button.btn.btn-danger.delete-account(data-original-text="Delete Account" data-loading-text="<i class='fas fa-circle-notch fa-spin'></i> Deleting") Delete Account
+      a.btn.btn-primary(href="/logout") Logout
 
 block content
   script.

@@ -91,7 +91,6 @@ a {
 }
 
 .bbcu-nav-bar {
-  height: 60px;
   width: 100%;
   border-bottom: 1px solid #eee;
   background: #fff;
@@ -110,11 +109,11 @@ a {
   border-bottom: 5px #00a991 solid;
 }
 
-.bbcu-nav-bar a {
+.bbcu-nav-bar .nav-item a {
   color: #333333;
 }
 
-.bbcu-nav-bar a:hover {
+.bbcu-nav-bar .nav-item a:hover {
   color: #00a991;
 }
 
@@ -336,22 +335,6 @@ a {
 .signup-failed-text {
   margin-top: 20px;
   margin-bottom: 40px;
-}
-
-.bbcu-nav-icon {
-  height: 24px;
-  width: 24px;
-  display: block;
-  background-repeat: none;
-  background-size: contain;
-}
-
-#profile_icon {
-  background-image: url("/images/Icons/Profile_Icon.png");
-}
-
-#notification_icon {
-  background-image: url("/images/Icons/Notification_Icon.png");
 }
 
 #issuanceCarousel .carousel-item {

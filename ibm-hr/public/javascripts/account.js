@@ -34,6 +34,48 @@ $(document).ready(() => {
 		connectButton.attr('disabled', false);
 	});
 
+	// Deletes the user's account
+	const deleteButton = $('.delete-account');
+	deleteButton.click(async () => {
+
+		// Start the loading animation
+		const loader = deleteButton;
+		loader.html(loader.data('loading-text'));
+		loader.attr('disabled', 'disabled');
+
+		if (confirm('Are you sure you want to delete your account?')) {
+
+			try {
+				console.log(`Deleting account ${window.user_id}`);
+				const delete_response = await $.ajax({
+					url: `/api/users/${window.user_id}`,
+					method: 'DELETE',
+					contentType: 'application/json'
+				});
+				console.log(`Deleted ${window.user_id}: ${JSON.stringify(delete_response)}`);
+				console.log('Redirecting to /logout');
+				await new Promise((resolve, reject) => {
+					setTimeout(resolve, 2000);
+				});
+				window.location.href = '/logout';
+
+			} catch (error) {
+
+				loader.removeAttr('disabled');
+				loader.html(loader.data('original-text'));
+
+				console.error(`Failed to delete account: ${JSON.stringify(error)}`);
+				alert(`Failed to delete account: ${JSON.stringify(error, 0, 1)}`);
+			}
+		} else {
+
+			loader.removeAttr('disabled');
+			loader.html(loader.data('original-text'));
+
+			console.log(`User changed their mind.  We won't delete ${window.user_id}`);
+		}
+	});
+
 	populate_user_info();
 	docReady.resolve();
 });
