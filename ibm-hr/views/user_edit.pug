@@ -41,6 +41,13 @@ block content
                         .form-group.col-md-4
                             label(for="editUserBaseSalary") Base Salary
                             input#editUserBaseSalary.form-control(type="text" placeholder="80000" name="Base Salary" required)
+                    .form-row
+                        .form-group.col-md-4
+                            label(for="editUserPortrait") Portrait
+                            input#editUserPortrait.form-control-file(type="file" name="portrait_selection")
+                            input(type="hidden" name="portrait" required)
+                            .text-center
+                                img#userPortraitPreview.img-thumbnail(src="" height="200" alt="Profile Image")
 
                     input#editUserCompany(type="hidden" name="Company" value="IBM" required)
 
