@@ -128,7 +128,7 @@ $(document).ready(async () => {
 
 			console.error(`Failed to log in as ${formObject.email}: ${JSON.stringify(error)}`);
 			const alertText = `Failed to log in as ${formObject.email}. error: ${JSON.stringify(error)}`;
-			$('#signupAlert').html(window.alertHTML(alertText));
+			$('#userpassLoginAlert').html(window.alertHTML(alertText));
 		}
 	});
 

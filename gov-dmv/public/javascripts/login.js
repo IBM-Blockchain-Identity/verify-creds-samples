@@ -128,7 +128,7 @@ $(document).ready(async () => {
 
 			console.error(`Failed to log in as ${formObject.email}: ${JSON.stringify(error)}`);
 			const alertText = `Failed to log in as ${formObject.email}. error: ${JSON.stringify(error)}`;
-			$('#signupAlert').html(window.alertHTML(alertText));
+			$('#userpassLoginAlert').html(window.alertHTML(alertText));
 		}
 	});
 
@@ -423,7 +423,7 @@ $(document).ready(async () => {
 						connection_shown = true;
 						console.log('Accepting connection offer via extension');
 						try {
-							await window.verifyCreds({
+							window.verifyCreds({
 								operation: 'respondToConnectionOffer',
 								connectionOffer: response.connection_offer
 							});
@@ -436,7 +436,7 @@ $(document).ready(async () => {
 						verification_shown = true;
 						console.log('Accepting proof request via extension');
 						try {
-							await window.verifyCreds({
+							window.verifyCreds({
 								operation: 'respondToProofRequest',
 								proofRequestId: response.verification.id
 							});
