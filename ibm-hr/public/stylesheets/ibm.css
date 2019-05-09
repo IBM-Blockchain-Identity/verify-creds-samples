@@ -134,9 +134,7 @@ h1, h2, h3, h4, h5, h6, label {
 }
 
 .issueButton:hover {
-    background-color: #ffffff !important;
-    border: 1px transparent;
-    color: #0b77e3;
+    animation: none;
 }
 
 @-webkit-keyframes glowing {
@@ -202,4 +200,8 @@ h1, h2, h3, h4, h5, h6, label {
 
 .form-control {
     border-radius: 0;
+}
+
+.blue-background .text-danger {
+    color: yellow!important;
 }
