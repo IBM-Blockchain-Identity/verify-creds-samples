@@ -422,7 +422,7 @@ $(document).ready(async () => {
 						connection_shown = true;
 						console.log('Accepting connection offer via extension');
 						try {
-							await window.verifyCreds({
+							window.verifyCreds({
 								operation: 'respondToConnectionOffer',
 								connectionOffer: response.connection_offer
 							});
@@ -435,7 +435,7 @@ $(document).ready(async () => {
 						verification_shown = true;
 						console.log('Accepting proof request via extension');
 						try {
-							await window.verifyCreds({
+							window.verifyCreds({
 								operation: 'respondToProofRequest',
 								proofRequestId: response.verification.id
 							});

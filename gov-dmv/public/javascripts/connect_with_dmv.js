@@ -182,7 +182,7 @@ async function issue_credential (connection_method) {
 					connection_shown = true;
 					console.log('Accepting connection offer via extension');
 					try {
-						await window.verifyCreds({
+						window.verifyCreds({
 							operation: 'respondToConnectionOffer',
 							connectionOffer: response.connection_offer
 						});
@@ -195,7 +195,7 @@ async function issue_credential (connection_method) {
 					credential_shown = true;
 					console.log('Accepting credential offer via extension');
 					try {
-						await window.verifyCreds({
+						window.verifyCreds({
 							operation: 'respondToCredentialOffer',
 							credentialOfferId: response.credential.id
 						});

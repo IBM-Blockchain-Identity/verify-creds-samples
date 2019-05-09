@@ -203,7 +203,7 @@ $(document).ready(() => {
 						connection_shown = true;
 						console.log('Accepting connection offer via extension');
 						try {
-							await window.verifyCreds({
+							window.verifyCreds({
 								operation: 'respondToConnectionOffer',
 								connectionOffer: response.connection_offer
 							});
@@ -216,7 +216,7 @@ $(document).ready(() => {
 						verification_shown = true;
 						console.log('Accepting proof request via extension');
 						try {
-							await window.verifyCreds({
+							window.verifyCreds({
 								operation: 'respondToProofRequest',
 								proofRequestId: response.verification.id
 							});
@@ -440,7 +440,7 @@ $(document).ready(() => {
 						connection_shown = true;
 						console.log('Accepting connection offer via extension');
 						try {
-							await window.verifyCreds({
+							window.verifyCreds({
 								operation: 'respondToConnectionOffer',
 								connectionOffer: response.connection_offer
 							});
@@ -453,7 +453,7 @@ $(document).ready(() => {
 						verification_shown = true;
 						console.log('Accepting proof request via extension');
 						try {
-							await window.verifyCreds({
+							window.verifyCreds({
 								operation: 'respondToProofRequest',
 								proofRequestId: response.verification.id
 							});
@@ -466,7 +466,7 @@ $(document).ready(() => {
 						credential_shown = true;
 						console.log('Accepting credential offer via extension');
 						try {
-							await window.verifyCreds({
+							window.verifyCreds({
 								operation: 'respondToCredentialOffer',
 								credentialOfferId: response.credential.id
 							});
