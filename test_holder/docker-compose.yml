@@ -12,3 +12,4 @@ services:
       - DELETE_BAD_CONNECTION_OFFERS=true
       - CONNECTIONS_CLEANUP=true
       - CREDENTIALS_CLEANUP=true
+      - VERIFICATIONS_CLEANUP=true

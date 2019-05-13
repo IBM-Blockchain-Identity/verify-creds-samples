@@ -45,7 +45,8 @@ const ev = {
 	DELETE_BAD_CONNECTION_OFFERS: process.env.DELETE_BAD_CONNECTION_OFFERS === 'true',
 	DELETE_BAD_CREDENTIAL_OFFERS: process.env.DELETE_BAD_CREDENTIAL_OFFERS === 'true',
 	CONNECTIONS_CLEANUP: process.env.CONNECTIONS_CLEANUP === 'true',
-	CREDENTIALS_CLEANUP: process.env.CREDENTIALS_CLEANUP === 'true'
+	CREDENTIALS_CLEANUP: process.env.CREDENTIALS_CLEANUP === 'true',
+	VERIFICATIONS_CLEANUP: process.env.VERIFICATIONS_CLEANUP === 'true'
 };
 
 for (const key in ev) {
@@ -83,10 +84,13 @@ agent.setLoggingLevel(ev.AGENT_LOG_LEVEL);
 		for (const index in connections) {
 			const conn = connections[index];
 			logger.debug(`***************DELETING CONNECTION ${conn.id} to ${conn.remote ? conn.remote.name : 'nobody'}***************`);
-			await agent.deleteConnection(conn.id);
+			try {
+				await agent.deleteConnection(conn.id);
+			} catch (error) {
+				logger.error(`Error when deleting connection ${conn.id}: ${error}`);
+			}
 		}
 	}
-
 
 	if (ev.CREDENTIALS_CLEANUP) {
 		logger.info('***************DELETING CREDENTIALS***************');
@@ -94,7 +98,25 @@ agent.setLoggingLevel(ev.AGENT_LOG_LEVEL);
 		logger.info(`***************${credentials.length} CREDENTIALS TO DELETE***************`);
 		for (const index in credentials) {
 			logger.debug(`***************DELETING CREDENTIAL ${credentials[index].id}***************`);
-			await agent.deleteCredential(credentials[index].id);
+			try {
+				await agent.deleteCredential(credentials[index].id);
+			} catch (error) {
+				logger.error(`Error when deleting connection ${credentials[index].id}: ${error}`);
+			}
+		}
+	}
+
+	if (ev.VERIFICATIONS_CLEANUP) {
+		logger.info('***************DELETING VERIFICATION***************');
+		const verifications = await agent.getVerifications();
+		logger.info(`***************${verifications.length} VERIFICATIONS TO DELETE***************`);
+		for (const index in verifications) {
+			logger.debug(`***************DELETING VERIFICATION ${verifications[index].id}***************`);
+			try {
+				await agent.deleteVerification(verifications[index].id);
+			} catch (error) {
+				logger.error(`Error when deleting verification ${verifications[index].id}: ${error}`);
+			}
 		}
 	}
 
