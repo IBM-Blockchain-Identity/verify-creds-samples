@@ -5,27 +5,27 @@ metadata:
 spec:
   tls:
     - hosts:
-        - credimi-dev.us-south.containers.appdomain.cloud
-        - gov-dmv.credimi-dev.us-south.containers.appdomain.cloud
-        - ibm-hr.credimi-dev.us-south.containers.appdomain.cloud
-        - bbcu.credimi-dev.us-south.containers.appdomain.cloud
+        - CLUSTER_INGRESS_URL_HERE
+        - DMV_CLUSTER_INGRESS_URL_HERE
+        - IBMHR_CLUSTER_INGRESS_URL_HERE
+        - BBCU_CLUSTER_INGRESS_URL_HERE
       secretName: credimi-dev
   rules:
-    - host: gov-dmv.credimi-dev.us-south.containers.appdomain.cloud
+    - host: DMV_CLUSTER_INGRESS_URL_HERE
       http:
         paths:
           - path: /
             backend:
               serviceName: gov-dmv
               servicePort: 80
-    - host: ibm-hr.credimi-dev.us-south.containers.appdomain.cloud
+    - host: IBMHR_CLUSTER_INGRESS_URL_HERE
       http:
         paths:
           - path: /
             backend:
               serviceName: ibm-hr
               servicePort: 80
-    - host: bbcu.credimi-dev.us-south.containers.appdomain.cloud
+    - host: BBCU_CLUSTER_INGRESS_URL_HERE
       http:
         paths:
           - path: /
@@ -44,26 +44,26 @@ metadata:
 spec:
   tls:
     - hosts:
-        - gov.livedemo.verify-creds.com
-        - bbcu.livedemo.verify-creds.com
-        - employer.livedemo.verify-creds.com
+        - DMV_VANITY_URL_HERE
+        - BBCU_VANITY_URL_HERE
+        - IBMHR_VANITY_URL_HERE
       secretName: vanity
   rules:
-    - host: bbcu.livedemo.verify-creds.com
+    - host: BBCU_VANITY_URL_HERE
       http:
         paths:
           - path: /
             backend:
               serviceName: bbcu
               servicePort: 80
-    - host: gov.livedemo.verify-creds.com
+    - host: DMV_VANITY_URL_HERE
       http:
         paths:
           - path: /
             backend:
               serviceName: gov-dmv
               servicePort: 80
-    - host: employer.livedemo.verify-creds.com
+    - host: IBMHR_VANITY_URL_HERE
       http:
         paths:
           - path: /

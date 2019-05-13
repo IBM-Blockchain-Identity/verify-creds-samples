@@ -17,7 +17,6 @@ build_and_push () {
     local BUILD_DIR=$3
 
     echo "Building $APP_NAME docker image"
-    # TODO remove build args when possible
     (cd ${BUILD_DIR}; docker build -t ${IMAGE_TAG} .)
 
     echo "Pushing $APP_NAME image $IMAGE_TAG"
