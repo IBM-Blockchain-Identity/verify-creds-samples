@@ -318,6 +318,9 @@ function populate_user_info () {
 		loader.html(loader.data('original-text'));
 		loader.removeAttr('disabled');
 
+		if (user_doc && user_doc.opts)
+			console.log(`User's agent information: ${JSON.stringify(user_doc.opts, 0, 1)}`);
+
 		console.log(`Got personal info for ${user_id} ${JSON.stringify(user_doc.personal_info, 0, 1)}`);
 		for (const schema_key in dictionary) {
 			const config = dictionary[schema_key];

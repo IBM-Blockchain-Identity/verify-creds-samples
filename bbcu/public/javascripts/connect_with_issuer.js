@@ -255,6 +255,9 @@ function populate_user_info () {
 	}).done((user_doc) => {
 		user_doc = user_doc[user_id];
 
+		if (user_doc && user_doc.opts)
+			console.log(`User's agent information: ${JSON.stringify(user_doc.opts, 0, 1)}`);
+
 		console.log(`Got personal info for ${user_id} ${JSON.stringify(user_doc.personal_info)}`);
 		for (const schema_key in dictionary) {
 			const config = dictionary[schema_key];
