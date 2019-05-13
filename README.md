@@ -2,6 +2,8 @@
 
 Play with these samples to learn how to integrate the [openssi-websdk](https://github.com/IBM-Blockchain-Identity/openssi-websdk) into your own website.
 
+For more information on the project surrounding these samples, take a look at [our docs](https://docs.info.verify-creds.com/).
+
 ## Try it out
 
 We've provided some live samples that you can play with without needing to download or build any code.  Use these if
