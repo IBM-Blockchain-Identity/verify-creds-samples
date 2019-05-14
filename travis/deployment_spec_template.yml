@@ -61,6 +61,8 @@ spec:
               value: "ADMIN_API_USERNAME_HERE"
             - name: ADMIN_API_PASSWORD
               value: "ADMIN_API_PASSWORD_HERE"
+            - name: SESSION_SECRET
+              value: "DMV_SESSION_SECRET_HERE"
 ---
 apiVersion: v1
 kind: Service
@@ -125,6 +127,8 @@ spec:
               value: "ADMIN_API_USERNAME_HERE"
             - name: ADMIN_API_PASSWORD
               value: "ADMIN_API_PASSWORD_HERE"
+            - name: SESSION_SECRET
+              value: "IBMHR_SESSION_SECRET_HERE"
 ---
 apiVersion: v1
 kind: Service
@@ -193,6 +197,8 @@ spec:
               value: "ADMIN_API_USERNAME_HERE"
             - name: ADMIN_API_PASSWORD
               value: "ADMIN_API_PASSWORD_HERE"
+            - name: SESSION_SECRET
+              value: "BBCU_SESSION_SECRET_HERE"
 ---
 apiVersion: v1
 kind: Service
