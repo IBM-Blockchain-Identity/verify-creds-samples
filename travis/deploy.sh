@@ -29,6 +29,10 @@ DMV_CLUSTER_INGRESS_URL=${DMV_CLUSTER_INGRESS_URL:-gov-dmv.credimi-dev.us-south.
 IBMHR_CLUSTER_INGRESS_URL=${IBMHR_CLUSTER_INGRESS_URL:-ibm-hr.credimi-dev.us-south.containers.appdomain.cloud}
 BBCU_CLUSTER_INGRESS_URL=${BBCU_CLUSTER_INGRESS_URL:-bbcu.credimi-dev.us-south.containers.appdomain.cloud}
 
+DMV_VANITY_URL=${DMV_VANITY_URL:-gov.livedemo.verify-creds.org}
+IBMHR_VANITY_URL=${IBMHR_VANITY_URL:-employer.livedemo.verify-creds.org}
+BBCU_VANITY_URL=${BBCU_VANITY_URL:-bbcu.livedemo.verify-creds.org}
+
 # Configure deployment spec
 DEPLOYMENT_SPEC=$DIR/deployment_spec.yml
 echo "Setting up deployment spec file: $DEPLOYMENT_SPEC"
