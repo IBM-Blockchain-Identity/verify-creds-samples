@@ -49,13 +49,26 @@ build your own sample websites from the templates we've provided.
 
 ### Setting up
 
-1. Visit your agent account management page and provision three new agents, `govdmv`, `ibmhr`,
-and `bbcu`.  Save the passwords the you create for each agent; you'll need them later.
+1. Visit your agent account management page and provision three new agents, `govdmv`, `ibmhr`, and `bbcu`.  Make sure the
+box marking the new agents as issuers is checked.
 
-2. Get the url for your account.  This was emailed to you when you created your agent account.
+2. Find your account url and record the passwords for the three agents that you created.  You can find this information
+by visiting your account dashboard, clicking on each agent, clicking the `Add Device` on the `General` page for the agent,
+and clicking on `Manual Entry` in the `Register Device` popup panel.
 
-3. Make sure all of your agents have their `role` set to `TRUST_ANCHOR`.  This is a requirement for the agents to be
-able to issue credentials.  You can use the following `curl` command to set this property on each of the above agents:
+3. Make sure all of your agents are capable of issuing credentials.  You can determine this via one of two methods:
+    1. Open the account dashboard, click on the agent, and check the `Agent Role` under the `General` page.
+        ```
+        Agent Name: govdmv
+        Agent DID: WpAsRjUvWNdJhgcpcir1TL
+        Agent Role: Issuer
+        ```
+    2. Use curl to check the agent's `role`, making sure it is set to `TRUST_ANCHOR`.  Use this curl command to check the
+    agent's role:
+        ```
+        curl -u <agent_name>:<agent_password> <account_url>/api/v1/info
+        ```
+4. If any of the agents are not issuers, use the following `curl` command to update their role:
     ```
     curl -u <account_admin_agent_name>:<account_admin_agent_password> -X PATCH \
         <account_url>/api/v1/identities/<agent_name> \
@@ -63,7 +76,7 @@ able to issue credentials.  You can use the following `curl` command to set this
         -d '{ "role": "TRUST_ANCHOR" }'
     ```
 
-4. Install...
+5. Install...
     - [the Verify Creds mobile app]().
     OR
     - [the Verify Creds browser extension]().
@@ -86,8 +99,6 @@ docker-compose build
     
     $ cat .env
     ACCOUNT_URL=https://my-account.example.com
-    AGENT_ADMIN_NAME=admin
-    AGENT_ADMIN_PASSWORD=****
     
     DMV_AGENT_NAME=govdmv
     DMV_AGENT_PASSWORD=****

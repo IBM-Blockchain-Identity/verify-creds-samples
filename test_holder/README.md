@@ -35,9 +35,6 @@ docker-compose build
     ACCOUNT_URL=https://my-account.example.com
     AGENT_NAME=test-holder
     AGENT_PASSWORD=test-holderpw
-    
-    AGENT_ADMIN_NAME=
-    AGENT_ADMIN_PASSWORD=
     ```
 
 2. Start the test holder.
