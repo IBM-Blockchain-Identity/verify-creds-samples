@@ -77,9 +77,9 @@ and clicking on `Manual Entry` in the `Register Device` popup panel.
     ```
 
 5. Install...
-    - [the Verify Creds mobile app]().
+    - [the Verify Creds mobile app](https://docs.info.verify-creds.com/explore/mobile_app/).
     OR
-    - [the Verify Creds browser extension]().
+    - [the Verify Creds browser extension](https://docs.info.verify-creds.com/explore/browser_extension/).
 
 ### Building the samples
 
