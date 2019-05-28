@@ -16,6 +16,8 @@
 
 $(document).ready(() => {
 
+	window.user_id = decodeURIComponent(window.readCookie('user_id'));
+
 	// Highlight the account navbar item
 	$('#accountsNav').addClass('active');
 	document.body.style['background-color'] = '#ffffff';

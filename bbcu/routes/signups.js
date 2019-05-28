@@ -54,6 +54,8 @@ exports.createRouter = function (signup_manager) {
 		if (status.status === SIGNUP_STEPS.FINISHED) {
 			// Log the user in and cleanup the signup and session when the signup is complete
 			req.session.user_id = signup_manager.get_signup_user(req.session.signup);
+			res.cookie('user_id', req.session.user_id);
+
 			signup_manager.delete_signup(req.session.signup);
 			delete req.session.signup;
 			res.json({
@@ -73,7 +75,7 @@ exports.createRouter = function (signup_manager) {
 	router.post('/signup', [ middleware ], (req, res) => {
 		if (!req.body || !req.body.username || typeof req.body.username !== 'string') {
 			return res.status(400).json({
-				error: SIGNUP_API_ERRORS.BAD_REQUEST,
+				error: SIGNUP_API_ERRORS.MISSING_REQUIRED_PARAMETERS,
 				reason: 'You must supply a username in order to log in'
 			});
 		}
@@ -81,7 +83,7 @@ exports.createRouter = function (signup_manager) {
 
 		if (!req.body.password || typeof req.body.password !== 'string') {
 			return res.status(400).json({
-				error: SIGNUP_API_ERRORS.BAD_REQUEST,
+				error: SIGNUP_API_ERRORS.MISSING_REQUIRED_PARAMETERS,
 				reason: 'You must supply a password in order to log in'
 			});
 		}
@@ -89,7 +91,7 @@ exports.createRouter = function (signup_manager) {
 
 		if (!req.body.agent_name || typeof req.body.agent_name !== 'string') {
 			return res.status(400).json({
-				error: SIGNUP_API_ERRORS.BAD_REQUEST,
+				error: SIGNUP_API_ERRORS.MISSING_REQUIRED_PARAMETERS,
 				reason: 'You must supply an agent name in order to log in'
 			});
 		}
@@ -97,7 +99,7 @@ exports.createRouter = function (signup_manager) {
 
 		if (!req.body || !req.body.connection_method || typeof req.body.connection_method !== 'string')
 			return res.status(400).json({
-				error: SIGNUP_API_ERRORS.BAD_REQUEST,
+				error: SIGNUP_API_ERRORS.MISSING_REQUIRED_PARAMETERS,
 				reason: 'Invalid connection_method for issuing the credential'
 			});
 
@@ -130,7 +132,7 @@ function middleware (req, res, next) {
 }
 
 const SIGNUP_API_ERRORS = {
-	BAD_REQUEST: 'BAD_REQUEST',
+	MISSING_REQUIRED_PARAMETERS: 'MISSING_REQUIRED_PARAMETERS',
 	NOT_SIGNING_UP: 'NOT_SIGNING_UP',
 	ALREADY_SIGNED_IN: 'ALREADY_SIGNED_IN',
 	UNKNOWN_SIGNUP_API_ERROR: 'UNKNOWN_SIGNUP_API_ERROR',

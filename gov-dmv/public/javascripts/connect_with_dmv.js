@@ -16,6 +16,8 @@
 
 $(document).ready(() => {
 
+	window.user_id = decodeURIComponent(window.readCookie('user_id'));
+
 	const connectButton = $('#connectWalletButton');
 
 	/**

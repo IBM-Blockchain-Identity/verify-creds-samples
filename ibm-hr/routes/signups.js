@@ -54,6 +54,8 @@ exports.createRouter = function (signup_manager) {
 		if (status.status === SIGNUP_STEPS.FINISHED) {
 			// Log the user in and cleanup the signup and session when the signup is complete
 			req.session.user_id = signup_manager.get_signup_user(req.session.signup);
+			res.cookie('user_id', req.session.user_id);
+
 			signup_manager.delete_signup(req.session.signup);
 			delete req.session.signup;
 			res.json({
@@ -95,7 +97,13 @@ exports.createRouter = function (signup_manager) {
 		}
 		const agent_name = req.body.agent_name;
 
-		const signup_id = signup_manager.create_signup(username, agent_name, password);
+		if (!req.body || !req.body.connection_method || typeof req.body.connection_method !== 'string')
+			return res.status(400).json({
+				error: SIGNUP_API_ERRORS.MISSING_REQUIRED_PARAMETERS,
+				reason: 'Invalid connection_method for issuing the credential'
+			});
+
+		const signup_id = signup_manager.create_signup(username, agent_name, password, req.body.connection_method);
 		req.session.signup = signup_id;
 		res.status(201).json({
 			message: 'Signup process initiated',

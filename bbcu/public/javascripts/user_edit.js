@@ -16,6 +16,8 @@
 
 $(document).ready(() => {
 
+	window.user_id = decodeURIComponent(window.readCookie('user_id'));
+
 	$('#cancelEditUserButton').click(() => {
 		console.log('Cancel editing');
 		window.location.href = '/admin/';

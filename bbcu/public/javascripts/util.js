@@ -43,6 +43,22 @@ window.emailParser = function (email) {
 };
 
 /**
+ * Reads a cookie.
+ * @param {string} name The name of the cookie.
+ * @returns {string|null} The content of the cookie.
+ */
+window.readCookie = function (name) {
+	const nameEQ = name + '=';
+	const ca = document.cookie.split(';');
+	for (let i = 0; i < ca.length; i++) {
+		let c = ca[i];
+		while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+		if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+	}
+	return null;
+};
+
+/**
  * Turns a timestamp into a pretty locale string.
  * @param {number} timestamp A timestamp.
  * @returns {string} A nice locale string for the timestamp.

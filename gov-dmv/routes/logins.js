@@ -67,6 +67,8 @@ exports.createRouter = function (users_instance, login_manager) {
 
 			// Users are "logged in" if they have a user id associate with the session
 			req.session.user_id = username;
+			res.cookie('user_id', req.session.user_id);
+
 			res.send({
 				message: 'OK'
 			});
@@ -134,6 +136,7 @@ exports.createRouter = function (users_instance, login_manager) {
 		if (status.status === LOGIN_STEPS.FINISHED) {
 			// If login is completed, update the session to log the user in
 			req.session.user_id = login_manager.get_login_user(req.session.vc_login);
+			res.cookie('user_id', req.session.user_id);
 
 			// Cleanup the VC login
 			login_manager.delete_login(req.session.vc_login);
