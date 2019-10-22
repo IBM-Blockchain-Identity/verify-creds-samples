@@ -28,7 +28,7 @@ Now you're going to switch roles, pretending to be the employee.  You're going t
 
 1. Click on `Home` link at the top of the page to return to the user's login page.
   ![hr_go_home.png](docs/hr_go_home.png)
-2. Enter the username and password for the account that you just created and "sign in" as that user to open their DMV profile page.
+2. Enter the username and password for the account that you just created and "sign in" as that user to open their employee profile page.
   ![hr_sign_in.png](docs/hr_sign_in.png)
 3. On the profile page, click the `Issue credential` button on the left panel of the page.
   ![issue_credential.png](docs/issue_credential.png)
