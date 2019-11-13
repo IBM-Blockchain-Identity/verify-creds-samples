@@ -119,6 +119,7 @@ block content
       hr
       h3 Your Digital License
       button#connectWalletButton.btn.btn-primary.mt-3 Click to receive your digital license
+      button#connectWalletButtonQRCode.btn.btn-primary.mt-3 Click to receive your digital license with QR Code
       span#extensionLoaded.d-none.text-muted.ml-3 Chrome extension detected
 
 block extra
@@ -175,6 +176,26 @@ block extra
                 .carousel-caption.text-danger
                   h5 Issuance Canceled
                   p Refresh the page to start over.
+
+  #connectionModal.modal.fade(tabindex="-1")
+    .modal-dialog
+      .modal-content
+        .modal-header
+          h5.modal-title Connect with Gov
+          button.close(type="button" data-dismiss="modal" aria-label="Close")
+            span(aria-hidden="true") &times;
+        .modal-body
+          #connectionReqQR(style="display: table; margin: 0 auto;")
+        .modal-footer
+          p
+            em
+              | To establish the connection, open the IBM Verify Credentials app on your
+              | mobile device. Click the "Scan QR Code" item from the Interact tab. Scan
+              | the QR code shown here by positioning your mobile device so the
+              | code is visible in the device's camera. When you have
+              | successfully scanned the code, a dialog will appear asking you
+              | if you want to connect to Gov. Click "Connect" to proceed to
+              | the next step.
 
 block scripts
   script(src="/javascripts/qrcode.min.js")

@@ -12,6 +12,7 @@ services:
     image: gov-dmv
     ports:
       - "8090:3000"
+      - "9229:9229"
     volumes:
       - "./gov-dmv/public:/opt/app/public"
       - "./gov-dmv/views:/opt/app/views"

@@ -19,6 +19,25 @@ $(document).ready(() => {
 	window.user_id = decodeURIComponent(window.readCookie('user_id'));
 
 	const connectButton = $('#connectWalletButton');
+	const connectButtonQRCode = $('#connectWalletButtonQRCode');
+
+	/**
+	 * Creates a connection invitation, displays the invitation to the user,
+	 * and waits for the connection to be accepted or rejected.
+	 */
+	connectButtonQRCode.click(async () => {
+		connectButtonQRCode.attr('disabled', true);
+
+		try {
+			// TODO:
+			await establish_connection();
+			await issue_credential('in_band');
+		} catch (error) {
+			console.error(`Credential issuance failed: ${error}`);
+		}
+
+		connectButtonQRCode.attr('disabled', false);
+	});
 
 	/**
 	 * Creates a connection invitation, displays the invitation to the user,
