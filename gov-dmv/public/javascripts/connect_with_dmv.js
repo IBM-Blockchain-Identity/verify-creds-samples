@@ -30,8 +30,7 @@ $(document).ready(() => {
 
 		try {
 			// TODO:
-			await establish_connection();
-			await issue_credential('in_band');
+			await issue_credential('qrcode');
 		} catch (error) {
 			console.error(`Credential issuance failed: ${error}`);
 		}
@@ -125,6 +124,8 @@ $.when(docReady, extensionReady).done(async () => {
 	use_extension = true;
 });
 
+// start the credential issuance flow, using the given connection_method if no connection
+//  is specified
 async function issue_credential (connection_method) {
 	const carousel = $('#issuanceCarousel');
 	const ISSUANCE_STEPS = {
@@ -197,6 +198,34 @@ async function issue_credential (connection_method) {
 				break;
 			}
 
+			if (connection_method === "qrcode") {
+				if (!connection_shown && response.connection_offer) {
+					connection_shown = true;
+					console.log('Showing qrcode with connection information');
+					const qrcodeContent = JSON.stringify({
+						type: "connect",
+						data: {
+							name: response.connection_offer.local.name,
+							url: response.connection_offer.local.iurl,
+							meta: {
+								nonce: response.connection_offer.id
+							}
+						}
+					});
+					// show modal dialog with QR code for mobile app to scan
+					new QRCode(document.getElementById('connectionReqQR'), {
+						text: qrcodeContent,
+						width: 400,
+						height: 400,
+						colorDark : '#000000',
+						colorLight : '#ffffff',
+						correctLevel : QRCode.CorrectLevel.L
+					});
+
+					$('#connectionModal').modal('show');
+				}
+			}
+
 			if (use_extension) {
 				// TODO render the connection offer as a QR code
 				if (!connection_shown && response.connection_offer) {
@@ -235,6 +264,7 @@ async function issue_credential (connection_method) {
 		carousel.carousel(ISSUANCE_STEPS.ERROR);
 		const message = `Credential issuance failed: ${error.message ? error.message : JSON.stringify(error)}`;
 		console.error(message);
+		$('#connectionModal').modal('hide');
 		$('#errorMessage').html(message);
 	}
 }

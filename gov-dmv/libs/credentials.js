@@ -276,6 +276,28 @@ class Issuance {
 					logger.info(`Created out-of-band connection offer ${this.connection_offer.id}`);
 					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
 
+				} else if (this.connection_method === 'qrcode') {
+
+					// return the issuance object's id (this.id) as the id for
+					//  the mock connection offer.  UI will add that to the qr code
+					//  as meta data that we can then look for on new connections
+					//  to know when the connection has been made between our agent
+					//  and the user's agent.
+					this.connection_offer = {
+						id: this.id,
+						local: {
+							name: this.agent.name,
+							iurl: this.agent.iurl
+						}
+					};
+					logger.info(`Built connection information`);
+					// using the issuance object's id (this.id) as the nonce we
+					//  are looking for 
+					const nonce_connection_offer = await this.waitForNonceConnectionOffer(this.id, 30, 3000);
+					// once we have the offer, accept it since it matches the
+					//  nonce that we are expecting
+					await this.agent.acceptConnection(nonce_connection_offer.id);
+
 				} else {
 					const error = new Error(`An invalid connection method was used: ${this.connection_method}`);
 					logger.error(`Credential issuance could not proceed: ${error}`);
@@ -387,6 +409,50 @@ class Issuance {
 			};
 
 		return ret;
+	}
+
+	/**
+	 * Waits for a {@link Connection} to enter the 'connected' or 'rejected'.
+	 * @param {string} nonce The connection nonce for a specific invitation.
+	 * @param {number} [retries] The number of times we should check the status of the connection before giving up.
+	 * @param {number} [retry_interval] The number of milliseconds to wait between each connection status check.
+	 * @return {Promise<Connection>} The accepted {@link Connection}.
+	 */
+	async waitForNonceConnectionOffer(nonce, retries, retry_interval) {
+
+		let attempts = 0;
+		const retry_opts = {
+			times: retries ? retries : 30,
+			interval: retry_interval ? retry_interval : 3000,
+			errorFilter: (error) => {
+				// We should stop if the error was something besides still waiting for the connection.
+				return error.toString().toLowerCase().indexOf('waiting') >= 0;
+			}
+		};
+
+		return new Promise((resolve, reject) => {
+			async.retry(retry_opts, async () => {
+
+				this.logger.debug(`Checking for connection nonce: ${nonce}. Attempt ${++attempts}/${retry_opts.times}`);
+
+				const updated_connection = await this.getConnection({"properties.meta.nonce": nonce});
+				if (!updated_connection || !updated_connection.state) {
+					throw new Error('Connection state could not be determined');
+				} else if ([ 'inbound_offer' ].indexOf(updated_connection.state) >= 0) {
+					return updated_connection;
+				} else {
+					throw new Error('Still waiting on connection to be accepted');
+				}
+			}, (error, inbound_connection_offer) => {
+				if (error) {
+					this.logger.error(`Failed to establish connection with nonce: ${nonce}: ${error}`);
+					return reject(new Error(`Connection nonce: ${nonce} failed: ${error}`));
+				}
+
+				this.logger.info(`Connection with nonce: ${nonce} successfully established with agent ${inbound_connection_offer.remote.pairwise.did}`);
+				resolve (inbound_connection_offer);
+			});
+		});
 	}
 }
 
