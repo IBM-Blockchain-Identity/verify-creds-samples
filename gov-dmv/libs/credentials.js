@@ -14,7 +14,7 @@
  limitations under the License.
  */
 const uuidv4 = require('uuid/v4');
-
+const async = require('async');
 const Logger = require('./logger.js').Logger;
 const logger = Logger.makeLogger(Logger.logPrefix(__filename));
 
@@ -433,9 +433,9 @@ class Issuance {
 		return new Promise((resolve, reject) => {
 			async.retry(retry_opts, async () => {
 
-				this.logger.debug(`Checking for connection nonce: ${nonce}. Attempt ${++attempts}/${retry_opts.times}`);
+				logger.debug(`Checking for connection nonce: ${nonce}. Attempt ${++attempts}/${retry_opts.times}`);
 
-				const updated_connection = await this.getConnection({"properties.meta.nonce": nonce});
+				const updated_connection = await this.agent.getConnections({"properties.meta.nonce": nonce});
 				if (!updated_connection || !updated_connection.state) {
 					throw new Error('Connection state could not be determined');
 				} else if ([ 'inbound_offer' ].indexOf(updated_connection.state) >= 0) {
@@ -445,11 +445,11 @@ class Issuance {
 				}
 			}, (error, inbound_connection_offer) => {
 				if (error) {
-					this.logger.error(`Failed to establish connection with nonce: ${nonce}: ${error}`);
+					logger.error(`Failed to establish connection with nonce: ${nonce}: ${error}`);
 					return reject(new Error(`Connection nonce: ${nonce} failed: ${error}`));
 				}
 
-				this.logger.info(`Connection with nonce: ${nonce} successfully established with agent ${inbound_connection_offer.remote.pairwise.did}`);
+				logger.info(`Connection with nonce: ${nonce} successfully established with agent ${inbound_connection_offer.remote.pairwise.did}`);
 				resolve (inbound_connection_offer);
 			});
 		});
