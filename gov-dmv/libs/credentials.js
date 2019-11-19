@@ -278,6 +278,10 @@ class Issuance {
 
 				} else if (this.connection_method === 'qrcode') {
 
+					const agent_info = await this.agent.getIdentity();
+					if (!agent_info || !agent_info.iurl) {
+						throw new Error("Cannot find our agent url");
+					}
 					// return the issuance object's id (this.id) as the id for
 					//  the mock connection offer.  UI will add that to the qr code
 					//  as meta data that we can then look for on new connections
@@ -287,7 +291,7 @@ class Issuance {
 						id: this.id,
 						local: {
 							name: this.agent.name,
-							iurl: this.agent.iurl
+							iurl: agent_info.iurl
 						}
 					};
 					logger.info(`Built connection information`);
@@ -296,7 +300,7 @@ class Issuance {
 					const nonce_connection_offer = await this.waitForNonceConnectionOffer(this.id, 30, 3000);
 					// once we have the offer, accept it since it matches the
 					//  nonce that we are expecting
-					await this.agent.acceptConnection(nonce_connection_offer.id);
+					connection = await this.agent.acceptConnection(nonce_connection_offer.id);
 
 				} else {
 					const error = new Error(`An invalid connection method was used: ${this.connection_method}`);
@@ -430,18 +434,22 @@ class Issuance {
 			}
 		};
 
+		const that = this;
 		return new Promise((resolve, reject) => {
 			async.retry(retry_opts, async () => {
 
 				logger.debug(`Checking for connection nonce: ${nonce}. Attempt ${++attempts}/${retry_opts.times}`);
 
-				const updated_connection = await this.agent.getConnections({"properties.meta.nonce": nonce});
-				if (!updated_connection || !updated_connection.state) {
-					throw new Error('Connection state could not be determined');
-				} else if ([ 'inbound_offer' ].indexOf(updated_connection.state) >= 0) {
-					return updated_connection;
+				const connection_array = await that.agent.getConnections({"remote.properties.meta.nonce": nonce});
+				if (!connection_array || connection_array.length === 0) {
+					throw new Error('Still waiting for connection offer from user');
+				} else if (connection_array.length === 1) {
+					const connection_offer = connection_array[0];
+					if ([ 'inbound_offer' ].indexOf(connection_offer.state) >= 0) {
+						return connection_offer;
+					}
 				} else {
-					throw new Error('Still waiting on connection to be accepted');
+					throw new Error(`Failed, found more than one connection offer for nonce: ${nonce}`);
 				}
 			}, (error, inbound_connection_offer) => {
 				if (error) {

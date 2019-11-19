@@ -482,8 +482,13 @@ class ConnectionResponder {
 						state: 'inbound_offer'
 					});
 					logger.info('Connection Offers: ' + offers.length);
-					if (offers.length > 0) {
-						const offer = offers[0];
+					for (let i=0; i< offers.length; i++) {
+						const offer = offers[i];
+						// we've already got code looking for incoming requests
+						//  from account holders, let those pass through
+						if (offer.remote && offer.remote.properties && offer.remote.properties.meta && offer.remote.properties.meta.nonce) {
+							continue;
+						}
 						try {
 							logger.info(`Accepting connection offer ${offer.id} from  ${offer.remote.name}`);
 							const r = await this.agent.acceptConnection(offer.id);
