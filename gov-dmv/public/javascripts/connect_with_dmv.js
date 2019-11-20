@@ -196,6 +196,9 @@ async function issue_credential (connection_method) {
 
 			if ([ 'STOPPED', 'ERROR', 'FINISHED' ].indexOf(response.status) >= 0) {
 				break;
+			} else if ('ISSUING_CREDENTIAL' === response.status) {
+                                // connection has been accepted and established, hide QR code
+				$('#connectionModal').modal('hide');
 			}
 
 			if (connection_method === "qrcode") {
@@ -212,6 +215,10 @@ async function issue_credential (connection_method) {
 							}
 						}
 					});
+                                        // cleanout any previous QR code
+                                        const qrcodeParentNode = document.getElementById('connectionReqQR');
+                                        qrcodeParentNode.innerHTML = "";
+
 					// show modal dialog with QR code for mobile app to scan
 					new QRCode(document.getElementById('connectionReqQR'), {
 						text: qrcodeContent,
