@@ -27,8 +27,7 @@ const USER_ERRORS = require('../libs/users.js').USERS_ERRORS;
  * @param {Middleware} middleware Authentication middleware used to protect API endpoints.
  * @returns {object} An express router for the users API.
  */
-exports.createRouter = function (users_instance, ev, middleware) {
-
+exports.createRouter = function (users_instance, agent_info, ev, middleware) {
 	const router = express.Router();
 	router.use(bodyParser.urlencoded({extended: true}));
 	router.use(bodyParser.json());
@@ -90,6 +89,14 @@ exports.createRouter = function (users_instance, ev, middleware) {
 				status = 404;
 			return res.status(status).send({error: error.code, reason: error.message});
 		}
+	});
+
+	// QR codes
+	router.get('/qrcodes', [ middleware.is_admin ], (req, res, next) => {
+		const user_id = req.session.user_id;
+		console.log("ev="+JSON.stringify(ev,null,4));
+		console.log("info="+JSON.stringify(agent_info,null,4));
+		res.render('qrcodes', {title: 'QR Codes', user_id: user_id, account_url: agent_info.url});
 	});
 
 	return router;

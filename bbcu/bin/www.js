@@ -297,8 +297,8 @@ async function start () {
 	}
 
 	if (ev.ACCEPT_INCOMING_CONNECTIONS) {
-		logger.info(`Listening for and accepting connection offers to my agent, ${agent.name}`);
-		const responder = new Helpers.ConnectionResponder(agent);
+		logger.info(`Listening for and accepting SDK requests to my agent, ${agent.name}`);
+		const responder = new Helpers.SdkResponder(agent, 3000, users, connection_icon_provider, agent_info, signup_helper, login_proof_helper);
 		responder.start();
 	} else {
 		logger.info(`Not listening for connection offers to my agent, ${agent.name}`);
@@ -322,7 +322,7 @@ async function start () {
 	const hash = crypto.createHash('sha256');
 	hash.update(ev.ACCOUNT_URL + ev.AGENT_NAME + ev.MY_URL);
 	ev.SESSION_SECRET = ev.SESSION_SECRET ? ev.SESSION_SECRET : hash.digest('hex');
-	const app = App(ev, nano, agent, card_renderer, users, connection_icon_provider, login_proof_helper, signup_helper);
+	const app = App(ev, nano, agent, card_renderer, users, connection_icon_provider, login_proof_helper, signup_helper, agent_info);
 
 	// Get port from environment and store in Express.
 	app.set('port', port);

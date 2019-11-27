@@ -229,14 +229,25 @@ class Signup {
 			const my_credential_definitions = await this.agent.getCredentialDefinitions();
 			logger.debug(`${this.agent.user}'s list of credential definitions: ${JSON.stringify(my_credential_definitions, 0, 1)}`);
 
-			if (!my_credential_definitions.length) {
+			// This returns cred defs for all schemas, not just account schemas
+			let account_credential_definitions = [];
+			for (var i=0; i<my_credential_definitions.length; i++) {
+				if (my_credential_definitions[i].schema_name == "BBCU Account") {
+					account_credential_definitions.push(my_credential_definitions[i]);
+				}
+			}
+
+			//if (!my_credential_definitions.length) {
+			if (!account_credential_definitions.length) {
 				const err = new Error(`No credential definitions were found for issuer ${this.agent.user}!`);
 				err.code = SIGNUP_ERRORS.SIGNUP_NO_CREDENTIAL_DEFINITIONS;
 				throw err;
 			}
 
-			my_credential_definitions.sort(sortSchemas).reverse();
-			const schema_id = my_credential_definitions[0].schema_id;
+			//my_credential_definitions.sort(sortSchemas).reverse();
+			//const schema_id = my_credential_definitions[0].schema_id;
+			account_credential_definitions.sort(sortSchemas).reverse();
+			const schema_id = account_credential_definitions[0].schema_id;
 			logger.debug(`Issuing credential to new user with schema ${schema_id}`);
 
 			const schema = await this.agent.getCredentialSchema(schema_id);

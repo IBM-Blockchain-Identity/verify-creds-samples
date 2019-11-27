@@ -1,0 +1,80 @@
+extends user_layout
+
+block content
+  #qrPage.container
+    .row.greeting-row
+      .col
+        h3.greeting QR Codes
+        p Scan a QR Code to initiate an interaction with Big Blue Credit Union
+    .row
+      .col-md-8.left-column
+
+        .card.qrcode-card.mb-4
+          .card-header
+            h4.font-weight-bold Connection
+          .card-body
+            p Scan to request a connection with BBCU:
+            div#connection_qrcode
+
+        .card.qrcode-card.mb-4
+          .card-header
+            h4.font-weight-bold Credentials
+          .card-body
+            .card.inner-card.mb-2
+              .card-header
+                h4 Account Credential
+              .card-body
+                p Scan to request account credential from BBCU:
+                div#account_credential_qrcode
+            .card.mb-2.inner-card
+              .card-header
+                h4 Credit Score Credential
+              .card-body
+                p Scan to request credit score credential from BBCU:
+                div#credit_score_credential_qrcode
+
+        .card.qrcode-card.mb-4
+          .card-header
+            h4.font-weight-bold Proofs
+          .card-body
+            .card.inner-card.mb-2
+              .card-header
+                h4 Employment Proof Request
+              .card-body
+                p Scan to request employment verification by BBCU:
+                div#employment_proof_qrcode
+            .card.inner-card.mb-2
+              .card-header
+                h4 Login Proof Request
+              .card-body
+                p Scan to log in to BBCU and get login token to use for accessing BBCU web app:
+                div#login_proof_qrcode
+            .card.inner-card.mb-2
+              .card-header
+                h4 Mortgage Rates Proof Offer
+              .card-body
+                p Scan mortgage rate proof offer and send to BBCU to get latest mortgage rates:
+                div#rate_proof_qrcode
+
+      .col-md-4
+        .card.mb-4.box-shadow
+          .card-body.height-200.card-background
+          .card-body
+            h3.blue Tips and Tricks
+            p How you can save more with a BBCUPlatinum card.
+
+        .card.mb-4.box-shadow
+          .card-body.height-200.rewards-background
+          .card-body
+            h3.blue Rewards
+            p Where will you travel with the BBCU rewards you earn?
+
+    input#account_url(type="hidden" value=account_url)
+    input#user_id(type="hidden" value=user_id)
+
+block extra
+
+block scripts
+  script(src="/javascripts/qrcode.min.js")
+  script(src="/javascripts/qrcode-generator.js")
+  script(src="/javascripts/qrcodes.js")

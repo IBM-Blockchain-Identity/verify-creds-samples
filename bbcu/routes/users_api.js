@@ -204,6 +204,124 @@ exports.createRouter = function (users_instance, agent, middleware) {
 		}
 	});
 
+	// Get account data for a specific user
+	router.post('/account', async (req, res) => {
+		console.log("/api/account - body="+JSON.stringify(req.body));
+		if (!req.body || !req.body.token || typeof req.body.token !== 'string') {
+			return res.status(401).json({
+				error: 'NOT_AUTHORIZED',
+				reason: 'Token required to retrieve account data'
+			});
+		}
+		const token = req.body.token;
+
+		// Get user for token - token is the verification id proven by the user
+		var v = null;
+		try {
+			v = await agent.getVerification(token);
+		}
+		catch (e) {
+			console.log(" -- Error getting verification object="+JSON.stringify(e));
+			return res.status(401).json({
+				error: 'NOT_AUTHORIZED',
+				reason: 'User for token was not found'
+			});
+		}
+		if (!v || v.state != "passed") {
+			return res.status(401).json({
+				error: 'NOT_AUTHORIZED',
+				reason: 'Token state is not passed'
+			});
+		}
+		if (v.proof_request.name != "BBCU Login Request") { //|| v.proof_request.version != "1.0")
+			return res.status(401).json({
+				error: 'NOT_AUTHORIZED',
+				reason: 'BBCU Account required to retrieve account data'
+			});
+		}
+		const userUrl = v.connection.remote.url;
+		const userlist = await users_instance.read_users();
+		var user = null;
+		for (var i in userlist) {
+			if (userlist[i].opts && (userlist[i].opts.agent_name == userUrl)) {
+				user = userlist[i];
+				break;
+			}
+		}
+		if (!user) {
+			return res.status(401).json({
+				error: 'NOT_AUTHORIZED',
+				reason: 'User for agent url ' + userUrl + ' was not found'
+			});
+		}
+		var data = {"user": user, "accounts": []};
+
+		// Get accounts for user
+		data.accounts.push({
+			"name": "BBCU Checking",
+			"id": "10019479",
+			"type": "Checking",
+			"balance": "1000.00"
+		});
+		data.accounts.push({
+			"name": "Primary Savings",
+			"id": "10016357",
+			"type": "Savings",
+			"balance": "1000000000.00"
+		});
+
+		res.send(data);
+	});
+
+	// Get account data for a specific user
+	router.post('/logout', async (req, res) => {
+		console.log("/api/logout - body="+JSON.stringify(req.body));
+		if (!req.body || !req.body.token || typeof req.body.token !== 'string') {
+			return res.status(401).json({
+				error: 'NOT_AUTHORIZED',
+				reason: 'Token required'
+			});
+		}
+		const token = req.body.token;
+
+		// Get user for token - token is the verification id proven by the user
+		var v = null;
+		try {
+			v = await agent.getVerification(token);
+		}
+		catch (e) {
+			console.log(" -- Error getting verification object="+JSON.stringify(e));
+			return res.status(401).json({
+				error: 'NOT_AUTHORIZED',
+				reason: 'User for token was not found'
+			});
+		}
+		if (!v || v.state != "passed") {
+			return res.status(401).json({
+				error: USER_ERRORS.USER_DOES_NOT_EXIST,
+				reason: 'Token state is not passed'
+			});
+		}
+		if (v.proof_request.name != "BBCU Login Request") { //|| v.proof_request.version != "1.0")
+			return res.status(401).json({
+				error: 'NOT_AUTHORIZED',
+				reason: 'BBCU Account required to retrieve account data'
+			});
+		}
+		// Delete verification object, which logs user out
+		try {
+			await agent.deleteVerification(token);
+		}
+		catch (e) {
+			console.log(" -- Error deleting verification object="+JSON.stringify(e));
+			return res.status(500).json({
+				error: 'ERROR',
+				reason: 'Unable to log out - user is still logged in'
+			});
+		}
+		res.send("OK");
+	});
+
 	return router;
 };
 

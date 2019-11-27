@@ -49,7 +49,7 @@ const logger = Logger.makeLogger(Logger.logPrefix(__filename));
  * @param {SignupHelper} [signup_helper] Manages proof schemas and user record creation.
  * @return {object} An express webapp that can be attached to an http server.
  */
-function createApp (ev, nano, agent, card_renderer, users, connection_icon_provider, login_proof_helper, signup_helper) {
+function createApp (ev, nano, agent, card_renderer, users, connection_icon_provider, login_proof_helper, signup_helper, agent_info) {
 
 	// Set up the express app that will serve up our web pages and APIs
 	logger.debug('Setting up express app');
@@ -83,7 +83,7 @@ function createApp (ev, nano, agent, card_renderer, users, connection_icon_provi
 	const middleware = new Middleware(ev.ADMIN_API_USERNAME, ev.ADMIN_API_PASSWORD, ev.FRIENDLY_NAME);
 
 	// UI routers
-	app.use('/', UserUI.createRouter(users, ev, middleware));
+	app.use('/', UserUI.createRouter(users, agent_info, ev, middleware));
 	app.use('/', LoginAPI.createRouter(users, login_manager));
 	if (signup_helper)
 		app.use('/', SignupAPI.createRouter(signup_manager));

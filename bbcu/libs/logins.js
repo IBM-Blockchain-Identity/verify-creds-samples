@@ -215,17 +215,29 @@ class Login {
 			const my_credential_definitions = await this.agent.getCredentialDefinitions();
 			logger.debug(`${this.agent.user}'s list of credential definitions: ${JSON.stringify(my_credential_definitions, 0, 1)}`);
 
-			if (!my_credential_definitions.length) {
+			// This returns cred defs for all schemas, not just account schemas
+			let account_credential_definitions = [];
+			for (var i=0; i<my_credential_definitions.length; i++) {
+				if (my_credential_definitions[i].schema_name == "BBCU Account") {
+					account_credential_definitions.push(my_credential_definitions[i]);
+				}
+			}
+
+			//if (!my_credential_definitions.length) {
+			if (!account_credential_definitions.length) {
 				const err = new Error(`No credential definitions were found for issuer ${this.agent.user}!`);
 				err.code = LOGIN_ERRORS.LOGIN_NO_CREDENTIAL_DEFINITIONS;
 				throw err;
 			}
-			my_credential_definitions.sort(sortSchemas).reverse();
-			const cred_def_id = my_credential_definitions[0].id;
+			//my_credential_definitions.sort(sortSchemas).reverse();
+			account_credential_definitions.sort(sortSchemas).reverse();
+			//const cred_def_id = my_credential_definitions[0].id;
+			const cred_def_id = account_credential_definitions[0].id;
 
 			logger.debug(`Checking for attributes with credential definition id ${cred_def_id}`);
 			const proof_request = await this.login_helper.getProofSchema({
-				restrictions: [ {cred_def_id: my_credential_definitions[0].id} ]
+				//restrictions: [ {cred_def_id: my_credential_definitions[0].id} ]
+				restrictions: [ {cred_def_id: account_credential_definitions[0].id} ]
 			});
 
 			const account_proof_schema = await this.agent.createProofSchema(proof_request.name, proof_request.version,
@@ -326,8 +338,9 @@ class Login {
 				throw error;
 			}
 
-			logger.info(`Deleting verification request ${proof.id}`);
-			await this.agent.deleteVerification(proof.id);
+			// Don't delete if successful login so SDK can use it
+			//logger.info(`Deleting verification request ${proof.id}`);
+			//await this.agent.deleteVerification(proof.id);
 
 			logger.info(`Checking the validity of the proof in verification ${proof.id}`);
 			try {
