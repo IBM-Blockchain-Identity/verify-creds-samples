@@ -15,6 +15,7 @@
  */
 
 const uuidv4 = require('uuid/v4');
+const semverCompare = require('semver-compare');
 
 const Logger = require('./logger.js').Logger;
 const logger = Logger.makeLogger(Logger.logPrefix(__filename));
@@ -470,16 +471,14 @@ class Signup {
 }
 
 /**
- * Sorts schema objects from the cloud agent API based on their schema number, which seems to match the order in which
- * they were published.
+ * Sorts schema objects from the cloud agent API based on their schema version number, which
+ * we assume is the order in which they were meant to be published (1.1 then 1.2 then 1.3...)
  * @param {object} a A schema object.
  * @param {object} b A schema object.
- * @return {number} <0 if a come before b, 0 if they are the same, >0 if b comes before a
+ * @return {number} <0 if a comes before b, 0 if they are the same, >0 if b comes before a
  */
 function sortSchemas (a, b) {
-	const aData = parseInt(JSON.parse(a.data).schemaId, 10);
-	const bData = parseInt(JSON.parse(b.data).schemaId, 10);
-	return aData - bData;
+	return semverCompare(a.schema_version, b.schema_version);
 }
 
 exports.SIGNUP_STEPS = Signup.SIGNUP_STEPS;

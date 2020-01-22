@@ -26,6 +26,7 @@
     "openssi-websdk": "0.0.8-alpha",
     "pug": "^2.0.3",
     "request": "^2.88.0",
+    "semver-compare": "^1.0.0",
     "uuid": "^3.2.1",
     "winston": "^3.0.0"
   },
