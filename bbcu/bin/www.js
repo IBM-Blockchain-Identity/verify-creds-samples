@@ -297,7 +297,7 @@ async function start () {
 	}
 
 	if (ev.ACCEPT_INCOMING_CONNECTIONS) {
-		logger.info(`Listening for and accepting connection offers to my agent, ${agent.name}`);
+		logger.info(`Listening for and accepting connection, credential and verification requests to my agent, ${agent.name}`);
 		const responder = new Helpers.ConnectionResponder(agent);
 		responder.start();
 	} else {

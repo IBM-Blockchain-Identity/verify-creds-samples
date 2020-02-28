@@ -66,3 +66,18 @@ window.readCookie = function (name) {
 window.date_formatter = function (timestamp) {
 	return new Date(timestamp).toLocaleString();
 };
+
+/**
+ * Generate a random alpha-numeric string.  Returns an empty string if length is 0.
+ * @param {number} length The length of string to return.
+ * @returns {string} A randomized alpha-numeric string with the given length.
+ */
+window.makeid = function (length) {
+	let result = '';
+	const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	const charactersLength = characters.length;
+	for (let i = 0; i < length; i++) {
+		result += characters.charAt(Math.floor(Math.random() * charactersLength));
+	}
+	return result;
+};

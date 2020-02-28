@@ -15,7 +15,8 @@ block content
                             .carousel-item.active
                                 h3 Digital Credential Sign On
                                 button#mobile-sign-on-button.btn.btn-bbcu.vcSignonLink Login with a digital credential
-                                button.btn.btn-bbcu.vcSignupLink(href="/signup") Sign up for an account
+                                button.btn.btn-bbcu.vcSignupBrowserLink(href="/signupBrowser") Sign up for an account - Browser
+                                button.btn.btn-bbcu.vcSignupMobileLink(href="/signupMobile") Sign up for an account - Mobile
                                 .sign-in-links
                                     a.userpassLink(href="#") Login with Email and Password
                             .carousel-item
@@ -136,6 +137,20 @@ block extra
                                     a.vcSignupCancel.ml-2.text-decoration-underline(href="#") Cancel
 
                             .carousel-item.text-center
+                                h2 Before registering for an account..
+                                .row.mt-4.mb-4.text-left
+                                    .col-sm-3
+                                    .col-sm-6
+                                        p.text-decoration-bolder You will need the following credentials:
+                                        ol
+                                            li Driver's License
+                                            li Proof of Employment
+                                    .col-sm-3
+                                div
+                                    button#credsNextButtonMobile.btn.btn-bbcu Next
+                                    a.vcSignupCancel.ml-2.text-decoration-underline(href="#") Cancel
+
+                            .carousel-item.text-center
                                 h2 Please enter an email, password, and agent URL to create a BBCU account
                                 .signup-form.text-left
                                     form#signupForm
@@ -159,6 +174,35 @@ block extra
                                     button#signupNextButton.btn.btn-bbcu(disabled) Next
                                     a.vcSignupCancel.ml-2.text-decoration-underline(href="#") Cancel
                                     span.extension-loaded.d-none.text-muted.ml-3 Chrome extension detected
+
+                            .carousel-item.text-center
+                                h2 Please enter an email to create a BBCU account
+                                .signup-form.text-left
+                                    form#signupFormMobile
+                                        .form-group
+                                            label.hidden-form-label(for="signupUserIDMobile") Email Address
+                                            .input-group
+                                                input#signupUserIDMobile.form-control(type="text" name="usernameMobile" placeholder="Email Address" required)
+                                                .input-group-append
+                                                    span.input-group-text @example.com
+                                div
+                                    button#signupNextButtonMobile.btn.btn-bbcu(disabled) Next
+                                    a.vcSignupCancel.ml-2.text-decoration-underline(href="#") Cancel
+
+                            .carousel-item.text-center
+                                h2 Connect with BBCU
+                                .modal-body
+                                  #connectionReqQR(style="display: table; margin: 0 auto;")
+                                .modal-footer
+                                  p
+                                    em
+                                      | To establish the connection, open the IBM Verify Credentials app on your
+                                      | mobile device. Click the "Scan QR Code" item from the Interact tab. Scan
+                                      | the QR code shown here by positioning your mobile device so the
+                                      | code is visible in the device's camera. When you have
+                                      | successfully scanned the code, a dialog will appear asking you
+                                      | if you want to connect to BBCU. Click "Connect" to proceed to
+                                      | the next step.
 
                             .carousel-item.text-center
                                 h2 Collecting information
@@ -207,4 +251,5 @@ block extra
 
 block scripts
     script(src="/javascripts/login.js")
+    script(src="/javascripts/utils.js")
     script(src="/javascripts/qrcode.min.js")

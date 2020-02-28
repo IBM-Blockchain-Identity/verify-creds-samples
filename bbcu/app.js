@@ -32,6 +32,7 @@ const UserAPI = require('./routes/users_api.js');
 const SchemaAPI = require('./routes/schemas_api.js');
 const CredDefsAPI = require('./routes/cred_def_api.js');
 const CredentialsAPI = require('./routes/credentials_api.js');
+const AgentAPI = require('./routes/agent_api.js');
 
 // Logging setup
 const Logger = require('./libs/logger.js').Logger;
@@ -93,6 +94,7 @@ function createApp (ev, nano, agent, card_renderer, users, connection_icon_provi
 	app.use('/api', SchemaAPI.createRouter(agent, ev.SCHEMA_TEMPLATE_PATH, middleware));
 	app.use('/api', CredDefsAPI.createRouter(agent, middleware));
 	app.use('/api', CredentialsAPI.createRouter(issuance_manager, middleware));
+	app.use('/api', AgentAPI.createRouter(agent, middleware));
 
 	// catch 404 and forward to error handler
 	app.use((req, res, next) => {

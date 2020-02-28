@@ -524,5 +524,5 @@ module.exports = {
 	LoginHelper,
 	NullProofHelper,
 	AccountSignupHelper,
-	ConnectionResponder
+	ConnectionResponder,
 };

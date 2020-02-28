@@ -71,6 +71,18 @@ exports.createRouter = function (signup_manager) {
 		}
 	});
 
+	/* Get the proof schema for the signup flow */
+	router.get('/signup/proofschema', [ middleware ], async (req, res) => {
+
+		const proof_schema = await signup_manager.get_signup_schema();
+		logger.debug(`Signup proofschema found ${proof_schema != null}, proofschema name: ${proofschema ? proofschema.name : ''}`);
+
+		res.status(200).json({
+			message: 'Proof schema retrieved',
+			proof_schema: proof_schema
+		});
+	});
+
 	/* POST start a new account signup flow */
 	router.post('/signup', [ middleware ], (req, res) => {
 		if (!req.body || !req.body.username || typeof req.body.username !== 'string') {
@@ -81,7 +93,7 @@ exports.createRouter = function (signup_manager) {
 		}
 		const username = req.body.username;
 
-		if (!req.body.password || typeof req.body.password !== 'string') {
+		if (!req.body.qrCodeNonce && (!req.body.password || typeof req.body.password !== 'string')) {
 			return res.status(400).json({
 				error: SIGNUP_API_ERRORS.MISSING_REQUIRED_PARAMETERS,
 				reason: 'You must supply a password in order to log in'
@@ -89,7 +101,7 @@ exports.createRouter = function (signup_manager) {
 		}
 		const password = req.body.password;
 
-		if (!req.body.agent_name || typeof req.body.agent_name !== 'string') {
+		if (!req.body.qrCodeNonce && (!req.body.agent_name || typeof req.body.agent_name !== 'string')) {
 			return res.status(400).json({
 				error: SIGNUP_API_ERRORS.MISSING_REQUIRED_PARAMETERS,
 				reason: 'You must supply an agent name in order to log in'
@@ -97,13 +109,14 @@ exports.createRouter = function (signup_manager) {
 		}
 		const agent_name = req.body.agent_name;
 
-		if (!req.body || !req.body.connection_method || typeof req.body.connection_method !== 'string')
+		if (!req.body.qrCodeNonce && (!req.body || !req.body.connection_method || typeof req.body.connection_method !== 'string')) {
 			return res.status(400).json({
 				error: SIGNUP_API_ERRORS.MISSING_REQUIRED_PARAMETERS,
 				reason: 'Invalid connection_method for issuing the credential'
 			});
+		}
 
-		const signup_id = signup_manager.create_signup(username, agent_name, password, req.body.connection_method);
+		const signup_id = signup_manager.create_signup(username, agent_name, password, req.body.connection_method, req.body.qrCodeNonce);
 		req.session.signup = signup_id;
 		res.status(201).json({
 			message: 'Signup process initiated',

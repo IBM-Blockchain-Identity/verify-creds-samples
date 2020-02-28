@@ -98,20 +98,23 @@ class Users {
 	async create_user (username, password, personal_info, opts) {
 		if (!username || typeof username !== 'string')
 			throw new TypeError('New user\'s username was not a non-empty string');
-		if (typeof password !== 'string')
+		// if this is a mobile user scanning a QR code, may not have a password, yet
+		if ((!opts || !opts.mobile_user) && typeof password !== 'string')
 			throw new TypeError('New user\'s password must be a string');
 		if ([ 'undefined', 'null', 'object' ].indexOf(typeof personal_info) < 0)
 			throw new TypeError('New user\'s personal info was an invalid type');
 		if ([ 'undefined', 'null', 'object' ].indexOf(typeof opts) < 0)
 			throw new TypeError('New user\'s optional fields list was an invalid type');
 
-		let hash;
-		try {
-			hash = await bcrypt.hash(password, 10);
-		} catch (error) {
-			logger.error(`User password could not be hashed: ${error}`);
-			error.code = error.code ? error.code : USERS_ERRORS.USER_CREATION_FAILURE;
-			throw error;
+		let hash = null;
+		if (password) {
+			try {
+				hash = await bcrypt.hash(password, 10);
+			} catch (error) {
+				logger.error(`User password could not be hashed: ${error}`);
+				error.code = error.code ? error.code : USERS_ERRORS.USER_CREATION_FAILURE;
+				throw error;
+			}
 		}
 
 		const userDoc = {
