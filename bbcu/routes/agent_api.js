@@ -19,12 +19,12 @@ const bodyParser = require('body-parser');
 const compression = require('compression');
 
 // Logging setup
-const Logger = require('../libs/logger.js').Logger;
-const logger = Logger.makeLogger(Logger.logPrefix(__filename));
+// const Logger = require('../libs/logger.js').Logger;
+// const logger = Logger.makeLogger(Logger.logPrefix(__filename));
 
 /**
  * Creates an express router for all the REST endpoints related to logging in and out of the app.
- * @param {SignupManager} signup_manager A SignupManager instance for managing new user signups.
+ * @param {Agent} agent An agent instance associated with this web app.
  * @returns {object} An express router for the login API.
  */
 exports.createRouter = function (agent) {

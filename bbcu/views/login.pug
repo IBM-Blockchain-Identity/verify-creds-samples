@@ -14,8 +14,19 @@ block content
                         .carousel-inner
                             .carousel-item.active
                                 h3 Digital Credential Sign On
-                                button#mobile-sign-on-button.btn.btn-bbcu.vcSignonLink Login with a digital credential
+                                button#browser-sign-on-button.btn.btn-bbcu I want to use browser extension
+                                button#mobile-sign-on-button.btn.btn-bbcu I want to use mobile app
+                                .sign-in-links
+                                    a.userpassLink(href="#") Login with Email and Password
+                            .carousel-item
+                                h3 Digital Credential Sign On with Browser
+                                button#browser-sign-on-button-login.btn.btn-bbcu.vcSignonLink Login with a digital credential
                                 button.btn.btn-bbcu.vcSignupBrowserLink(href="/signupBrowser") Sign up for an account - Browser
+                                .sign-in-links
+                                    a.userpassLink(href="#") Login with Email and Password
+                            .carousel-item
+                                h3 Digital Credential Sign On with Mobile
+                                button#mobile-sign-on-button-login.btn.btn-bbcu Login with a digital credential
                                 button.btn.btn-bbcu.vcSignupMobileLink(href="/signupMobile") Sign up for an account - Mobile
                                 .sign-in-links
                                     a.userpassLink(href="#") Login with Email and Password
@@ -47,6 +58,19 @@ block content
                                             input#vcUserID.form-control(type="text" name="username" placeholder="Email" required)
                                     button.btn.btn-bbcu.mt-3(type="submit") Sign On
                                     span.extension-loaded.d-none.text-muted.ml-3 Chrome extension detected
+                                .sign-in-links
+                                    .row
+                                        a.col.userpassLink(href="#") Login with Username and Password
+                                    .row
+                                        a.col.vcSignupLink(href="#") Sign up for an account
+                            .carousel-item
+                                h3 Digital Credential Sign On
+                                form#vcSignonFormMobile
+                                    .row.ml-0.mr-0
+                                        .col.pr-0.pl-0
+                                            label#vcUserIDLabelMobile.hidden-form-label(for="vcUserIDMobile") Email
+                                            input#vcUserIDMobile.form-control(type="text" name="username" placeholder="Email" required)
+                                    button.btn.btn-bbcu.mt-3(type="submit") Sign On
                                 .sign-in-links
                                     .row
                                         a.col.userpassLink(href="#") Login with Username and Password
@@ -87,6 +111,20 @@ block extra
                                     i.fas.fa-circle-notch.fa-spin.fa-2x
                                 .verifying-creds-text
                                     span Please wait
+                            .carousel-item.text-center
+                                h2 Connect with BBCU
+                                .modal-body
+                                  #connectionReqQRLogin(style="display: table; margin: 0 auto;")
+                                .modal-footer
+                                  p
+                                    em
+                                      | To establish the connection, open the IBM Verify Credentials app on your
+                                      | mobile device. Click the "Scan QR Code" item from the Interact tab. Scan
+                                      | the QR code shown here by positioning your mobile device so the
+                                      | code is visible in the device's camera. When you have
+                                      | successfully scanned the code, a dialog will appear asking you
+                                      | if you want to connect to BBCU. Click "Connect" to proceed to
+                                      | the next step.
                             .carousel-item.text-center
                                 h2 Establishing a connection with your agent
                                 .spinner-container
@@ -251,5 +289,5 @@ block extra
 
 block scripts
     script(src="/javascripts/login.js")
-    script(src="/javascripts/utils.js")
+    script(src="/javascripts/util.js")
     script(src="/javascripts/qrcode.min.js")

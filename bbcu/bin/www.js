@@ -153,7 +153,7 @@ async function start () {
 	if (typeof agent_retry_backoff_limit !== 'number' || isNaN(agent_retry_backoff_limit) || agent_retry_backoff_limit < 1000)
 		throw new Error('AGENT_MAX_RETRY_INTERVAL must be an integer >= 1000 representing milliseconds');
 
-        const account_health_url = ev.ACCOUNT_URL.endsWith("/") ? ev.ACCOUNT_URL + "health" : ev.ACCOUNT_URL + "/health";
+	const account_health_url = ev.ACCOUNT_URL.endsWith('/') ? ev.ACCOUNT_URL + 'health' : ev.ACCOUNT_URL + '/health';
 	await wait_for_url(account_health_url, agent_retries, agent_retry_backoff_limit);
 
 	// Generally, you won't have to wait for your agent, so the above is optional

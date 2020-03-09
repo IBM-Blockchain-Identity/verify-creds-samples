@@ -520,9 +520,117 @@ class ConnectionResponder {
 	}
 }
 
+/**
+ * Waits for a request type (Connection, Credential, Verification) to be pending for
+ *  the web apps's associated agent.
+ * @param {string} agent The agent who is receiving the inbound offer/request.
+ * @param {string} type The type of request.
+ * @param {string} nonce The connection ID.
+ * @param {number} [retries] The number of times we should check the status of the connection before giving up.
+ * @param {number} [retry_interval] The number of milliseconds to wait between each connection status check.
+ * @return {Promise<object>} The found request.
+ */
+class InboundNonceWatcher {
+
+	constructor (agent, type, nonce, retries=30, interval=3000) {
+		if (!agent || typeof agent.getConnections !== 'function')
+			throw new TypeError('Invalid agent for InboundWatcher');
+		if (interval !== undefined && typeof interval !== 'number' || interval < 0)
+			throw new TypeError('Invalid polling interval for InboundNonceWatcher');
+		if (retries !== undefined && typeof retries !== 'number' || retries < 0)
+			throw new TypeError('Invalid polling interval for InboundNonceWatcher');
+		if (nonce !== undefined && typeof nonce !== 'string' || nonce.length === 0)
+			throw new TypeError('Invalid nonce for InboundNonceWatcher');
+		this.agent = agent;
+		this.type = type;
+		this.nonce = nonce;
+		this.stopped = true;
+		this.retries = retries;
+		this.interval = interval;
+	}
+
+	async start () {
+		this.stopped = false;
+
+		let attempts = 0;
+		const qr_code_nonce = this.nonce;
+		const type = this.type;
+		const retry_opts = {
+			times: this.retries ? this.retries : 30,
+			interval: this.interval ? this.interval : 3000,
+			errorFilter: (error) => {
+				// We should stop if the error was something besides still waiting for the request.
+				return error.toString().toLowerCase().indexOf('waiting') >= 0;
+			}
+		};
+
+		return new Promise((resolve, reject) => {
+			async.retry(retry_opts, async () => {
+
+				logger.debug(`Checking status of request, type: ${type}, nonce: ${qr_code_nonce}. Attempt ${++attempts}/${retry_opts.times}`);
+				let queryObj = {};
+				let updated_request = null;
+				if (type & InboundNonceWatcher.REQUEST_TYPES.CONNECTION) {
+					queryObj['remote.properties.meta.nonce'] = qr_code_nonce;
+					updated_request = await this.agent.getConnections(queryObj);
+				}
+				if ((!updated_request || (updated_request.hasOwnProperty('length') && updated_request.length === 0)) && (type & InboundNonceWatcher.REQUEST_TYPES.VERIFICATION)) {
+					queryObj = {};
+					queryObj['properties.meta.nonce'] = qr_code_nonce;
+					updated_request = await this.agent.getVerifications(queryObj);
+				}
+				if (!updated_request || (updated_request.length > 0 && !updated_request[0].state)) {
+					throw new Error(`${type} state could not be determined`);
+				} else if (updated_request.length > 0) {
+					if ((type & InboundNonceWatcher.REQUEST_TYPES.CONNECTION && [ 'inbound_offer' ].indexOf(updated_request[0].state) >= 0) ||
+						(type & InboundNonceWatcher.REQUEST_TYPES.VERIFICATION && [ 'inbound_verification_request' ].indexOf(updated_request[0].state) >= 0)) {
+
+						return updated_request[0];
+					} else {
+						throw new Error(`${type} with nonce ${qr_code_nonce} is in an unexpected state`);
+					}
+				} else {
+					throw new Error(`Still waiting on ${type} to be complete`);
+				}
+			}, (error, found_request) => {
+				if (error) {
+					logger.error(`Failed to establish ${type} with nonce ${qr_code_nonce}: ${error}`);
+					return reject(new Error(`${type} with nonce ${qr_code_nonce} failed: ${error}`));
+				}
+
+				let agent_did = null;
+				if (found_request.remote) {
+					agent_did = found_request.remote.pairwise.did;
+				} else if (found_request.connection && found_request.connection.remote) {
+					agent_did = found_request.connection.remote.pairwise.did;
+				}
+				logger.info(`${type} with nonce ${qr_code_nonce} successfully established with agent ${agent_did}`);
+				resolve (found_request);
+			});
+		});
+	}
+
+	set_interval (interval) {
+		if (typeof interval !== 'number' || interval < 0)
+			throw new TypeError('InboundNonceWatcher interval must be >= 0');
+		this.interval = interval;
+	}
+
+	async stop () {
+		this.stopped = true;
+	}
+}
+
+InboundNonceWatcher.REQUEST_TYPES = {
+	CONNECTION: 1,
+	CREDENTIAL: 2,
+	VERIFICATION: 4,
+};
+
 module.exports = {
 	LoginHelper,
 	NullProofHelper,
 	AccountSignupHelper,
 	ConnectionResponder,
+	InboundNonceWatcher,
 };

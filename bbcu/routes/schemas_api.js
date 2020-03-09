@@ -18,6 +18,7 @@ const fs = require('fs');
 const express = require('express');
 const bodyParser = require('body-parser');
 const compression = require('compression');
+const semverCompare = require('semver-compare');
 
 /**
  * Creates an express router representing a REST API for managing schemas.
@@ -39,7 +40,7 @@ exports.createRouter = function (agent, schema_path, middleware) {
 	router.use(bodyParser.text());
 	router.use(compression());
 
-	// GET the default schema (for publishing from the UI
+	// GET the default schema (for publishing from the UI)
 	router.get('/schema_templates/default', async (req, res, next) => {
 		try {
 			const template_schema = await new Promise((resolve, reject) => {
@@ -94,7 +95,28 @@ exports.createRouter = function (agent, schema_path, middleware) {
 	router.get('/schemas', async (req, res, next) => {
 		try {
 			const schemas = await agent.getCredentialSchemas();
+			if (req.query && req.query.sort && req.query.sort === 'true' && schemas && schemas.length > 1) {
+				schemas.sort(sortSchemas).reverse();
+			}
 			res.send({message: 'Got the full list of schemas', schemas: schemas});
+		} catch (error) {
+			error.code = error.code ? error.code : SCHEMA_API_ERRORS.UNKNOWN_SCHEMA_API_ERROR;
+			return res.status(500).send({error: error.code, reason: error.message});
+		}
+	});
+
+	/* GET all schemas */
+	router.get('/proof_schemas', async (req, res, next) => {
+		try {
+			let queryObj = {};
+			if (req.query && req.query.name && req.query.name.length > 0) {
+				queryObj = {name: req.query.name};
+			}
+			const schemas = await agent.verifierGetProofSchemas(queryObj);
+			if (req.query && req.query.sort && req.query.sort === 'true' && schemas && schemas.length > 1) {
+				schemas.sort(sortSchemas).reverse();
+			}
+			res.send({message: 'Got the full list of proof schemas', schemas: schemas});
 		} catch (error) {
 			error.code = error.code ? error.code : SCHEMA_API_ERRORS.UNKNOWN_SCHEMA_API_ERROR;
 			return res.status(500).send({error: error.code, reason: error.message});
@@ -103,6 +125,17 @@ exports.createRouter = function (agent, schema_path, middleware) {
 
 	return router;
 };
+
+/**
+ * Sorts schema objects from the cloud agent API based on their schema version number, which
+ * we assume is the order in which they were meant to be published (1.1 then 1.2 then 1.3...)
+ * @param {object} a A schema object.
+ * @param {object} b A schema object.
+ * @return {number} <0 if a comes before b, 0 if they are the same, >0 if b comes before a
+ */
+function sortSchemas (a, b) {
+	return semverCompare(a.version, b.version);
+}
 
 const SCHEMA_API_ERRORS = {
 	UNKNOWN_SCHEMA_API_ERROR: 'UNKNOWN_SCHEMA_API_ERROR',

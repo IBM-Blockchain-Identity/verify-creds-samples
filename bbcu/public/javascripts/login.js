@@ -14,6 +14,15 @@
  limitations under the License.
  */
 
+const vcSignonCarouselSlides = {
+	CREATED: 0,
+	QR_CODE: 1,
+	ESTABLISHING_CONNECTION: 2,
+	CHECKING_CREDENTIAL: 3,
+	SUCCEEDED: 4,
+	FAILED: 5
+};
+
 const vcSignupCarouselSlides = {
 	BEFORE_REGISTERING: 0,
 	BEFORE_REGISTERING_MOBILE: 1,
@@ -33,9 +42,12 @@ $(document).ready(() => {
 
 	const loginCarousel = $('#loginCarousel');
 	const loginCarouselSlides = {
-		MOBILE_WALLET_SIGN_ON: 0,
-		USERPASS_SIGN_ON: 1,
-		VC_SIGN_ON: 2
+		SELECT_PLATFORM: 0,
+		BROWSER_WALLET_SIGN_ON: 1,
+		MOBILE_WALLET_SIGN_ON: 2,
+		USERPASS_SIGN_ON: 3,
+		VC_SIGN_ON: 4,
+		VC_SIGN_ON_MOBILE: 5
 	};
 
 	// Show the user id/password sign-on form if the user clicks on the traditional signin links
@@ -46,6 +58,21 @@ $(document).ready(() => {
 	// Show the digital wallet sign-on form if the appropriate links are clicked
 	$('.vcSignonLink').on('click', () => {
 		loginCarousel.carousel(loginCarouselSlides.VC_SIGN_ON);
+	});
+
+	// Show the digital wallet sign-on form if the appropriate links are clicked
+	$('#browser-sign-on-button').on('click', () => {
+		loginCarousel.carousel(loginCarouselSlides.BROWSER_WALLET_SIGN_ON);
+	});
+
+	// Show the digital wallet sign-on form if the appropriate links are clicked
+	$('#mobile-sign-on-button').on('click', () => {
+		loginCarousel.carousel(loginCarouselSlides.MOBILE_WALLET_SIGN_ON);
+	});
+
+	// Show the digital wallet sign-on form if the appropriate links are clicked
+	$('#mobile-sign-on-button-login').on('click', () => {
+		loginCarousel.carousel(loginCarouselSlides.VC_SIGN_ON_MOBILE);
 	});
 
 	// Show the userpass signon input labels when the user id or password form inputs are clicked
@@ -102,158 +129,18 @@ $(document).ready(() => {
 	});
 
 	const vcSignonForm = $('#vcSignonForm');
+	const vcSignonFormMobile = $('#vcSignonFormMobile');
 	const vcSignonModal = $('#vcSignonModal');
 	const vcSignonCarousel = $('#vcSignonCarousel');
-	const vcSignonCarouselSlides = {
-		CREATED: 0,
-		ESTABLISHING_CONNECTION: 1,
-		CHECKING_CREDENTIAL: 2,
-		SUCCEEDED: 3,
-		FAILED: 4
-	};
 
-	// Sign on using VCs
+	// Sign on using VCs with browser extension
 	vcSignonForm.submit(async (event) => {
-		event.preventDefault();
+		await ProcessSignon(vcSignonModal, vcSignonCarousel);
+	});
 
-		const formArray = vcSignonForm.serializeArray();
-		const formObject = {};
-		for (let i = 0; i < formArray.length; i++) {
-			formObject[formArray[i]['name']] = formArray[i]['value'].trim();
-		}
-		console.log(`VC Sign in info: ${JSON.stringify(formObject)}`);
-
-		// You can only use the sign on api with a username
-		const data = {
-			username: formObject.username,
-			connection_method: 'in_band'
-		};
-
-		// Reset the signon carousel
-		vcSignonCarousel.carousel(vcSignonCarouselSlides.CREATED);
-		// Open the signon modal and keep it open
-		vcSignonModal.modal({
-			backdrop: 'static',
-			keyboard: false
-		});
-
-		try {
-			const response = await $.ajax({
-				url: '/login/vc',
-				method: 'POST',
-				dataType: 'json',
-				contentType: 'application/json',
-				data: JSON.stringify(data)
-			});
-
-			console.log(`Created VC login: ${JSON.stringify(response)}`);
-
-			let tries_left = 300;
-			const interval = 4000; // milliseconds
-			let connection_shown = false;
-			let verification_shown = false;
-			const running = true;
-			while (running) {
-
-				console.log(`Tries left: ${tries_left--}`);
-				if (tries_left <= 0) {
-					throw new Error('VC login took too long');
-				}
-
-				let response = await $.ajax({
-					url: '/login/vc/status',
-					method: 'GET',
-					dataType: 'json',
-					contentType: 'application/json'
-				});
-
-				if (!response || !response.vc_login || !response.vc_login.status)
-					throw new Error(`No status information returned in update response: ${JSON.stringify(response)}`);
-				response = response.vc_login;
-				console.log(`Updated login status: ${JSON.stringify(response.status)}`);
-
-				const REMOTE_LOGIN_STEPS = {
-					CREATED: vcSignonCarouselSlides.CREATED,
-					ESTABLISHING_CONNECTION: vcSignonCarouselSlides.ESTABLISHING_CONNECTION,
-					CHECKING_CREDENTIAL: vcSignonCarouselSlides.CHECKING_CREDENTIAL,
-					FINISHED: vcSignonCarouselSlides.SUCCEEDED,
-					STOPPED: vcSignonCarouselSlides.FAILED,
-					ERROR: vcSignonCarouselSlides.FAILED
-				};
-
-
-				// Update the carousel to match the current status
-				if (REMOTE_LOGIN_STEPS.hasOwnProperty(response.status))
-					vcSignonCarousel.carousel(REMOTE_LOGIN_STEPS[response.status]);
-				else
-					console.warn(`Unknown login status detected: ${response.status}`);
-
-
-				if ('ERROR' === response.status) {
-					if (response.error)
-						$('#loginErrorCode').html(`Code: ${response.error}`);
-					if (response.reason)
-						$('#loginErrorMessage').html(`Reason: ${response.reason}`);
-					console.error(`Failed to complete VC signon: ${JSON.stringify(response)}`);
-					break;
-
-				} else if ('FINISHED' === response.status) {
-					console.log('VC Signon successful.  Redirecting to account page');
-
-					await new Promise((resolve, reject) => {
-						setTimeout(resolve, 3000);
-					});
-
-					// Redirect to account page.  The user's session should be logged in at this point.
-					window.location.href = '/account';
-				}
-
-				if ([ 'STOPPED', 'ERROR' ].indexOf(response.status) >= 0) {
-					break;
-				}
-
-				if (use_extension) {
-					// TODO render the connection offer as a QR code
-					if (!connection_shown && response.connection_offer) {
-						connection_shown = true;
-						console.log('Accepting connection offer via extension');
-						try {
-							window.verifyCreds({
-								operation: 'respondToConnectionOffer',
-								connectionOffer: response.connection_offer
-							});
-						} catch (error) {
-							console.error(`Extension failed to show connection offer: ${JSON.stringify(error)}`);
-						}
-					}
-
-					if (!verification_shown && response.verification) {
-						verification_shown = true;
-						console.log('Accepting proof request via extension');
-						try {
-							window.verifyCreds({
-								operation: 'respondToProofRequest',
-								proofRequestId: response.verification.id
-							});
-						} catch (error) {
-							console.error(`Extension failed to show proof request: ${JSON.stringify(error)}`);
-						}
-					}
-				}
-
-				await new Promise((resolve, reject) => {
-					setTimeout(resolve, interval);
-				});
-			}
-
-		} catch (error) {
-			if (error.code)
-				$('#loginErrorCode').html(`Code: ${error.code}`);
-			$('#loginErrorMessage').html(`Reason: ${error.message}`);
-
-			vcSignonCarousel.carousel(vcSignonCarouselSlides.FAILED);
-			console.error(`VC login failed: ${JSON.stringify(error)}`);
-		}
+	// Sign on using VCs with mobile app
+	vcSignonFormMobile.submit(async (event) => {
+		await ProcessSignon(vcSignonModal, vcSignonCarousel, true);
 	});
 
 	const vcSignupModal = $('#vcSignupModal');
@@ -346,8 +233,8 @@ $(document).ready(() => {
 		}
 	});
 
-	$('#signupNextButton').on('click', function() { ProcessSignup(vcSignupCarousel); });
-	$('#signupNextButtonMobile').on('click', function() { ProcessSignup(vcSignupCarousel, true); });
+	$('#signupNextButton').on('click', () => { ProcessSignup(vcSignupCarousel); });
+	$('#signupNextButtonMobile').on('click', () => { ProcessSignup(vcSignupCarousel, true); });
 
 	docReady.resolve();
 });
@@ -376,7 +263,168 @@ $.when(docReady, extensionReady).done(async () => {
 	use_extension = true;
 });
 
-async function ProcessSignup(vcSignupCarousel, mobileCredMgr=false) {
+async function ProcessSignon (vcSignonModal, vcSignonCarousel, mobileCredMgr=false) {
+	event.preventDefault();
+
+	let form = null;
+	if (mobileCredMgr) {
+		form = $('#vcSignonFormMobile');
+	} else {
+		form = $('#vcSignonForm');
+	}
+	console.log('Submit='+form.serialize());
+
+	const formArray = form.serializeArray();
+	const formObject = {};
+	for (let i = 0; i < formArray.length; i++) {
+		formObject[formArray[i]['name']] = formArray[i]['value'].trim();
+	}
+	console.log(`VC Sign in info: ${JSON.stringify(formObject)}`);
+
+	// You can only use the sign on api with a username
+	const data = {
+		username: formObject.username,
+		connection_method: 'in_band'
+	};
+
+	// Reset the signon carousel
+	vcSignonCarousel.carousel(vcSignonCarouselSlides.CREATED);
+	// Open the signon modal and keep it open
+	vcSignonModal.modal({
+		backdrop: 'static',
+		keyboard: false
+	});
+
+	let qrCodeNonce = null;
+	try {
+		if (mobileCredMgr) {
+			// If the user selected for a signon for a mobile app, establish a
+			//  connection and verification using a QR code rather than forcing
+			//  the user to provide their agent url
+			qrCodeNonce = await displayProofQRCode(data.username, 'BBCU Login Request', 'connectionReqQRLogin');
+			data['qr_code_nonce'] = qrCodeNonce;
+		}
+
+		const response = await $.ajax({
+			url: '/login/vc',
+			method: 'POST',
+			dataType: 'json',
+			contentType: 'application/json',
+			data: JSON.stringify(data)
+		});
+
+		console.log(`Created VC login: ${JSON.stringify(response)}`);
+
+		let tries_left = 300;
+		const interval = 4000; // milliseconds
+		let connection_shown = false;
+		let verification_shown = false;
+		const running = true;
+		while (running) {
+
+			console.log(`Tries left: ${tries_left--}`);
+			if (tries_left <= 0) {
+				throw new Error('VC login took too long');
+			}
+
+			let response = await $.ajax({
+				url: '/login/vc/status',
+				method: 'GET',
+				dataType: 'json',
+				contentType: 'application/json'
+			});
+
+			if (!response || !response.vc_login || !response.vc_login.status)
+				throw new Error(`No status information returned in update response: ${JSON.stringify(response)}`);
+			response = response.vc_login;
+			console.log(`Updated login status: ${JSON.stringify(response.status)}`);
+
+			const REMOTE_LOGIN_STEPS = {
+				CREATED: vcSignonCarouselSlides.CREATED,
+				WAITING_FOR_OFFER: vcSignonCarouselSlides.QR_CODE,
+				ESTABLISHING_CONNECTION: vcSignonCarouselSlides.ESTABLISHING_CONNECTION,
+				CHECKING_CREDENTIAL: vcSignonCarouselSlides.CHECKING_CREDENTIAL,
+				FINISHED: vcSignonCarouselSlides.SUCCEEDED,
+				STOPPED: vcSignonCarouselSlides.FAILED,
+				ERROR: vcSignonCarouselSlides.FAILED
+			};
+
+
+			// Update the carousel to match the current status
+			if (REMOTE_LOGIN_STEPS.hasOwnProperty(response.status))
+				vcSignonCarousel.carousel(REMOTE_LOGIN_STEPS[response.status]);
+			else
+				console.warn(`Unknown login status detected: ${response.status}`);
+
+
+			if ('ERROR' === response.status) {
+				if (response.error)
+					$('#loginErrorCode').html(`Code: ${response.error}`);
+				if (response.reason)
+					$('#loginErrorMessage').html(`Reason: ${response.reason}`);
+				console.error(`Failed to complete VC signon: ${JSON.stringify(response)}`);
+				break;
+
+			} else if ('FINISHED' === response.status) {
+				console.log('VC Signon successful.  Redirecting to account page');
+
+				await new Promise((resolve, reject) => {
+					setTimeout(resolve, 3000);
+				});
+
+				// Redirect to account page.  The user's session should be logged in at this point.
+				window.location.href = '/account';
+			}
+
+			if ([ 'STOPPED', 'ERROR' ].indexOf(response.status) >= 0) {
+				break;
+			}
+
+			if (use_extension) {
+				// TODO render the connection offer as a QR code
+				if (!connection_shown && response.connection_offer) {
+					connection_shown = true;
+					console.log('Accepting connection offer via extension');
+					try {
+						window.verifyCreds({
+							operation: 'respondToConnectionOffer',
+							connectionOffer: response.connection_offer
+						});
+					} catch (error) {
+						console.error(`Extension failed to show connection offer: ${JSON.stringify(error)}`);
+					}
+				}
+
+				if (!verification_shown && response.verification) {
+					verification_shown = true;
+					console.log('Accepting proof request via extension');
+					try {
+						window.verifyCreds({
+							operation: 'respondToProofRequest',
+							proofRequestId: response.verification.id
+						});
+					} catch (error) {
+						console.error(`Extension failed to show proof request: ${JSON.stringify(error)}`);
+					}
+				}
+			}
+
+			await new Promise((resolve, reject) => {
+				setTimeout(resolve, interval);
+			});
+		}
+
+	} catch (error) {
+		if (error.code)
+			$('#loginErrorCode').html(`Code: ${error.code}`);
+		$('#loginErrorMessage').html(`Reason: ${error.message}`);
+
+		vcSignonCarousel.carousel(vcSignonCarouselSlides.FAILED);
+		console.error(`VC login failed: ${JSON.stringify(error)}`);
+	}
+}
+
+async function ProcessSignup (vcSignupCarousel, mobileCredMgr=false) {
 
 	let form = null;
 	if (mobileCredMgr) {
@@ -399,7 +447,7 @@ async function ProcessSignup(vcSignupCarousel, mobileCredMgr=false) {
 		username = `${formObject.username.trim()}@example.com`;
 	}
 	const password = formObject.password ? formObject.password : null;
-	let agent_name = formObject.agent_name ? formObject.agent_name : null;
+	const agent_name = formObject.agent_name ? formObject.agent_name : null;
 
 	if (formObject.password !== formObject.confirm_password)
 		return console.error('Passwords must match!');
@@ -428,80 +476,7 @@ async function ProcessSignup(vcSignupCarousel, mobileCredMgr=false) {
 			// If the user selected for a signon for a mobile app, establish a
 			//  connection and verification using a QR code rather than forcing
 			//  the user to provide their agent url
-			response = await $.ajax({
-				url: '/api/agentinfo',
-				method: 'GET',
-				dataType: 'json',
-				contentType: 'application/json'
-			});
-			if (!response || !response.agent || !response.agent.url)
-				throw new Error(`No agent information returned in response: ${JSON.stringify(response)}`);
-			agent_name = response.agent.name ? response.agent.name : null;
-			const verifierAgent = response.agent;
-			response = await $.ajax({
-				url: '/api/schemas',
-				method: 'GET',
-				dataType: 'json',
-				contentType: 'application/json'
-			});
-			if (!response || !response.schemas)
-				throw new Error(`No agent information returned in response: ${JSON.stringify(response)}`);
-
-			const verifierSchemas = response.schemas;
-
-			// Find most current schema version
-
-			console.log('Showing qrcode with connection+verification information');
-			// Build a QR code that will cause the mobile app to ask for a
-			//  verification request after connecting to the verifier agent
-			// Request connection
-            // {
-            //      "type": "connect",
-            //      "data": {
-            //              "name": name,
-            //              "url": agent.user + "@:" + agent.URL,
-            //              "meta": {}
-            //      }
-            // }
-			qrCodeNonce = window.makeid(20);
-			let protocol = verifierAgent.url.indexOf("https://");
-			// create the agent url from the account url
-			if (protocol === 0) {
-				protocol = "https://";
-			} else {
-				protocol = verifierAgent.url.indexOf("http://");
-				if (protocol === 0) {
-					protocol = "http://"
-				}
-			}
-			if (protocol && protocol.length) {
-				verifierAgent.url = `${protocol}${verifierAgent.user}:@${verifierAgent.url.slice(protocol.length)}`;
-			}
-			const qrcodeContent = JSON.stringify({
-				type: "connect",
-				data: {
-					name: verifierAgent.name,
-					url: verifierAgent.url,
-					meta: {
-						nonce: qrCodeNonce,
-						username: username
-					}
-				}
-			});
-			// cleanout any previous QR code
-			const qrcodeParentNode = document.getElementById('connectionReqQR');
-			qrcodeParentNode.innerHTML = "";
-
-			// show modal dialog with QR code for mobile app to scan
-			new QRCode(document.getElementById('connectionReqQR'), {
-				text: qrcodeContent,
-				width: 400,
-				height: 400,
-				colorDark : '#000000',
-				colorLight : '#ffffff',
-				correctLevel : QRCode.CorrectLevel.L
-			});
-
+			qrCodeNonce = await displayProofQRCode(username, 'Verify Employment', 'connectionReqQR');
 		}
 
 		// The user selected a "normal" signon, so needs to provide his/her
@@ -646,4 +621,121 @@ async function ProcessSignup(vcSignupCarousel, mobileCredMgr=false) {
 		console.error(`Failed to create signup: ${JSON.stringify(error)}`);
 		vcSignupCarousel.carousel(vcSignupCarouselSlides.NOT_ALLOWED);
 	}
+}
+
+async function displayProofQRCode (username, schemaName, qrCodeParentId) {
+
+	return new Promise(async (resolve, reject) => {
+		try {
+			if (!username || typeof username !== 'string') {
+				throw new TypeError('Invalid schemaName was provided to displayProofQRCode');
+			}
+			if (!schemaName || typeof schemaName !== 'string') {
+				throw new TypeError('Invalid schemaName was provided to displayProofQRCode');
+			}
+			if (!qrCodeParentId || typeof qrCodeParentId !== 'string') {
+				throw new TypeError('Invalid qrCode parent element was provided to displayProofQRCode');
+			}
+
+			let response = null;
+
+			// get the webapp's agent information
+			response = await $.ajax({
+				url: '/api/agentinfo',
+				method: 'GET',
+				dataType: 'json',
+				contentType: 'application/json'
+			});
+			if (!response || !response.agent || !response.agent.url)
+				throw new Error(`No agent information returned in response: ${JSON.stringify(response)}`);
+			const verifierAgent = response.agent;
+
+			// get the schemas registered by the agent
+			response = await $.ajax({
+				url: '/api/proof_schemas',
+				method: 'GET',
+				dataType: 'json',
+				contentType: 'application/json',
+				data: {name: schemaName, sort: true},
+			});
+			if (!response || !response.schemas)
+				throw new Error(`No schema information returned in response: ${JSON.stringify(response)}`);
+			const verifierSchemasArray = response.schemas;
+
+			// schemas sorted by latest version number.  Look for the given schemaName to find
+			//  the correct name and most recent version number to use.
+			let verifierSchema = null;
+			for (let i=0; i<verifierSchemasArray.length; i++) {
+				if (verifierSchemasArray[i].name === schemaName) {
+					verifierSchema = verifierSchemasArray[i];
+					break;
+				}
+			}
+
+			if (!verifierSchema) {
+				throw new Error('Requested schema not found');
+			}
+			// Find most current schema versio
+			console.log('Showing qrcode with connection+verification information');
+			// Proof request
+			// {
+			// 	"type": "proof",
+			// 	"data": {
+			// 		"name": name,							UI USE ONLY
+			// 		"nickname": nickname,					UI USE ONLY
+			// 		"verifier": "https://alice:@124d...",
+			// 		"proof_schema_id": "BBCU Account:1.0",
+			//		"wait": true | false | null,
+			//		"meta": {}
+			// 	}
+			// }
+			const qrCodeNonce = window.makeid(20);
+			let protocol = verifierAgent.url.indexOf('https://');
+			// create the agent url from the account url
+			if (protocol === 0) {
+				protocol = 'https://';
+			} else {
+				protocol = verifierAgent.url.indexOf('http://');
+				if (protocol === 0) {
+					protocol = 'http://';
+				}
+			}
+			if (protocol && protocol.length) {
+				verifierAgent.url = `${protocol}${verifierAgent.user}:@${verifierAgent.url.slice(protocol.length)}`;
+			}
+			const qrcodeContent = JSON.stringify({
+				type: 'proof',
+				data: {
+					name: verifierAgent.user,
+					nickname: verifierAgent.name,
+					verifier: verifierAgent.url,
+					proof_schema_id: verifierSchema.id,
+					wait: false,
+					meta: {
+						nonce: qrCodeNonce,
+						username: username
+					}
+				}
+			});
+			// cleanout any previous QR code
+			const qrcodeParentNode = document.getElementById(qrCodeParentId);
+			qrcodeParentNode.innerHTML = '';
+			// show modal dialog with QR code for mobile app to scan
+			new QRCode(document.getElementById(qrCodeParentId), {
+				text: qrcodeContent,
+				width: 400,
+				height: 400,
+				colorDark : '#000000',
+				colorLight : '#ffffff',
+				correctLevel : QRCode.CorrectLevel.L
+			});
+
+			return resolve(qrCodeNonce);
+		} catch (error) {
+			const message = `displayProofQRCode failed: ${error.message ? error.message : JSON.stringify(error)}`;
+			console.error(message);
+			return reject(`Failed to build QR cdoe.  Error: ${message}`);
+		}
+	});
+
 }

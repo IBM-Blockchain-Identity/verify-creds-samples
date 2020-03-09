@@ -16,7 +16,7 @@
 
 const uuidv4 = require('uuid/v4');
 const semverCompare = require('semver-compare');
-const async = require('async');
+const InboundNonceWatcher = require('./helpers.js').InboundNonceWatcher;
 
 const Logger = require('./logger.js').Logger;
 const logger = Logger.makeLogger(Logger.logPrefix(__filename));
@@ -59,21 +59,22 @@ class SignupManager {
 	 * @param {string} agent_name The agent name associated with the user.
 	 * @param {string} password The new user's password.
 	 * @param {ConnectionMethod} connection_method The method for connecting to the user.
+	 * @param {string} qr_code_nonce The nonce provided in the qrCode that is initiating this signup.
 	 * @returns {string} A Signup instance ID to be used to check the status of the Signup later.
 	 */
-	create_signup (user, agent_name, password, connection_method, qrCodeNonce=null) {
+	create_signup (user, agent_name, password, connection_method, qr_code_nonce=null) {
 		if (!user || typeof user !== 'string')
 			throw new TypeError('Invalid user was provided to signup manager');
-		if (!qrCodeNonce && (!agent_name || typeof agent_name !== 'string'))
+		if (!qr_code_nonce && (!agent_name || typeof agent_name !== 'string'))
 			throw new TypeError('Invalid agent name provided to signup manager');
-		if (!qrCodeNonce && (!password || typeof password !== 'string'))
+		if (!qr_code_nonce && (!password || typeof password !== 'string'))
 			throw new TypeError('Invalid password provided to signup manager');
 		if (!connection_method || typeof connection_method !== 'string')
 			throw new TypeError('Invalid connection method for issuing credentials');
 
 		const signup_id = uuidv4();
 		logger.info(`Creating signup ${signup_id}`);
-		this.signups[signup_id] = new Signup(signup_id, agent_name, this.agent, user, password, this.user_records, this.card_renderer, this.connection_icon_provider, this.signup_helper, connection_method, qrCodeNonce);
+		this.signups[signup_id] = new Signup(signup_id, agent_name, this.agent, user, password, this.user_records, this.card_renderer, this.connection_icon_provider, this.signup_helper, connection_method, qr_code_nonce);
 		this.signups[signup_id].start();
 		return signup_id;
 	}
@@ -147,11 +148,11 @@ class SignupManager {
 	/**
 	 * Get schema used for signups.
 	 *
-	 * @returns {any}
+	 * @returns {any} The signup proof schema
 	 */
-	async get_signup_schema (signup_id) {
+	async get_signup_schema () {
 		if (!this.signup_helper)
-			throw new TypeError('Signup manager has no signup helper')
+			throw new TypeError('Signup manager has no signup helper');
 
 		return await this.signup_helper.getProofSchema();
 	}
@@ -209,8 +210,10 @@ class Signup {
 	 * @param {ImageProvider} connection_icon_provider Provides the image data for connection offers.
 	 * @param {SignupHelper} signup_helper Manages proof schemas and user record creation.
 	 * @param {ConnectionMethod} connection_method The method for establishing the connection to the user
+	 * @param {string} qr_code_nonce The nonce provided in the qrCode that is initiating this signup.
+	 * @returns {Signup} The created Signup object
 	 */
-	constructor (id, agent_name, agent, user, password, user_records, card_renderer, connection_icon_provider, signup_helper, connection_method, qrCodeNonce=null) {
+	constructor (id, agent_name, agent, user, password, user_records, card_renderer, connection_icon_provider, signup_helper, connection_method, qr_code_nonce=null) {
 		this.id = id;
 		this.agent = agent;
 		this.user = user;
@@ -226,7 +229,7 @@ class Signup {
 		this.verification = null;
 		this.credential = null;
 		this.connection_method = connection_method;
-		this.qrCodeNonce = qrCodeNonce;
+		this.qr_code_nonce = qr_code_nonce;
 	}
 
 	/**
@@ -269,7 +272,7 @@ class Signup {
 				proof_request.requested_attributes, proof_request.requested_predicates);
 			logger.debug(`Created proof schema: ${JSON.stringify(account_proof_schema)}`);
 
-			if (this.qrCodeNonce) {
+			if (this.qr_code_nonce) {
 				this.status = Signup.SIGNUP_STEPS.WAITING_FOR_OFFER;
 			} else {
 				this.status = Signup.SIGNUP_STEPS.ESTABLISHING_CONNECTION;
@@ -280,12 +283,25 @@ class Signup {
 
 			try {
 
-				if (this.qrCodeNonce) {
-
-					this.connection_offer = await this.waitForConnectionNonce(this.qrCodeNonce, 30, 3000);
-					logger.info(`Received connection offer with nonce: ${this.qrCodeNonce}, offer: ${this.connection_offer.id}`);
-					this.agent.acceptConnection(this.connection_offer.id);
-					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
+				if (this.qr_code_nonce) {
+					// look for connection offer that has the nonce from the qr code
+					const watcher = new InboundNonceWatcher(
+						this.agent,
+						InboundNonceWatcher.REQUEST_TYPES.CONNECTION | InboundNonceWatcher.REQUEST_TYPES.VERIFICATION,
+						this.qr_code_nonce, 30, 3000);
+					const inbound_offer = await watcher.start();
+					if (inbound_offer && inbound_offer.state) {
+						if (inbound_offer.state === 'inbound_offer') {
+							// found a connection offer with the given nonce
+							logger.info(`Received connection offer with nonce: ${this.qr_code_nonce}, offer: ${this.connection_offer.id}`);
+							this.agent.acceptConnection(this.connection_offer.id);
+							connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
+						} else if (inbound_offer.state === 'inbound_verification_request') {
+							// found a verification request
+							connection = inbound_offer.connection;
+							this.verification = inbound_offer;
+						}
+					}
 
 				} else if (this.connection_method === 'in_band') {
 
@@ -333,25 +349,45 @@ class Signup {
 
 			this.status = Signup.SIGNUP_STEPS.CHECKING_CREDENTIAL;
 
-			// If no proof requests, then send request
-			logger.info(`Sending proof request to ${connection.remote.pairwise.did}`);
+			// if the user is acting off of a qr code for proof, then the next
+			//  step after establishing the connection is getting the verification
+			//  request
+			if (this.qr_code_nonce) {
+				try {
+					if (this.qr_code_nonce) {
+						if (!this.verification) {
+							// look for verification request that has the nonce from the qr code
+							const watcher = new InboundNonceWatcher(this.agent, InboundNonceWatcher.REQUEST_TYPES.VERIFICATION, this.qr_code_nonce, 30, 3000);
+							this.verification = await watcher.start();
+						}
+						logger.info(`Received verification request with nonce: ${this.qr_code_nonce}, offer: ${this.verification.id}`);
+						this.agent.updateVerification(this.verification.id, 'outbound_proof_request');
+					}
+				} catch (error) {
+					logger.error(`Verification request never arrived.  Deleting connection ${connection.id}. error: ${error}`);
+					await this.agent.deleteConnection(connection.id);
+					throw error;
+				}
+			} else {
+				// If no proof requests, then send request
+				logger.info(`Sending proof request to ${connection.remote.pairwise.did}`);
 
-			try {
-				this.verification = await this.agent.createVerification({
-					did: connection.remote.pairwise.did
-				},
-				account_proof_schema.id,
-				'outbound_proof_request',
-				{
-					icon: icon
-				});
-			} catch (error) {
-				logger.error(`Verification request failed.  Deleting connection ${connection.id}. error: ${error}`);
-				await this.agent.deleteConnection(connection.id);
-				throw error;
+				try {
+					this.verification = await this.agent.createVerification({
+						did: connection.remote.pairwise.did
+					},
+					account_proof_schema.id,
+					'outbound_proof_request',
+					{
+						icon: icon
+					});
+				} catch (error) {
+					logger.error(`Verification request failed.  Deleting connection ${connection.id}. error: ${error}`);
+					await this.agent.deleteConnection(connection.id);
+					throw error;
+				}
+				logger.info(`Created verification request: ${this.verification.id}`);
 			}
-			logger.info(`Created verification request: ${this.verification.id}`);
-
 			logger.info(`Waiting for verification of proof request from ${connection.remote.pairwise.did}`);
 			let proof;
 			try {
@@ -385,8 +421,8 @@ class Signup {
 			personal_info.email = this.user;
 
 			const user_doc = await this.user_records.create_user(this.user, this.password, personal_info, {
-				agent_name: this.agent_name,
-				mobile_user: this.qrCodeNonce ? true : false
+				agent_name: this.agent_name ? this.agent_name : connection.remote.iurl,
+				mobile_user: this.qr_code_nonce ? true : false
 			});
 			logger.debug(`User record: ${JSON.stringify(user_doc)}`);
 
@@ -494,52 +530,6 @@ class Signup {
 			ret.verification = {id: this.verification.id};
 
 		return ret;
-	}
-
-	/**
-	 * Waits for a {@link Connection} to enter the 'connected' or 'rejected'.
-	 * @param {string} nonce The connection ID.
-	 * @param {number} [retries] The number of times we should check the status of the connection before giving up.
-	 * @param {number} [retry_interval] The number of milliseconds to wait between each connection status check.
-	 * @return {Promise<Connection>} The accepted {@link Connection}.
-	 */
-	async waitForConnectionNonce (nonce, retries, retry_interval) {
-
-		let attempts = 0;
-		let qrCodeNonce = nonce;
-		const retry_opts = {
-			times: retries ? retries : 30,
-			interval: retry_interval ? retry_interval : 3000,
-			errorFilter: (error) => {
-				// We should stop if the error was something besides still waiting for the connection.
-				return error.toString().toLowerCase().indexOf('waiting') >= 0;
-			}
-		};
-
-		return new Promise((resolve, reject) => {
-			async.retry(retry_opts, async () => {
-
-				logger.debug(`Checking status of connection ${qrCodeNonce}. Attempt ${++attempts}/${retry_opts.times}`);
-				let queryObj = {};
-				queryObj["remote.properties.meta.nonce"] = this.qrCodeNonce;
-				const updated_connection = await this.agent.getConnections(queryObj);
-				if (!updated_connection || (updated_connection.length > 0 && !updated_connection[0].state)) {
-					throw new Error('Connection state could not be determined');
-				} else if (updated_connection.length > 0 && [ 'inbound_offer' ].indexOf(updated_connection[0].state) >= 0) {
-					return updated_connection[0];
-				} else {
-					throw new Error('Still waiting on connection to be accepted');
-				}
-			}, (error, accepted_connection) => {
-				if (error) {
-					logger.error(`Failed to establish connection with nonce ${qrCodeNonce}: ${error}`);
-					return reject(new Error(`Connection with nonce ${qrCodeNonce} failed: ${error}`));
-				}
-
-				logger.info(`Connection with nonce ${qrCodeNonce} successfully established with agent ${accepted_connection.remote.pairwise.did}`);
-				resolve (accepted_connection);
-			});
-		});
 	}
 }
 

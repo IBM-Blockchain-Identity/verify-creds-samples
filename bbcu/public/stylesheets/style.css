@@ -169,7 +169,7 @@ a {
 }
 
 .banner-sign-in {
-  width: 334px;
+  width: 410px;
   height: 331px;
   background-color: #ffffff;
   color: #333333;
@@ -187,7 +187,9 @@ a {
   background-color: #002a54;
 }
 
-#mobile-sign-on-button {
+#browser-sign-on-button,
+#browser-sign-on-button-login,
+#mobile-sign-on-button-login {
   margin-top: 50px;
 }
 

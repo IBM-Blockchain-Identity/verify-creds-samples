@@ -75,7 +75,7 @@ exports.createRouter = function (signup_manager) {
 	router.get('/signup/proofschema', [ middleware ], async (req, res) => {
 
 		const proof_schema = await signup_manager.get_signup_schema();
-		logger.debug(`Signup proofschema found ${proof_schema != null}, proofschema name: ${proofschema ? proofschema.name : ''}`);
+		logger.debug(`Signup proofschema found ${proof_schema !== null}, proofschema name: ${proof_schema ? proof_schema.name : ''}`);
 
 		res.status(200).json({
 			message: 'Proof schema retrieved',

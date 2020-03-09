@@ -16,6 +16,7 @@
 
 const uuidv4 = require('uuid/v4');
 const semverCompare = require('semver-compare');
+const InboundNonceWatcher = require('./helpers.js').InboundNonceWatcher;
 
 const Logger = require('./logger.js').Logger;
 const logger = Logger.makeLogger(Logger.logPrefix(__filename));
@@ -52,9 +53,10 @@ class LoginManager {
 	 * Creates an Login flow for the given user.
 	 * @param {string} user The app user we want to log in.
 	 * @param {ConnectionMethod} connection_method The method for connecting to the user.
+	 * @param {string} qr_code_nonce The nonce in the QR code that initiated this login flow.
 	 * @returns {string} A Login instance ID to be used to check the status of the Login later.
 	 */
-	create_login (user, connection_method) {
+	create_login (user, connection_method, qr_code_nonce) {
 		if (!user || typeof user !== 'string')
 			throw new TypeError('Invalid user was provided to login manager');
 		if (!connection_method || typeof connection_method !== 'string')
@@ -62,7 +64,7 @@ class LoginManager {
 
 		const login_id = uuidv4();
 		logger.info(`Creating login ${login_id}`);
-		this.logins[login_id] = new Login(login_id, this.agent, user, this.user_records, this.connection_icon_provider, this.login_helper, connection_method);
+		this.logins[login_id] = new Login(login_id, this.agent, user, this.user_records, this.connection_icon_provider, this.login_helper, connection_method, qr_code_nonce);
 		this.logins[login_id].start();
 		return login_id;
 	}
@@ -156,6 +158,7 @@ class Login {
 	static get LOGIN_STEPS () {
 		return {
 			CREATED: 'CREATED',
+			WAITING_FOR_OFFER: 'WAITING_FOR_OFFER',
 			ESTABLISHING_CONNECTION: 'ESTABLISHING_CONNECTION',
 			CHECKING_CREDENTIAL: 'CHECKING_CREDENTIAL',
 			FINISHED: 'FINISHED',
@@ -182,8 +185,9 @@ class Login {
 	 * @param {ImageProvider} connection_icon_provider Provides the image data for connection offers.
 	 * @param {ProofHelper} login_helper Provides proof schemas and checks proof responses.
 	 * @param {ConnectionMethod} connection_method The method for establishing the connection to the user
+	 * @param {string} qr_code_nonce The nonce in the QR code that initiated this login flow.
 	 */
-	constructor (id, agent, user, user_records, connection_icon_provider, login_helper, connection_method) {
+	constructor (id, agent, user, user_records, connection_icon_provider, login_helper, connection_method, qr_code_nonce) {
 		this.id = id;
 		this.agent = agent;
 		this.user = user;
@@ -196,6 +200,7 @@ class Login {
 		this.connection_offer = null;
 		this.verification = null;
 		this.connection_method = connection_method;
+		this.qr_code_nonce = qr_code_nonce;
 	}
 
 	/**
@@ -233,14 +238,38 @@ class Login {
 				proof_request.requested_attributes, proof_request.requested_predicates);
 			logger.debug(`Created proof schema: ${JSON.stringify(account_proof_schema)}`);
 
-			this.status = Login.LOGIN_STEPS.ESTABLISHING_CONNECTION;
+			if (this.qr_code_nonce) {
+				this.status = Login.LOGIN_STEPS.WAITING_FOR_OFFER;
+			} else {
+				this.status = Login.LOGIN_STEPS.ESTABLISHING_CONNECTION;
+			}
 			logger.info(`Connection to user via the ${this.connection_method} method`);
 			const connection_opts = icon ? {icon: icon} : null;
 			let connection;
 
 			try {
 
-				if (this.connection_method === 'in_band') {
+				if (this.qr_code_nonce) {
+					// look for connection offer that has the nonce from the qr code
+					const watcher = new InboundNonceWatcher(
+						this.agent,
+						InboundNonceWatcher.REQUEST_TYPES.CONNECTION | InboundNonceWatcher.REQUEST_TYPES.VERIFICATION,
+						this.qr_code_nonce, 30, 3000);
+					const inbound_offer = await watcher.start();
+					if (inbound_offer && inbound_offer.state) {
+						if (inbound_offer.state === 'inbound_offer') {
+							// found a connection offer with the given nonce
+							logger.info(`Received offer with nonce: ${this.qr_code_nonce}, offer: ${this.connection_offer.id}`);
+							this.agent.acceptConnection(this.connection_offer.id);
+							connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
+						} else if (inbound_offer.state === 'inbound_verification_request') {
+							// found a verification request
+							connection = inbound_offer.connection;
+							this.verification = inbound_offer;
+						}
+					}
+
+				} else if (this.connection_method === 'in_band') {
 
 					if (!user_doc.opts || !user_doc.opts.agent_name) {
 						const err = new Error('User record does not have an associated agent name');
@@ -286,24 +315,44 @@ class Login {
 
 			this.status = Login.LOGIN_STEPS.CHECKING_CREDENTIAL;
 
-			// If no proof requests, then send request
-			logger.info(`Sending proof request to ${connection.remote.pairwise.did}`);
-			try {
-				this.verification = await this.agent.createVerification({
-					did: connection.remote.pairwise.did
-				},
-				account_proof_schema.id,
-				'outbound_proof_request',
-				{
-					icon: icon
-				});
-			} catch (error) {
-				logger.error(`Sending login proof request failed.  Deleting connection ${connection.id}. error: ${error}`);
-				error.code = error.code ? error.code : LOGIN_ERRORS.LOGIN_VERIFICATION_FAILED;
-				await this.agent.deleteConnection(connection.id);
-				throw error;
+			// If the user is acting off of a qr code for proof, then the next
+			//  step after establishing the connection is getting the verification
+			//  request.  Once we have the verification request, turn it into
+			//  an outbound proof request.
+			if (this.qr_code_nonce) {
+				try {
+					if (!this.verification) {
+						// look for verification request that has the nonce from the qr code
+						const watcher = new InboundNonceWatcher(this.agent, InboundNonceWatcher.REQUEST_TYPES.VERIFICATION, this.qr_code_nonce, 30, 3000);
+						this.verification = await watcher.start();
+					}
+					logger.info(`Received verification request with nonce: ${this.qr_code_nonce}, offer: ${this.verification.id}`);
+					this.agent.updateVerification(this.verification.id, 'outbound_proof_request');
+				} catch (error) {
+					logger.error(`Verification request never arrived.  Deleting connection ${connection.id}. error: ${error}`);
+					await this.agent.deleteConnection(connection.id);
+					throw error;
+				}
+			} else {
+				// If no proof requests, then send request
+				logger.info(`Sending proof request to ${connection.remote.pairwise.did}`);
+				try {
+					this.verification = await this.agent.createVerification({
+						did: connection.remote.pairwise.did
+					},
+					account_proof_schema.id,
+					'outbound_proof_request',
+					{
+						icon: icon
+					});
+				} catch (error) {
+					logger.error(`Sending login proof request failed.  Deleting connection ${connection.id}. error: ${error}`);
+					error.code = error.code ? error.code : LOGIN_ERRORS.LOGIN_VERIFICATION_FAILED;
+					await this.agent.deleteConnection(connection.id);
+					throw error;
+				}
+				logger.info(`Created verification request: ${this.verification.id}`);
 			}
-			logger.info(`Created verification request: ${this.verification.id}`);
 
 			logger.info(`Waiting for verification of proof request from ${connection.remote.pairwise.did}`);
 			let proof;
