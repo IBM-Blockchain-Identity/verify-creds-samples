@@ -99,7 +99,12 @@ exports.createRouter = function (users_instance, login_manager) {
 
 	// Start VC login flow
 	router.post('/login/vc', (req, res, next) => {
-		if (!req.body || !req.body.username || typeof req.body.username !== 'string') {
+		if (!req.body ||
+			(req.body.qr_code_nonce && (req.body.username === undefined || req.body.username === null)) ||
+			(!req.body.qr_code_nonce && !req.body.username) ||
+			typeof req.body.username !== 'string') {
+
+			// if this login is triggered from a QR code, an emtpy username is fine
 			return res.status(400).json({
 				error: LOGIN_API_ERRORS.BAD_REQUEST,
 				reason: 'You must supply a username in order to log in'

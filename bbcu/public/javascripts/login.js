@@ -71,8 +71,8 @@ $(document).ready(() => {
 	});
 
 	// Show the digital wallet sign-on form if the appropriate links are clicked
-	$('#mobile-sign-on-button-login').on('click', () => {
-		loginCarousel.carousel(loginCarouselSlides.VC_SIGN_ON_MOBILE);
+	$('#mobile-sign-on-button-login').on('click', async () => {
+		await ProcessSignon(vcSignonModal, vcSignonCarousel, true);
 	});
 
 	// Show the userpass signon input labels when the user id or password form inputs are clicked
@@ -176,10 +176,12 @@ $(document).ready(() => {
 	});
 
 	// Takes us from the "Creds you need" screen to the user signup form
-	$('#credsNextButtonMobile').on('click', () => {
-		$('#signupNextButtonMobile').removeAttr('disabled');
-		vcSignupCarousel.carousel(vcSignupCarouselSlides.ENTER_USER_INFO_MOBILE);
-	});
+	//  For this qr code demo, commenting this our.  We don't want to require
+	//  user to enter username, skip to showing the QR code
+	//$('#credsNextButtonMobile').on('click', () => {
+	//	$('#signupNextButtonMobile').removeAttr('disabled');
+	//	vcSignupCarousel.carousel(vcSignupCarouselSlides.ENTER_USER_INFO_MOBILE);
+	//});
 
 	// Show the signup form input labels when the user is filling out the fields
 	const signup_user = $('#signupUserID');
@@ -234,7 +236,7 @@ $(document).ready(() => {
 	});
 
 	$('#signupNextButton').on('click', () => { ProcessSignup(vcSignupCarousel); });
-	$('#signupNextButtonMobile').on('click', () => { ProcessSignup(vcSignupCarousel, true); });
+	$('#credsNextButtonMobile').on('click', () => { ProcessSignup(vcSignupCarousel, true); });
 
 	docReady.resolve();
 });
@@ -442,7 +444,7 @@ async function ProcessSignup (vcSignupCarousel, mobileCredMgr=false) {
 	console.log(`Signup info: ${JSON.stringify(formObject)}`);
 	let username = null;
 	if (mobileCredMgr) {
-		username = `${formObject.usernameMobile.trim()}@example.com`;
+		username = '';
 	} else {
 		username = `${formObject.username.trim()}@example.com`;
 	}
@@ -491,7 +493,7 @@ async function ProcessSignup (vcSignupCarousel, mobileCredMgr=false) {
 				username: username,
 				agent_name: agent_name,
 				connection_method: 'in_band',
-				qrCodeNonce: mobileCredMgr ? qrCodeNonce: null,
+				qr_code_nonce: mobileCredMgr ? qrCodeNonce: null,
 			})
 		});
 
@@ -627,8 +629,8 @@ async function displayProofQRCode (username, schemaName, qrCodeParentId) {
 
 	return new Promise(async (resolve, reject) => {
 		try {
-			if (!username || typeof username !== 'string') {
-				throw new TypeError('Invalid schemaName was provided to displayProofQRCode');
+			if (username === undefined || username === null || typeof username !== 'string') {
+				throw new TypeError('Invalid username was provided to displayProofQRCode');
 			}
 			if (!schemaName || typeof schemaName !== 'string') {
 				throw new TypeError('Invalid schemaName was provided to displayProofQRCode');

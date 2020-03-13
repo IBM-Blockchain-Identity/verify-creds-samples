@@ -57,8 +57,10 @@ class LoginManager {
 	 * @returns {string} A Login instance ID to be used to check the status of the Login later.
 	 */
 	create_login (user, connection_method, qr_code_nonce) {
-		if (!user || typeof user !== 'string')
+		if ((!qr_code_nonce && (!user || typeof user !== 'string')) ||
+			(qr_code_nonce && (user === undefined || user === null || typeof user !== 'string'))) {
 			throw new TypeError('Invalid user was provided to login manager');
+		}
 		if (!connection_method || typeof connection_method !== 'string')
 			throw new TypeError('Invalid connection method for logging in');
 
@@ -216,7 +218,12 @@ class Login {
 			logger.info(`Starting credential login flow ${this.id}`);
 
 			logger.info(`Getting credential data for ${this.user}`);
-			const user_doc = await this.user_records.read_user(this.user);
+			let user_doc = null;
+			if (this.user) {
+				// if there is a username, use that as the key to retrieve
+				//  the user information
+				user_doc = await this.user_records.read_user(this.user);
+			}
 
 			const my_credential_definitions = await this.agent.getCredentialDefinitions();
 			logger.debug(`${this.agent.user}'s list of credential definitions: ${JSON.stringify(my_credential_definitions, 0, 1)}`);
@@ -378,6 +385,23 @@ class Login {
 
 			logger.info(`Deleting verification request ${proof.id}`);
 			await this.agent.deleteVerification(proof.id);
+
+			if (this.qr_code_nonce && !user_doc) {
+				// User account creation initiated by a QR code will be keyed off of
+				//  a randomly generated username.  So if the login is initiated by
+				//  a QR code and we got here without a user record, try to get a
+				//  user record using the account number that came back in the
+				//  proof response
+				if (proof && proof.info && proof.info.attributes && proof.info.attributes.length > 0) {
+					for (let i=0; i<proof.info.attributes.length; i++) {
+						const attr = proof.info.attributes[i];
+						if (attr.name === 'account_number') {
+							user_doc = await this.user_records.read_user_from_account(attr.value);
+							break;
+						}
+					}
+				}
+			}
 
 			logger.info(`Checking the validity of the proof in verification ${proof.id}`);
 			try {

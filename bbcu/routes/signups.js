@@ -85,7 +85,12 @@ exports.createRouter = function (signup_manager) {
 
 	/* POST start a new account signup flow */
 	router.post('/signup', [ middleware ], (req, res) => {
-		if (!req.body || !req.body.username || typeof req.body.username !== 'string') {
+		if (!req.body ||
+			(req.body.qr_code_nonce && (req.body.username === undefined || req.body.username === null)) ||
+			(!req.body.qr_code_nonce && !req.body.username) ||
+			typeof req.body.username !== 'string') {
+
+			// if this signup is triggered from a QR code, an emtpy username is fine
 			return res.status(400).json({
 				error: SIGNUP_API_ERRORS.MISSING_REQUIRED_PARAMETERS,
 				reason: 'You must supply a username in order to log in'
@@ -93,7 +98,7 @@ exports.createRouter = function (signup_manager) {
 		}
 		const username = req.body.username;
 
-		if (!req.body.qrCodeNonce && (!req.body.password || typeof req.body.password !== 'string')) {
+		if (!req.body.qr_code_nonce && (!req.body.password || typeof req.body.password !== 'string')) {
 			return res.status(400).json({
 				error: SIGNUP_API_ERRORS.MISSING_REQUIRED_PARAMETERS,
 				reason: 'You must supply a password in order to log in'
@@ -101,7 +106,7 @@ exports.createRouter = function (signup_manager) {
 		}
 		const password = req.body.password;
 
-		if (!req.body.qrCodeNonce && (!req.body.agent_name || typeof req.body.agent_name !== 'string')) {
+		if (!req.body.qr_code_nonce && (!req.body.agent_name || typeof req.body.agent_name !== 'string')) {
 			return res.status(400).json({
 				error: SIGNUP_API_ERRORS.MISSING_REQUIRED_PARAMETERS,
 				reason: 'You must supply an agent name in order to log in'
@@ -109,14 +114,14 @@ exports.createRouter = function (signup_manager) {
 		}
 		const agent_name = req.body.agent_name;
 
-		if (!req.body.qrCodeNonce && (!req.body || !req.body.connection_method || typeof req.body.connection_method !== 'string')) {
+		if (!req.body.qr_code_nonce && (!req.body || !req.body.connection_method || typeof req.body.connection_method !== 'string')) {
 			return res.status(400).json({
 				error: SIGNUP_API_ERRORS.MISSING_REQUIRED_PARAMETERS,
 				reason: 'Invalid connection_method for issuing the credential'
 			});
 		}
 
-		const signup_id = signup_manager.create_signup(username, agent_name, password, req.body.connection_method, req.body.qrCodeNonce);
+		const signup_id = signup_manager.create_signup(username, agent_name, password, req.body.connection_method, req.body.qr_code_nonce);
 		req.session.signup = signup_id;
 		res.status(201).json({
 			message: 'Signup process initiated',

@@ -63,7 +63,8 @@ class SignupManager {
 	 * @returns {string} A Signup instance ID to be used to check the status of the Signup later.
 	 */
 	create_signup (user, agent_name, password, connection_method, qr_code_nonce=null) {
-		if (!user || typeof user !== 'string')
+		if ((!qr_code_nonce && (!user || typeof user !== 'string')) ||
+			(qr_code_nonce && (user === undefined || user === null || typeof user !== 'string')))
 			throw new TypeError('Invalid user was provided to signup manager');
 		if (!qr_code_nonce && (!agent_name || typeof agent_name !== 'string'))
 			throw new TypeError('Invalid agent name provided to signup manager');
@@ -293,6 +294,7 @@ class Signup {
 					if (inbound_offer && inbound_offer.state) {
 						if (inbound_offer.state === 'inbound_offer') {
 							// found a connection offer with the given nonce
+							this.connection_offer = inbound_offer;
 							logger.info(`Received connection offer with nonce: ${this.qr_code_nonce}, offer: ${this.connection_offer.id}`);
 							this.agent.acceptConnection(this.connection_offer.id);
 							connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
@@ -411,6 +413,8 @@ class Signup {
 			logger.info(`Deleting verification request ${proof.id}`);
 			await this.agent.deleteVerification(proof.id);
 
+			// check that we have received the necessary information, then create
+			//  the user record in the database
 			logger.info(`Checking the validity of the proof in verification ${proof.id}`);
 			await this.signup_helper.checkProof(proof);
 
@@ -419,6 +423,13 @@ class Signup {
 			logger.info(`Creating user record for ${this.user}`);
 			const personal_info = await this.signup_helper.proofToUserRecord(proof);
 			personal_info.email = this.user;
+
+			if (this.qr_code_nonce) {
+				// if this is an account created as part of a qr code, then there is no
+				//  username or password information available.  Make the username a
+				//  random value.
+				this.user = uuidv4();
+			}
 
 			const user_doc = await this.user_records.create_user(this.user, this.password, personal_info, {
 				agent_name: this.agent_name ? this.agent_name : connection.remote.iurl,

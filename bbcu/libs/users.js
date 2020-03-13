@@ -19,6 +19,7 @@ const bcrypt = require('bcrypt');
 const users_design_doc = require('./design_docs/users.json');
 const DESIGN_DOC = users_design_doc._id.split('/')[1];
 const VIEW_USERS = 'users';
+const VIEW_ACCOUNTS = 'accounts';
 
 const Logger = require('./logger.js').Logger;
 const logger = Logger.makeLogger(Logger.logPrefix(__filename));
@@ -352,6 +353,46 @@ class Users {
 
 		// Passwords are stored as bcrypted hashes
 		return bcrypt.compare(password, doc.password);
+	}
+
+	/**
+	 * Retrieves the given user's database record.
+	 * @param {string} account_number The account number for a user.
+	 * @returns {Promise<User>} A promise that resolves with the user record.
+	 */
+	async read_user_from_account (account_number) {
+		if (!account_number || typeof account_number !== 'string')
+			throw new TypeError('Read user username was not a non-empty string');
+
+		logger.info(`Reading user from account ${account_number}`);
+		let doc;
+		try {
+			//const view_resp = await this.usersDB.view(DESIGN_DOC, VIEW_ACCOUNTS, {reduce: false, include_docs: true, keys: [ account_number ]});
+			const view_resp = await this.usersDB.view(DESIGN_DOC, VIEW_ACCOUNTS, {reduce: false, include_docs: true});
+			for (const index in view_resp.rows) {
+				const current_doc = view_resp.rows[index].doc;
+				if (current_doc && current_doc.personal_info && current_doc.personal_info.account_number === account_number) {
+					doc = current_doc;
+					break;
+				}
+			}
+		} catch (error) {
+			logger.error(`Failed to read user: ${error}`);
+			error.code = USERS_ERRORS.UNKNOWN_USER_READ_FAILURE;
+			throw error;
+		}
+
+		if (!doc) {
+			const error = new Error(`Account ${account_number} could not be found in the user list`);
+			logger.error(`Failed to find user: ${error}`);
+			error.code = USERS_ERRORS.USER_DOES_NOT_EXIST;
+			throw error;
+		}
+
+		logger.info(`Read user from account ${account_number}`);
+		delete doc.password;
+		logger.debug(`Account number ${account_number}'s user doc: ${JSON.stringify(doc)}`);
+		return doc;
 	}
 }
 

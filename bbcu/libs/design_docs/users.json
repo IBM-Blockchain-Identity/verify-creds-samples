@@ -5,6 +5,10 @@
     "users": {
       "reduce": "_count",
       "map": "function (doc) {\n  if(doc.type === 'user' && doc.email)\n    emit(doc.email, 1);\n}"
+    },
+    "accounts": {
+      "reduce": "_count",
+      "map": "function (doc) {\n  if(doc.type === 'user' && doc.personal_info && doc.personal_info.account_number)\n    emit(doc.personal_info.account_number, 1);\n}"
     }
   },
   "language": "javascript"
