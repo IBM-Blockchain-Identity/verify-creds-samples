@@ -397,6 +397,9 @@ class Login {
 						const attr = proof.info.attributes[i];
 						if (attr.name === 'account_number') {
 							user_doc = await this.user_records.read_user_from_account(attr.value);
+							// user came in empty, so fill it out now with the username from
+							//  the user record that we just looked up
+							this.user = user_doc._id;
 							break;
 						}
 					}
