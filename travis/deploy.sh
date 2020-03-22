@@ -83,7 +83,7 @@ sed -i "s+IBMHR_VANITY_URL_HERE+${IBMHR_VANITY_URL}+g" $INGRESS
 sed -i "s+BBCU_VANITY_URL_HERE+${BBCU_VANITY_URL}+g" $INGRESS
 
 echo "Configuring Kubectl to be able to talk to our cluster..."
-$(ibmcloud ks cluster config --cluster ${IBMCLOUD_DEPLOYMENT_CLUSTER} --export)
+$(ibmcloud ks cluster config --cluster ${IBMCLOUD_DEPLOYMENT_CLUSTER})
 
 echo "Deleting existing issuer deployments"
 kubectl delete deployment gov-dmv ibm-hr bbcu --namespace=$KUBERNETES_NAMESPACE
