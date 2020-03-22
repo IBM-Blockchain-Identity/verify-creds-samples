@@ -108,7 +108,12 @@ docker-compose build
     
     BBCU_AGENT_NAME=bbcu
     BBCU_AGENT_PASSWORD=****
+
+    COUCHDB_USER_NAME=****
+    COUCHDB_USER_PASSWORD=****
     ```
+
+    *Note:* If you have previously run these samples, the COUCHDB_xxx values need to reflect those of your current couch database.  The default values used to be admin/password.  If you can no longer remember the credentials for your couch database, you can always remove the `couchdb` directory and restart the container using `docker-compose build couchdb && docker-compose up -d couchdb`.
 
 2. Start the issuers.
     ```

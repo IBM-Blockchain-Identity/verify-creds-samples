@@ -35,7 +35,7 @@ spec:
               containerPort: 3000
           env:
             - name: DB_CONNECTION_STRING
-              value: "http://couchdb:5984"
+              value: "http://COUCHDB_USER_NAME_HERE:COUCHDB_USER_PASSWORD_HERE@couchdb:5984"
             - name: DB_USERS
               value: "gov_dmv_db"
             - name: LOG_LEVEL
@@ -100,7 +100,7 @@ spec:
               containerPort: 3000
           env:
             - name: DB_CONNECTION_STRING
-              value: "http://couchdb:5984"
+              value: "http://COUCHDB_USER_NAME_HERE:COUCHDB_USER_PASSWORD_HERE@couchdb:5984"
             - name: DB_USERS
               value: "ibm_hr_db"
             - name: LOG_LEVEL
@@ -165,7 +165,7 @@ spec:
               containerPort: 3000
           env:
             - name: DB_CONNECTION_STRING
-              value: "http://couchdb:5984"
+              value: "http://COUCHDB_USER_NAME_HERE:COUCHDB_USER_PASSWORD_HERE@couchdb:5984"
             - name: DB_USERS
               value: "bbcu_db"
             - name: LOG_LEVEL
@@ -232,3 +232,8 @@ spec:
           ports:
             - name: couchdb
               containerPort: 5984
+          env:
+            - name: COUCHDB_USER
+              value: "COUCHDB_USER_NAME_HERE"
+            - name: COUCHDB_PASSWORD
+              value: "COUCHDB_USER_PASSWORD_HERE"

@@ -6,6 +6,9 @@ services:
       - "5984:5984"
     volumes:
       - "./couchdb/data:/opt/couchdb/data"
+    environment:
+      - 'COUCHDB_USER=${COUCHDB_USER_NAME}'
+      - 'COUCHDB_PASSWORD=${COUCHDB_USER_PASSWORD}'
 
   dmv:
     build: ./gov-dmv
@@ -16,7 +19,7 @@ services:
       - "./gov-dmv/public:/opt/app/public"
       - "./gov-dmv/views:/opt/app/views"
     environment:
-      - DB_CONNECTION_STRING=http://couchdb:5984
+      - DB_CONNECTION_STRING=http://${COUCHDB_USER_NAME}:${COUCHDB_USER_PASSWORD}@couchdb:5984
       - DB_USERS=dmv_db
       - LOG_LEVEL=debug
       - ACCOUNT_URL
@@ -42,7 +45,7 @@ services:
       - "./ibm-hr/public:/opt/app/public"
       - "./ibm-hr/views:/opt/app/views"
     environment:
-      - DB_CONNECTION_STRING=http://couchdb:5984
+      - DB_CONNECTION_STRING=http://${COUCHDB_USER_NAME}:${COUCHDB_USER_PASSWORD}@couchdb:5984
       - DB_USERS=ibm_hr_db
       - LOG_LEVEL=debug
       - ACCOUNT_URL
@@ -68,7 +71,7 @@ services:
       - "./bbcu/public:/opt/app/public"
       - "./bbcu/views:/opt/app/views"
     environment:
-      - DB_CONNECTION_STRING=http://couchdb:5984
+      - DB_CONNECTION_STRING=http://${COUCHDB_USER_NAME}:${COUCHDB_USER_PASSWORD}@couchdb:5984
       - DB_USERS=bbcu_db
       - LOG_LEVEL=debug
       - ACCOUNT_URL
