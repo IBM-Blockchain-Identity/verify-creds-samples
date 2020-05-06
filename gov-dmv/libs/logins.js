@@ -241,7 +241,9 @@ class Login {
 				}
 
 				logger.info(`Accepting invitation from ${this.user}`);
-				connection = await this.agent.acceptInvitation(user_doc.opts.invitation_url);
+				this.connection_offer = await this.agent.acceptInvitation(user_doc.opts.invitation_url, connection_opts);
+				logger.info(`Sent connection offer ${this.connection_offer.id} to ${this.user}`);
+				connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
 			} catch (error) {
 				logger.error(`Failed to establish a connection with the user. error: ${error}`);
 				error.code = error.code ? error.code : LOGIN_ERRORS.LOGIN_CONNECTION_FAILED;

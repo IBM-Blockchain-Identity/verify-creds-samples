@@ -113,15 +113,7 @@ exports.createRouter = function (signup_manager) {
 			});
 		}
 		const agent_name = req.body.agent_name;
-
-		if (!req.body.qr_code_nonce && (!req.body || !req.body.connection_method || typeof req.body.connection_method !== 'string')) {
-			return res.status(400).json({
-				error: SIGNUP_API_ERRORS.MISSING_REQUIRED_PARAMETERS,
-				reason: 'Invalid connection_method for issuing the credential'
-			});
-		}
-
-		const signup_id = signup_manager.create_signup(username, agent_name, password, req.body.connection_method, req.body.qr_code_nonce);
+		const signup_id = signup_manager.create_signup(username, agent_name, password, req.body.qr_code_nonce);
 		req.session.signup = signup_id;
 		res.status(201).json({
 			message: 'Signup process initiated',

@@ -250,7 +250,7 @@ class Issuance {
 				}
 
 				logger.info(`Accepting invitation from ${this.user}`);
-				this.connection_offer = await this.agent.acceptInvitation(user_doc.opts.invitation_url);
+				this.connection_offer = await this.agent.acceptInvitation(user_doc.opts.invitation_url, connection_opts);
 				if (!this.connection_offer || this.connection_offer.state !== 'outbound_offer') {
 					throw new Error('Connection in unexpected state after accepting invitation');
 				}

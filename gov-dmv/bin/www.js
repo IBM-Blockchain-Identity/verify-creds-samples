@@ -38,6 +38,7 @@ const logger = Logger.makeLogger(Logger.logPrefix(__filename));
 const required = [
 	'DB_CONNECTION_STRING',
 	'DB_USERS',
+	'AGENT_ID',
 	'AGENT_NAME',
 	'AGENT_PASSWORD',
 	'FRIENDLY_NAME',

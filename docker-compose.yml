@@ -50,6 +50,7 @@ services:
       - DB_USERS=ibm_hr_db
       - LOG_LEVEL=debug
       - ACCOUNT_URL
+      - AGENT_ID=${IBMHR_AGENT_ID}
       - AGENT_NAME=${IBMHR_AGENT_NAME}
       - AGENT_PASSWORD=${IBMHR_AGENT_PASSWORD}
       - FRIENDLY_NAME=IBM HR
@@ -76,6 +77,7 @@ services:
       - DB_USERS=bbcu_db
       - LOG_LEVEL=debug
       - ACCOUNT_URL
+      - AGENT_ID=${BBCU_AGENT_ID}
       - AGENT_NAME=${BBCU_AGENT_NAME}
       - AGENT_PASSWORD=${BBCU_AGENT_PASSWORD}
       - FRIENDLY_NAME=Big Blue Credit Union
