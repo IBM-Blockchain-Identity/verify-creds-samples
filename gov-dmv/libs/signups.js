@@ -211,7 +211,6 @@ class Signup {
 		this.connection_offer = null;
 		this.verification = null;
 		this.credential = null;
-		this.connection_method = connection_method;
 	}
 
 	/**
@@ -237,7 +236,7 @@ class Signup {
 			}
 
 			my_credential_definitions.sort(sortSchemas).reverse();
-			const schema_id = my_credential_definitions[0].schema_id;
+			const schema_id = my_credential_definitions[0].schema.id;
 			logger.debug(`Issuing credential to new user with schema ${schema_id}`);
 
 			const schema = await this.agent.getCredentialSchema(schema_id);
@@ -255,33 +254,13 @@ class Signup {
 			logger.debug(`Created proof schema: ${JSON.stringify(account_proof_schema)}`);
 
 			this.status = Signup.SIGNUP_STEPS.ESTABLISHING_CONNECTION;
-			logger.info(`Connection to user via the ${this.connection_method} method`);
+			logger.info(`Connection to user via an`);
 			const connection_opts = icon ? {icon: icon} : null;
 			let connection;
 
 			try {
 
-				if (this.connection_method === 'in_band') {
-
-					if (!this.agent_name) {
-						const err = new Error('User record does not have an associated agent name');
-						err.code = SIGNUP_ERRORS.AGENT_NOT_FOUND;
-						throw err;
-					}
-
-					let connection_to = this.agent_name;
-					if (typeof connection_to === 'string') {
-						if (connection_to.toLowerCase().indexOf('http') >= 0)
-							connection_to = {url: connection_to};
-						else
-							connection_to = {name: connection_to};
-					}
-					logger.info(`Sending connection offer to ${JSON.stringify(connection_to)}`);
-					this.connection_offer = await this.agent.createConnection(connection_to, connection_opts);
-					logger.info(`Sent connection offer ${this.connection_offer.id} to ${JSON.stringify(connection_to)}`);
-					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
-
-				} else if (this.connection_method === 'out_of_band') {
+				if (this.connection_method === 'out_of_band') {
 
 					this.connection_offer = await this.agent.createConnection(null, connection_opts);
 					logger.info(`Created out-of-band connection offer ${this.connection_offer.id}`);
@@ -364,8 +343,8 @@ class Signup {
 			logger.debug(`User record: ${JSON.stringify(user_doc)}`);
 
 			const cred_attributes = {};
-			for (const index in schema.attr_names) {
-				const attr_name = schema.attr_names[index];
+			for (const index in schema.attrs) {
+				const attr_name = schema.attrs[index];
 				// Certain attributes are supposed to contain rendered images of the credential
 				if (attr_name === 'card_front') {
 					cred_attributes[attr_name] = await this.card_renderer.createCardFront(personal_info);

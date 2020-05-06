@@ -23,6 +23,7 @@ services:
       - DB_USERS=dmv_db
       - LOG_LEVEL=debug
       - ACCOUNT_URL
+      - AGENT_ID=${DMV_AGENT_ID}
       - AGENT_NAME=${DMV_AGENT_NAME}
       - AGENT_PASSWORD=${DMV_AGENT_PASSWORD}
       - FRIENDLY_NAME=Gov DMV

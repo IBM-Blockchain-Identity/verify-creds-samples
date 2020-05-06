@@ -50,18 +50,15 @@ class IssuanceManager {
 	/**
 	 * Creates an Issuance for the given user.
 	 * @param {string} user The app user we want to deliver a credential to.
-	 * @param {ConnectionMethod} connection_method The method for connecting to the user.
 	 * @returns {string} A Issuance instance ID to be used to check the status of the Issuance later.
 	 */
-	create_issuance (user, connection_method) {
+	create_issuance (user) {
 		if (!user || typeof user !== 'string')
 			throw new TypeError('Invalid user was provided for issuing credentials');
-		if (!connection_method || typeof connection_method !== 'string')
-			throw new TypeError('Invalid connection method for issuing credentials');
 
 		const issuance_id = uuidv4();
 		logger.info(`Creating issuance ${issuance_id}`);
-		this.issuances[issuance_id] = new Issuance(issuance_id, this.agent, user, this.user_records, this.card_renderer, this.connection_icon_provider, connection_method);
+		this.issuances[issuance_id] = new Issuance(issuance_id, this.agent, user, this.user_records, this.card_renderer, this.connection_icon_provider);
 		this.issuances[issuance_id].start();
 		return issuance_id;
 	}
@@ -164,9 +161,8 @@ class Issuance {
 	 * @param {Users} user_records The database of app Users where personal information is stored.
 	 * @param {CardRenderer} card_renderer The handler for creating credential images from user data.
 	 * @param {ImageProvider} connection_icon_provider Provides the image data for connection offers.
-	 * @param {ConnectionMethod} connection_method The method for establishing the connection to the user
 	 */
-	constructor (id, agent, user, user_records, card_renderer, connection_icon_provider, connection_method) {
+	constructor (id, agent, user, user_records, card_renderer, connection_icon_provider) {
 		this.id = id;
 		this.agent = agent;
 		this.user = user;
@@ -178,7 +174,6 @@ class Issuance {
 		this.connection_icon_provider = connection_icon_provider;
 		this.connection_offer = null;
 		this.credential = null;
-		this.connection_method = connection_method;
 	}
 
 	/**
@@ -198,8 +193,6 @@ class Issuance {
 			logger.info(`Getting credential data for ${this.user}`);
 			const user_doc = await this.user_records.read_user(this.user);
 
-
-
 			const my_credential_definitions = await this.agent.getCredentialDefinitions();
 			logger.debug(`${this.agent.user}'s list of credential definitions: ${JSON.stringify(my_credential_definitions, 0, 1)}`);
 
@@ -210,7 +203,7 @@ class Issuance {
 			}
 
 			my_credential_definitions.sort(sortSchemas).reverse();
-			const schema_id = my_credential_definitions[0].schema_id;
+			const schema_id = my_credential_definitions[0].schema.id;
 			logger.debug(`Issuing credential with schema ${schema_id}`);
 
 			const schema = await this.agent.getCredentialSchema(schema_id);
@@ -222,8 +215,8 @@ class Issuance {
 
 			logger.debug(`User record: ${JSON.stringify(user_doc)}`);
 			const attributes = {};
-			for (const index in schema.attr_names) {
-				const attr_name = schema.attr_names[index];
+			for (const index in schema.attrs) {
+				const attr_name = schema.attrs[index];
 				// Certain attributes are supposed to contain rendered images of the credential
 				if (attr_name === 'card_front') {
 					attributes[attr_name] = await this.card_renderer.createCardFront(user_doc.personal_info);
@@ -245,44 +238,24 @@ class Issuance {
 			}
 
 			this.status = Issuance.ISSUANCE_STEPS.ESTABLISHING_CONNECTION;
-			logger.info(`Connection to user via the ${this.connection_method} method`);
+			logger.info(`Connection to user via invitation`);
 			const connection_opts = icon ? {icon: icon} : null;
 			let connection;
 
 			try {
-
-				if (this.connection_method === 'in_band') {
-
-					if (!user_doc.opts || !user_doc.opts.agent_name) {
-						const err = new Error('User record does not have an associated agent name');
-						err.code = CREDENTIAL_ERRORS.CREDENTIAL_USER_AGENT_NOT_FOUND;
-						throw err;
-					}
-
-					let connection_to = user_doc.opts.agent_name;
-					if (typeof connection_to === 'string') {
-						if (connection_to.toLowerCase().indexOf('http') >= 0)
-							connection_to = {url: connection_to};
-						else
-							connection_to = {name: connection_to};
-					}
-					logger.info(`Sending connection offer to ${JSON.stringify(connection_to)}`);
-					this.connection_offer = await this.agent.createConnection(connection_to, connection_opts);
-					logger.info(`Sent connection offer ${this.connection_offer.id} to ${user_doc.opts.agent_name}`);
-					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
-
-				} else if (this.connection_method === 'out_of_band') {
-
-					this.connection_offer = await this.agent.createConnection(null, connection_opts);
-					logger.info(`Created out-of-band connection offer ${this.connection_offer.id}`);
-					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
-
-				} else {
-					const error = new Error(`An invalid connection method was used: ${this.connection_method}`);
-					logger.error(`Credential issuance could not proceed: ${error}`);
-					error.code = CREDENTIAL_ERRORS.CREDENTIAL_INVALID_CONNECTION_METHOD;
-					throw error;
+				if (!user_doc.opts || !user_doc.opts.invitation_url) {
+					const err = new Error('User record does not have an associated invitation url');
+					err.code = CREDENTIAL_ERRORS.CREDENTIAL_USER_AGENT_NOT_FOUND;
+					throw err;
 				}
+
+				logger.info(`Accepting invitation from ${this.user}`);
+				this.connection_offer = await this.agent.acceptInvitation(user_doc.opts.invitation_url);
+				if (!this.connection_offer || this.connection_offer.state !== 'outbound_offer') {
+					throw new Error('Connection in unexpected state after accepting invitation');
+				}
+				logger.info(`Sent connection offer ${this.connection_offer.id} to ${user_doc.opts.agent_name}`);
+				connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
 
 			} catch (error) {
 				logger.error(`Failed to establish a connection with the user. error: ${error}`);
@@ -410,7 +383,6 @@ const CREDENTIAL_ERRORS = {
 	CREDENTIAL_NOT_ACCEPTED: 'CREDENTIAL_NOT_ACCEPTED',
 	CREDENTIAL_NO_CREDENTIAL_DEFINITIONS: 'CREDENTIAL_NO_CREDENTIAL_DEFINITIONS',
 	CREDENTIAL_CONNECTION_FAILED: 'CREDENTIAL_CONNECTION_FAILED',
-	CREDENTIAL_INVALID_CONNECTION_METHOD: 'CREDENTIAL_INVALID_CONNECTION_METHOD',
 	CREDENTIAL_USER_AGENT_NOT_FOUND: 'CREDENTIAL_USER_AGENT_NOT_FOUND',
 	CREDENTIAL_UNKNOWN_ERROR: 'CREDENTIAL_UNKNOWN_ERROR',
 	CREDENTIAL_SCHEMA_LOOKUP_FAILED: 'CREDENTIAL_SCHEMA_LOOKUP_FAILED'
