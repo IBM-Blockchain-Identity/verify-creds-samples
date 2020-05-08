@@ -8,9 +8,9 @@ export KUBERNETES_NAMESPACE=ssi-samples-dev
 
 export VERSION=latest
 
-export GOVDMV_IMAGE_TAG=verifycreds/gov-dmv:$VERSION
-export IBMHR_IMAGE_TAG=verifycreds/ibm-hr:$VERSION
-export BBCU_IMAGE_TAG=verifycreds/bbcu:$VERSION
+export GOVDMV_IMAGE_TAG=verifycreds/gov-dmv-ti:$VERSION
+export IBMHR_IMAGE_TAG=verifycreds/ibm-hr-ti:$VERSION
+export BBCU_IMAGE_TAG=verifycreds/bbcu-ti:$VERSION
 
 export ACCOUNT_URL=$NEWDEV_ACCOUNT_URL
 
