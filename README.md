@@ -91,7 +91,9 @@ docker-compose build
 
 ### Running the samples
 
-1. Setup your `.env` file with the necessary parameters to connect.
+1. Setup your `.env` file with the necessary parameters to connect.  The account url value can be found in your welcome email or
+by visiting your account dashboard, clicking on an agent, clicking the `Add Device` on the `General` page for the agent,
+and clicking on `Manual Entry` in the `Register Device` popup panel.
     ```
     $ cp .env_template .env
     
