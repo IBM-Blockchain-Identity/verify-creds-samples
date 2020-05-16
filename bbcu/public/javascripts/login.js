@@ -285,8 +285,7 @@ async function ProcessSignon (vcSignonModal, vcSignonCarousel, mobileCredMgr=fal
 
 	// You can only use the sign on api with a username
 	const data = {
-		username: formObject.username,
-		connection_method: 'in_band'
+		username: formObject.username
 	};
 
 	// Reset the signon carousel
@@ -384,19 +383,6 @@ async function ProcessSignon (vcSignonModal, vcSignonCarousel, mobileCredMgr=fal
 
 			if (use_extension) {
 				// TODO render the connection offer as a QR code
-				if (!connection_shown && response.connection_offer) {
-					connection_shown = true;
-					console.log('Accepting connection offer via extension');
-					try {
-						window.verifyCreds({
-							operation: 'respondToConnectionOffer',
-							connectionOffer: response.connection_offer
-						});
-					} catch (error) {
-						console.error(`Extension failed to show connection offer: ${JSON.stringify(error)}`);
-					}
-				}
-
 				if (!verification_shown && response.verification) {
 					verification_shown = true;
 					console.log('Accepting proof request via extension');
@@ -492,7 +478,6 @@ async function ProcessSignup (vcSignupCarousel, mobileCredMgr=false) {
 				password: password,
 				username: username,
 				agent_name: agent_name,
-				connection_method: 'in_band',
 				qr_code_nonce: mobileCredMgr ? qrCodeNonce: null,
 			})
 		});
@@ -571,19 +556,6 @@ async function ProcessSignup (vcSignupCarousel, mobileCredMgr=false) {
 
 			if (use_extension) {
 				// TODO render the connection offer as a QR code
-				if (!connection_shown && response.connection_offer) {
-					connection_shown = true;
-					console.log('Accepting connection offer via extension');
-					try {
-						window.verifyCreds({
-							operation: 'respondToConnectionOffer',
-							connectionOffer: response.connection_offer
-						});
-					} catch (error) {
-						console.error(`Extension failed to show connection offer: ${JSON.stringify(error)}`);
-					}
-				}
-
 				if (!verification_shown && response.verification && response.verification.id) {
 					verification_shown = true;
 					console.log('Accepting proof request via extension');

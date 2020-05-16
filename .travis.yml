@@ -28,3 +28,9 @@ deploy:
     on:
       repo: IBM-Blockchain-Identity/verify-creds-samples
       branch: master
+  - provider: script
+    skip_cleanup: true
+    script: ./travis/deploy_newdev.sh
+    on:
+      repo: IBM-Blockchain-Identity/verify-creds-samples
+      branch: newagency

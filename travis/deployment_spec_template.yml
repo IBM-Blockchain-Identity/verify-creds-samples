@@ -42,6 +42,8 @@ spec:
               value: "debug"
             - name: ACCOUNT_URL
               value: "ACCOUNT_URL_HERE"
+            - name: AGENT_ID
+              value: "DMV_AGENT_ID_HERE"
             - name: AGENT_NAME
               value: "DMV_AGENT_NAME_HERE"
             - name: FRIENDLY_NAME
@@ -107,6 +109,8 @@ spec:
               value: "debug"
             - name: ACCOUNT_URL
               value: "ACCOUNT_URL_HERE"
+            - name: AGENT_ID
+              value: "IBMHR_AGENT_ID_HERE"
             - name: AGENT_NAME
               value: "IBMHR_AGENT_NAME_HERE"
             - name: FRIENDLY_NAME
@@ -172,6 +176,8 @@ spec:
               value: "debug"
             - name: ACCOUNT_URL
               value: "ACCOUNT_URL_HERE"
+            - name: AGENT_ID
+              value: "BBCU_AGENT_ID_HERE"
             - name: AGENT_NAME
               value: "BBCU_AGENT_NAME_HERE"
             - name: FRIENDLY_NAME

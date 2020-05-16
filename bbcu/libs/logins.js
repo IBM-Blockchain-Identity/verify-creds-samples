@@ -52,21 +52,18 @@ class LoginManager {
 	/**
 	 * Creates an Login flow for the given user.
 	 * @param {string} user The app user we want to log in.
-	 * @param {ConnectionMethod} connection_method The method for connecting to the user.
 	 * @param {string} qr_code_nonce The nonce in the QR code that initiated this login flow.
 	 * @returns {string} A Login instance ID to be used to check the status of the Login later.
 	 */
-	create_login (user, connection_method, qr_code_nonce) {
+	create_login (user, qr_code_nonce) {
 		if ((!qr_code_nonce && (!user || typeof user !== 'string')) ||
 			(qr_code_nonce && (user === undefined || user === null || typeof user !== 'string'))) {
 			throw new TypeError('Invalid user was provided to login manager');
 		}
-		if (!connection_method || typeof connection_method !== 'string')
-			throw new TypeError('Invalid connection method for logging in');
 
 		const login_id = uuidv4();
 		logger.info(`Creating login ${login_id}`);
-		this.logins[login_id] = new Login(login_id, this.agent, user, this.user_records, this.connection_icon_provider, this.login_helper, connection_method, qr_code_nonce);
+		this.logins[login_id] = new Login(login_id, this.agent, user, this.user_records, this.connection_icon_provider, this.login_helper, qr_code_nonce);
 		this.logins[login_id].start();
 		return login_id;
 	}
@@ -186,10 +183,9 @@ class Login {
 	 * @param {Users} user_records The database of app Users where personal information is stored.
 	 * @param {ImageProvider} connection_icon_provider Provides the image data for connection offers.
 	 * @param {ProofHelper} login_helper Provides proof schemas and checks proof responses.
-	 * @param {ConnectionMethod} connection_method The method for establishing the connection to the user
 	 * @param {string} qr_code_nonce The nonce in the QR code that initiated this login flow.
 	 */
-	constructor (id, agent, user, user_records, connection_icon_provider, login_helper, connection_method, qr_code_nonce) {
+	constructor (id, agent, user, user_records, connection_icon_provider, login_helper, qr_code_nonce) {
 		this.id = id;
 		this.agent = agent;
 		this.user = user;
@@ -201,7 +197,6 @@ class Login {
 		this.login_helper = login_helper;
 		this.connection_offer = null;
 		this.verification = null;
-		this.connection_method = connection_method;
 		this.qr_code_nonce = qr_code_nonce;
 	}
 
@@ -250,7 +245,7 @@ class Login {
 			} else {
 				this.status = Login.LOGIN_STEPS.ESTABLISHING_CONNECTION;
 			}
-			logger.info(`Connection to user via the ${this.connection_method} method`);
+			logger.info(`Connection to user`);
 			const connection_opts = icon ? {icon: icon} : null;
 			let connection;
 
@@ -276,37 +271,15 @@ class Login {
 						}
 					}
 
-				} else if (this.connection_method === 'in_band') {
-
-					if (!user_doc.opts || !user_doc.opts.agent_name) {
-						const err = new Error('User record does not have an associated agent name');
+				} else {
+					if (!user_doc.opts || !user_doc.opts.invitation_url) {
+						const err = new Error('User record does not have an associated invitation url');
 						err.code = LOGIN_ERRORS.AGENT_NOT_FOUND;
 						throw err;
 					}
 
-					let connection_to = user_doc.opts.agent_name;
-					if (typeof connection_to === 'string') {
-						if (connection_to.toLowerCase().indexOf('http') >= 0)
-							connection_to = {url: connection_to};
-						else
-							connection_to = {name: connection_to};
-					}
-					logger.info(`Sending connection offer to ${JSON.stringify(connection_to)}`);
-					this.connection_offer = await this.agent.createConnection(connection_to, connection_opts);
-					logger.info(`Sent connection offer ${this.connection_offer.id} to ${user_doc.opts.agent_name}`);
-					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
-
-				} else if (this.connection_method === 'out_of_band') {
-
-					this.connection_offer = await this.agent.createConnection(null, connection_opts);
-					logger.info(`Created out-of-band connection offer ${this.connection_offer.id}`);
-					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
-
-				} else {
-					const error = new Error(`An invalid connection method was used: ${this.connection_method}`);
-					logger.error(`Credential issuance could not proceed: ${error}`);
-					error.code = LOGIN_ERRORS.LOGIN_INVALID_CONNECTION_METHOD;
-					throw error;
+					logger.info(`Accepting invitation from ${this.user}`);
+					connection = await this.agent.acceptInvitation(user_doc.opts.invitation_url);
 				}
 
 			} catch (error) {
@@ -485,7 +458,6 @@ const LOGIN_ERRORS = {
 	AGENT_NOT_FOUND: 'SIGNUP_HOLDER_AGENT_NOT_FOUND',
 	LOGIN_UNKNOWN_ERROR: 'LOGIN_UNKNOWN_ERROR',
 	LOGIN_NO_CREDENTIAL_DEFINITIONS: 'LOGIN_NO_CREDENTIAL_DEFINITIONS',
-	LOGIN_INVALID_CONNECTION_METHOD: 'LOGIN_INVALID_CONNECTION_METHOD',
 	LOGIN_CONNECTION_FAILED: 'LOGIN_CONNECTION_FAILED'
 };
 
