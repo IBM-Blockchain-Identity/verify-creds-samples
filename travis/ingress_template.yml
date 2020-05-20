@@ -13,7 +13,7 @@ spec:
         - DMV_CLUSTER_INGRESS_URL_HERE
         - IBMHR_CLUSTER_INGRESS_URL_HERE
         - BBCU_CLUSTER_INGRESS_URL_HERE
-      secretName: credimi-dev
+      secretName: ti-agency-dev
   rules:
     - host: DMV_CLUSTER_INGRESS_URL_HERE
       http:
