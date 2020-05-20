@@ -8,33 +8,67 @@ This project contains the code necessary to run a mock-up of the **BBCU Online**
 
 [Visit this page](https://bbcu.livedemo.verify-creds.com) to play with a running instance of this sample.
 
-### Signing up for an account
+There are two paths that you may take which illustrate, we belive, the two most likely user
+experiences that you will have, as a digital identity user, when signing up for an account.
 
-1. Click on `Sign up for an account` button on the login page.
+### Path 1: Signing up for an account manually
+
+If you select the `I want to use browser extension` button, you will be taken through a user
+experience where you will need to manually enter a username, password and Agent URL in order
+to establish an account.  This path may be taken whether you use the IBM Verify Creds browser
+extension or the IBM Verify Creds mobile app.
+
+1. Click on `Sign up for an account - Browser` button on the login page.  Again, this will
+still support the mobile app.
 2. Click the `Next` button on the modal that appears.
   ![signup_1.png](docs/signup_1.png)
 3. Fill out the signup form and click the `Next` button. The Agent URL entered here will be used to connect to the
 your agent.
   ![signup_2.png](docs/signup_2.png)
-4. Accept the connection offer from `Big Blue Credit Union` on your mobile app.
-5. Respond to proof request on your mobile app.
-6. Accept the credential offer from `Big Blue Credit Union` on your mobile app.  You will be logged in to your new
-account.
+4. Accept the connection offer from `Big Blue Credit Union` on your mobile app or browser extension.
+5. Respond to proof request on your mobile app or browser extension.
+6. Accept the credential offer from `Big Blue Credit Union` on your mobile app or browser extension.  You will be logged in to your new account.
+
+### Path 2: Signing up for an account with IBM Verify Creds mobile app
+If you select the `I want to use mobile app` button, you will be taken through a user experience where you don't need to provide your agent url to the BBCU application.
+
+1. Click on the `Sign up for an account - Mobile` button on the login page.
+2. Click the `Next` button on the modal that appears.
+  ![signup_1.png](docs/signup_1.png)
+3. Scan the QR code in order to connect with BBCU.
+4. Respond to proof request on your mobile app.
+5. Accept the credential offer from `Big Blue Credit Union` on your mobile app.  You will be logged in to your new account.
 
 ## Part 4: Signing in using verifiable credentials
 
+There are two paths that you may take which illustrate, we belive, the two most likely user
+experiences that you will have, as a digital identity user, when logging into an account.
+
+### Path 1: Logging into an account manually
+
 1. Log out of your BBCU account page.
   ![login_1.png](docs/login_1.png)
+2. Click the `I want to use browser extension` button.
 2. Click the `Login with a digital credential` button.
 3. Enter the user name for your account and click the `Sign On` button.
   ![login_2.png](docs/login_2.png)
 4. Respond to the proof request on your mobile app.
+
+### Path 2: Logging into an account with IBM Verify Creds mobile app
+
+1. Log out of your BBCU account page.
+  ![login_1.png](docs/login_1.png)
+2. Click the `I want to use mobile app` button.
+3. Click the `Login with a digital credential` button.
+4. Scan the QR code in order to connect with BBCU.
+5. Respond to the proof request on your mobile app.
 
 ## Running through the demo again
 
 Remember to delete the user that you created before attempting [Part 3](#part-3-signing-up-for-a-bank-account) again.
 This can be done from the admin panel; simply click the `Delete` button on the user's row in the User List table.
   ![delete_user.png](docs/delete_user.png)
+This can also be done by logging into your BBCU account and then clicking on the Delete Account button at the top of the page.
 
 ## Development
 
