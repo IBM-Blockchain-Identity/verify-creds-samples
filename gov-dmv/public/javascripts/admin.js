@@ -703,7 +703,7 @@ function create_cred_def_table (cred_defs) {
 
 	for (const cred_def_id in cred_defs) {
 		const def = cred_defs[cred_def_id];
-		table.data.push(def);
+		table.data.push({id: def.id, schema_id: def.schema.id});
 	}
 
 	const credDefTable = $('#credDefTable');
