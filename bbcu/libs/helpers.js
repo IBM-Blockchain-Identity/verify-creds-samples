@@ -216,15 +216,15 @@ class AccountSignupHelper {
 
 	/**
 	 * Creates a AccountSignupHelper that will create proof requests asking for a drivers license and employment badge.
-	 * @param {string} hr_issuer The agent name for the HR issuer.
-	 * @param {string} dmv_issuer The agent name for the dmv issuer.
+	 * @param {string} hr_issuer_did The agent DID for the HR issuer.
+	 * @param {string} dmv_issuer_did The agent DID for the dmv issuer.
 	 * @param {string} proof_schema_path The path to a proof schema file.
 	 * @param {Agent} agent An Agent instance capable of looking up schemas.
 	 */
-	constructor (hr_issuer, dmv_issuer, proof_schema_path, agent) {
-		if (!hr_issuer || typeof hr_issuer !== 'string')
+	constructor (hr_issuer_did, dmv_issuer_did, proof_schema_path, agent) {
+		if (!hr_issuer_did || typeof hr_issuer_did !== 'string')
 			throw new TypeError('Invalid HR issuer');
-		if (!dmv_issuer || typeof dmv_issuer !== 'string')
+		if (!dmv_issuer_did || typeof dmv_issuer_did !== 'string')
 			throw new TypeError('Invalid DMV issuer');
 		if (!proof_schema_path || typeof proof_schema_path !== 'string')
 			throw new TypeError('Invalid proof schema path for signup helper');
@@ -240,67 +240,10 @@ class AccountSignupHelper {
 		if (!fs.existsSync(proof_schema_path))
 			throw new Error(`File ${proof_schema_path} does not exist`);
 
-		this.hr_issuer = hr_issuer;
-		this.dmv_issuer = dmv_issuer;
+		this.hr_issuer_did = hr_issuer_did;
+		this.dmv_issuer_did = dmv_issuer_did;
 		this.proof_schema_path = proof_schema_path;
 		this.agent = agent;
-	}
-
-	/**
-	 * Sets up tagged connections to the DMV and HR apps so that we can use the `/credential_definitions?route=trustedDMV:true`
-	 * or `/credential_definitions?route=trustedDMV:true` API calls to get their credential definition list later.
-	 * @returns {Promise<void>} A promise that resolves when the tagged connections are established.
-	 */
-	async setup () {
-		let to = {};
-		if (this.dmv_issuer.toLowerCase().indexOf('http') >= 0)
-			to.url = this.dmv_issuer;
-		else
-			to.name = this.dmv_issuer;
-
-		logger.info(`Setting up a connection to trusted issuer: ${JSON.stringify(to)}`);
-		let connection_offer = await this.agent.createConnection(to, {
-			trustedDMV: 'true'
-		});
-		await this.agent.waitForConnection(connection_offer.id);
-		logger.info(`Connection ${connection_offer.id} established`);
-
-		to = {};
-		if (this.hr_issuer.toLowerCase().indexOf('http') >= 0)
-			to.url = this.hr_issuer;
-		else
-			to.name = this.hr_issuer;
-
-		logger.info(`Setting up a connection to trusted issuer: ${JSON.stringify(to)}`);
-		connection_offer = await this.agent.createConnection(to, {
-			trustedHR: 'true'
-		});
-		await this.agent.waitForConnection(connection_offer.id);
-		logger.info(`Connection ${connection_offer.id} established`);
-	}
-
-	/**
-	 * Cleans up all the connections created for this signup flow.  Handy for when you need to change the properties
-	 * you want to set on the connections to the issuers.
-	 * @returns {Promise<void>} A promise that resolves when the connections created for this flow are deleted.
-	 */
-	async cleanup () {
-		logger.info(`Cleaning up connections to the issuers: ${this.dmv_issuer} and ${this.hr_issuer}`);
-		const connections = await this.agent.getConnections({
-			$or: [
-				{
-					'remote.name': {$in: [ this.hr_issuer, this.dmv_issuer ]}
-				},
-				{
-					'remote.url': {$in: [ this.hr_issuer, this.dmv_issuer ]}
-				}
-			]
-		});
-		logger.info(`Cleaning up ${connections.length} issuer connections`);
-		for (const index in connections) {
-			logger.debug(`Cleaning up connection ${connections[index].id}`);
-			await this.agent.deleteConnection(connections[index].id);
-		}
 	}
 
 	async getProofSchema (opts) {
@@ -315,9 +258,9 @@ class AccountSignupHelper {
 			});
 		});
 
-		logger.info(`Looking up credential definitions for issuer ${this.dmv_issuer}`);
-		const dmv_cred_defs = await this.agent.getCredentialDefinitions(null, {trustedDMV: 'true'});
-		logger.debug(`${this.dmv_issuer}'s credential definitions: ${JSON.stringify(dmv_cred_defs, 0, 1)}`);
+		logger.info(`Looking up credential definitions for issuer ${this.dmv_issuer_did}`);
+		const dmv_cred_defs = await this.agent.getCredentialDefinitions(true, {owner_did: this.dmv_issuer_did});
+		logger.debug(`${this.dmv_issuer_did}'s credential definitions: ${JSON.stringify(dmv_cred_defs, 0, 1)}`);
 		const dmv_restrictions = [];
 		for (const agent_index in dmv_cred_defs.agents) {
 			const agent = dmv_cred_defs.agents[agent_index];
@@ -329,12 +272,9 @@ class AccountSignupHelper {
 			}
 		}
 
-		logger.info(`Making sure we still have a connection to ${this.hr_issuer} and ${this.dmv_issuer}`);
-		await this.setup();
-
-		logger.info(`Looking up credential definitions for issuer ${this.hr_issuer}`);
-		const hr_cred_defs = await this.agent.getCredentialDefinitions(null, {trustedHR: 'true'});
-		logger.debug(`${this.hr_issuer}'s credential definitions: ${JSON.stringify(hr_cred_defs, 0, 1)}`);
+		logger.info(`Looking up credential definitions for issuer ${this.hr_issuer_did}`);
+		const hr_cred_defs = await this.agent.getCredentialDefinitions(true, {owner_did: this.hr_issuer_did});
+		logger.debug(`${this.hr_issuer_did}'s credential definitions: ${JSON.stringify(hr_cred_defs, 0, 1)}`);
 		const hr_restrictions = [];
 		for (const agent_index in hr_cred_defs.agents) {
 			const agent = hr_cred_defs.agents[agent_index];
@@ -455,72 +395,6 @@ class AccountSignupHelper {
 }
 
 /**
- * Listens for and accepts incoming connection requests.  The AccountSignupHelper needs the other issuers to be running
- * one of these so that it can establish a connection to look up their credential definitions and build a proof schema.
- */
-class ConnectionResponder {
-	constructor (agent, interval) {
-		if (!agent || typeof agent.getConnections !== 'function')
-			throw new TypeError('Invalid agent for ConnectionResponder');
-		if (interval !== undefined && typeof interval !== 'number' || interval < 0)
-			throw new TypeError('Invalid polling interval for ConnectionResponder');
-		this.agent = agent;
-		this.stopped = true;
-		this.interval = interval !== undefined ? interval : 3000;
-	}
-
-	async start () {
-		this.stopped = false;
-
-		async.until(
-			() => { return this.stopped; },
-			async () => {
-
-				try {
-
-					const offers = await this.agent.getConnections({
-						state: 'inbound_offer'
-					});
-					logger.info('Connection Offers: ' + offers.length);
-					if (offers.length > 0) {
-						const offer = offers[0];
-						try {
-							logger.info(`Accepting connection offer ${offer.id} from  ${offer.remote.name}`);
-							const r = await this.agent.acceptConnection(offer.id);
-							logger.info(`Accepted connection offer ${r.id} from ${r.remote.name}`);
-						} catch (error) {
-							logger.error(`Couldn't accept connection offer ${offer.id}. Error: ${error}`);
-							logger.info(`Deleting bad connection offer ${offer.id}`);
-							await this.agent.deleteConnection(offer.id);
-						}
-					}
-				} catch (error) {
-					logger.error(`Failed to respond to connection requests: ${error}`);
-				}
-
-				return new Promise((resolve, reject) => {
-					setTimeout(resolve, this.interval);
-				});
-			},
-			(error) => {
-				logger.error(`Stopping connection responder: ${error}`);
-				this.stopped = false;
-			}
-		);
-	}
-
-	set_interval (interval) {
-		if (typeof interval !== 'number' || interval < 0)
-			throw new TypeError('ConnectionResponder interval must be >= 0');
-		this.interval = interval;
-	}
-
-	async stop () {
-		this.stopped = true;
-	}
-}
-
-/**
  * Waits for a request type (Connection, Credential, Verification) to be pending for
  *  the web apps's associated agent.
  * @param {string} agent The agent who is receiving the inbound offer/request.
@@ -631,6 +505,5 @@ module.exports = {
 	LoginHelper,
 	NullProofHelper,
 	AccountSignupHelper,
-	ConnectionResponder,
 	InboundNonceWatcher,
 };

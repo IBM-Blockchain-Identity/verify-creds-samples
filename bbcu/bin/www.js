@@ -81,10 +81,9 @@ const ev = {
 	LOGIN_PROOF_PATH: process.env.LOGIN_PROOF_PATH,
 	SIGNUP_PROOF_PROVIDER: process.env.SIGNUP_PROOF_PROVIDER,
 	SIGNUP_ACCOUNT_PROOF_PATH: process.env.SIGNUP_ACCOUNT_PROOF_PATH,
-	SIGNUP_DMV_ISSUER_AGENT: process.env.SIGNUP_DMV_ISSUER_AGENT,
-	SIGNUP_HR_ISSUER_AGENT: process.env.SIGNUP_HR_ISSUER_AGENT,
+	SIGNUP_DMV_ISSUER_AGENT_DID: process.env.SIGNUP_DMV_ISSUER_AGENT_DID,
+	SIGNUP_HR_ISSUER_AGENT_DID: process.env.SIGNUP_HR_ISSUER_AGENT_DID,
 	SCHEMA_TEMPLATE_PATH: process.env.SCHEMA_TEMPLATE_PATH,
-	ACCEPT_INCOMING_CONNECTIONS: process.env.ACCEPT_INCOMING_CONNECTIONS === 'true',
 	ADMIN_API_USERNAME: process.env.ADMIN_API_USERNAME,
 	ADMIN_API_PASSWORD: process.env.ADMIN_API_PASSWORD
 };
@@ -278,27 +277,17 @@ async function start () {
 	if (ev.SIGNUP_PROOF_PROVIDER === 'account') {
 		if (!ev.SIGNUP_ACCOUNT_PROOF_PATH)
 			throw new Error('SIGNUP_ACCOUNT_PROOF_PATH must be set in order to use `account` SIGNUP_PROOF_PROVIDER');
-		if (!ev.SIGNUP_DMV_ISSUER_AGENT)
-			throw new Error('SIGNUP_DMV_ISSUER_AGENT must be set in order to use `account` SIGNUP_PROOF_PROVIDER');
-		if (!ev.SIGNUP_HR_ISSUER_AGENT)
-			throw new Error('SIGNUP_HR_ISSUER_AGENT must be set in order to use `account` SIGNUP_PROOF_PROVIDER');
+		if (!ev.SIGNUP_DMV_ISSUER_AGENT_DID)
+			throw new Error('SIGNUP_DMV_ISSUER_AGENT_DID must be set in order to use `account` SIGNUP_PROOF_PROVIDER');
+		if (!ev.SIGNUP_HR_ISSUER_AGENT_DID)
+			throw new Error('SIGNUP_HR_ISSUER_AGENT_DID must be set in order to use `account` SIGNUP_PROOF_PROVIDER');
 		logger.info(`${ev.SIGNUP_PROOF_PROVIDER} signup proof selected.  Proof request path: ${ev.SIGNUP_ACCOUNT_PROOF_PATH}`);
-		signup_helper = new Helpers.AccountSignupHelper(ev.SIGNUP_HR_ISSUER_AGENT, ev.SIGNUP_DMV_ISSUER_AGENT, ev.SIGNUP_ACCOUNT_PROOF_PATH, agent);
-		await signup_helper.cleanup();
-		await signup_helper.setup();
+		signup_helper = new Helpers.AccountSignupHelper(ev.SIGNUP_HR_ISSUER_AGENT_DID, ev.SIGNUP_DMV_ISSUER_AGENT_DID, ev.SIGNUP_ACCOUNT_PROOF_PATH, agent);
 
 	} else if (ev.SIGNUP_PROOF_PROVIDER === 'none') {
 		logger.info('VC signups will be disabled');
 	} else {
 		throw new Error(`Invalid value for SIGNUP_PROOF_PROVIDER: ${ev.SIGNUP_PROOF_PROVIDER}`);
-	}
-
-	if (ev.ACCEPT_INCOMING_CONNECTIONS) {
-		logger.info(`Listening for and accepting connection, credential and verification requests to my agent, ${agent.name}`);
-		const responder = new Helpers.ConnectionResponder(agent);
-		responder.start();
-	} else {
-		logger.info(`Not listening for connection offers to my agent, ${agent.name}`);
 	}
 
 	/*************************

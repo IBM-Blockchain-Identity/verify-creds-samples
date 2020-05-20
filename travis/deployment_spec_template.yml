@@ -185,9 +185,9 @@ spec:
             - name: AGENT_PASSWORD
               value: "BBCU_AGENT_PASSWORD_HERE"
             - name: SIGNUP_DMV_ISSUER_AGENT
-              value: "DMV_AGENT_URL_HERE"
+              value: "DMV_AGENT_DID_HERE"
             - name: SIGNUP_HR_ISSUER_AGENT
-              value: "HR_AGENT_URL_HERE"
+              value: "HR_AGENT_DID_HERE"
             - name: CARD_IMAGE_RENDERING
               value: "branding_server"
             - name: BRANDING_SERVER_ENDPOINT
