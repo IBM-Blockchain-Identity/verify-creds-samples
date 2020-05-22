@@ -190,8 +190,8 @@ $(document).ready(() => {
 	const signup_password_label = $('label[for="signupPassword"]');
 	const signup_confirm_password = $('#signupConfirmPassword');
 	const signup_confirm_password_label = $('label[for="signupConfirmPassword"]');
-	const signup_agent_name = $('#signupAgentName');
-	const signup_agent_name_label = $('label[for="signupAgentName"]');
+	const signup_invitation_url = $('#signupInvitationURL');
+	const signup_invitation_url_label = $('label[for="signupInvitationURL"]');
 
 	signup_user.focus(() => {
 		signup_user_label.css('visibility', 'visible');
@@ -214,12 +214,12 @@ $(document).ready(() => {
 		if (!signup_confirm_password.val().trim())
 			signup_confirm_password_label.css('visibility', 'hidden');
 	});
-	signup_agent_name.focus(() => {
-		signup_agent_name_label.css('visibility', 'visible');
+	signup_invitation_url.focus(() => {
+		signup_invitation_url_label.css('visibility', 'visible');
 	});
-	signup_agent_name.focusout(() => {
-		if (!signup_agent_name.val().trim())
-			signup_agent_name_label.css('visibility', 'hidden');
+	signup_invitation_url.focusout(() => {
+		if (!signup_invitation_url.val().trim())
+			signup_invitation_url_label.css('visibility', 'hidden');
 	});
 
 	// Make sure new users are being given the password we think they are
@@ -435,7 +435,7 @@ async function ProcessSignup (vcSignupCarousel, mobileCredMgr=false) {
 		username = `${formObject.username.trim()}@example.com`;
 	}
 	const password = formObject.password ? formObject.password : null;
-	const agent_name = formObject.agent_name ? formObject.agent_name : null;
+	const invitation_url = formObject.invitation_url ? formObject.invitation_url : null;
 
 	if (formObject.password !== formObject.confirm_password)
 		return console.error('Passwords must match!');
@@ -477,7 +477,7 @@ async function ProcessSignup (vcSignupCarousel, mobileCredMgr=false) {
 			data: JSON.stringify({
 				password: password,
 				username: username,
-				agent_name: agent_name,
+				invitation_url: invitation_url,
 				qr_code_nonce: mobileCredMgr ? qrCodeNonce: null,
 			})
 		});

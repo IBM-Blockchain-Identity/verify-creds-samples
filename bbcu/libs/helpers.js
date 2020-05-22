@@ -262,28 +262,18 @@ class AccountSignupHelper {
 		const dmv_cred_defs = await this.agent.getCredentialDefinitions(true, {owner_did: this.dmv_issuer_did});
 		logger.debug(`${this.dmv_issuer_did}'s credential definitions: ${JSON.stringify(dmv_cred_defs, 0, 1)}`);
 		const dmv_restrictions = [];
-		for (const agent_index in dmv_cred_defs.agents) {
-			const agent = dmv_cred_defs.agents[agent_index];
-
-			for (const cred_def_index in agent.results.items) {
-				const cred_def_id = agent.results.items[cred_def_index].id;
-
-				dmv_restrictions.push({cred_def_id: cred_def_id});
-			}
+		for (const cred_def_index in dmv_cred_defs) {
+			const cred_def = dmv_cred_defs[cred_def_index];
+			dmv_restrictions.push({cred_def_id: cred_def.id});
 		}
 
 		logger.info(`Looking up credential definitions for issuer ${this.hr_issuer_did}`);
 		const hr_cred_defs = await this.agent.getCredentialDefinitions(true, {owner_did: this.hr_issuer_did});
 		logger.debug(`${this.hr_issuer_did}'s credential definitions: ${JSON.stringify(hr_cred_defs, 0, 1)}`);
 		const hr_restrictions = [];
-		for (const agent_index in hr_cred_defs.agents) {
-			const agent = hr_cred_defs.agents[agent_index];
-
-			for (const cred_def_index in agent.results.items) {
-				const cred_def_id = agent.results.items[cred_def_index].id;
-
-				hr_restrictions.push({cred_def_id: cred_def_id});
-			}
+		for (const cred_def_index in hr_cred_defs) {
+			const cred_def = hr_cred_defs[cred_def_index];
+			hr_restrictions.push({cred_def_id: cred_def.id});
 		}
 
 		const proof_request = {

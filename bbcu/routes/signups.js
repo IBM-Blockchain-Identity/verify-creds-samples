@@ -106,14 +106,14 @@ exports.createRouter = function (signup_manager) {
 		}
 		const password = req.body.password;
 
-		if (!req.body.qr_code_nonce && (!req.body.agent_name || typeof req.body.agent_name !== 'string')) {
+		if (!req.body.qr_code_nonce && (!req.body.invitation_url || typeof req.body.invitation_url !== 'string')) {
 			return res.status(400).json({
 				error: SIGNUP_API_ERRORS.MISSING_REQUIRED_PARAMETERS,
-				reason: 'You must supply an agent name in order to log in'
+				reason: 'You must supply an invitation url in order to log in'
 			});
 		}
-		const agent_name = req.body.agent_name;
-		const signup_id = signup_manager.create_signup(username, agent_name, password, req.body.qr_code_nonce);
+		const invitation_url = req.body.invitation_url;
+		const signup_id = signup_manager.create_signup(username, invitation_url, password, req.body.qr_code_nonce);
 		req.session.signup = signup_id;
 		res.status(201).json({
 			message: 'Signup process initiated',

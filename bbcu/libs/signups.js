@@ -199,7 +199,7 @@ class Signup {
 
 	/**
 	 * @param {string} id The ID for looking up this Signup instance.
-	 * @param {string} agent_name An agent name to associate with the user.
+	 * @param {string} invitation_url An invitation url used to establish connections with the user's agent.
 	 * @param {Agent} agent An agent to connect to users and send credential offers.
 	 * @param {string} user The user to connect with.
 	 * @param {string} password The new user's password.
@@ -210,12 +210,12 @@ class Signup {
 	 * @param {string} qr_code_nonce The nonce provided in the qrCode that is initiating this signup.
 	 * @returns {Signup} The created Signup object
 	 */
-	constructor (id, agent_name, agent, user, password, user_records, card_renderer, connection_icon_provider, signup_helper, qr_code_nonce=null) {
+	constructor (id, invitation_url, agent, user, password, user_records, card_renderer, connection_icon_provider, signup_helper, qr_code_nonce=null) {
 		this.id = id;
 		this.agent = agent;
 		this.user = user;
 		this.password = password;
-		this.agent_name = agent_name;
+		this.invitation_url = invitation_url;
 		this.user_records = user_records;
 		this.status = Signup.SIGNUP_STEPS.CREATED;
 		this.error = null;
@@ -302,14 +302,14 @@ class Signup {
 
 				} else {
 
-					if (!user_doc.opts || !user_doc.opts.invitation_url) {
-						const err = new Error('User record does not have an associated invitation url');
+					if (!this.invitation_url) {
+						const err = new Error('User information does not have an associated invitation url');
 						err.code = SIGNUP_ERRORS.AGENT_NOT_FOUND;
 						throw err;
 					}
 
 					logger.info(`Accepting invitation from ${this.user}`);
-					this.connection_offer = await this.agent.acceptInvitation(user_doc.opts.invitation_url, connection_opts);
+					this.connection_offer = await this.agent.acceptInvitation(this.invitation_url, connection_opts);
 					logger.info(`Sent connection offer ${this.connection_offer.id} to ${this.user}`);
 					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
 
@@ -410,6 +410,7 @@ class Signup {
 
 			const user_doc = await this.user_records.create_user(this.user, this.password, personal_info, {
 				agent_name: this.agent_name ? this.agent_name : connection.remote.iurl,
+				invitation_url: this.invitation_url,
 				mobile_user: this.qr_code_nonce ? true : false
 			});
 			logger.debug(`User record: ${JSON.stringify(user_doc)}`);
