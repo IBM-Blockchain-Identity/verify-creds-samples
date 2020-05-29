@@ -39,8 +39,15 @@ exports.createRouter = function (agent) {
 	router.use(compression());
 
 	/* Get the status of the current signup flow */
-	router.get('/agentinfo', [], (req, res) => {
-		res.status(200).json({agent: {url: agent.url, name: agent.name, user: agent.user}});
+	router.get('/agentinfo', [], async (req, res) => {
+		const invitations = await agent.getInvitations({"max_acceptances": "-1"});
+		let invitation = null;
+		if (!invitations || invitations.length === 0 ) {
+			invitation = agent.createInvitation();
+		} else {
+			invitation = invitations[0];
+		}
+		res.status(200).json({agent: {url: agent.url, name: agent.name, user: agent.user, invitation_url: invitation.url}});
 	});
 
 	return router;

@@ -301,7 +301,7 @@ async function ProcessSignon (vcSignonModal, vcSignonCarousel, mobileCredMgr=fal
 		if (mobileCredMgr) {
 			// If the user selected for a signon for a mobile app, establish a
 			//  connection and verification using a QR code rather than forcing
-			//  the user to provide their agent url
+			//  the user to provide their invitation url
 			qrCodeNonce = await displayProofQRCode(data.username, 'BBCU Login Request', 'connectionReqQRLogin');
 			data['qr_code_nonce'] = qrCodeNonce;
 		}
@@ -463,7 +463,7 @@ async function ProcessSignup (vcSignupCarousel, mobileCredMgr=false) {
 		if (mobileCredMgr) {
 			// If the user selected for a signon for a mobile app, establish a
 			//  connection and verification using a QR code rather than forcing
-			//  the user to provide their agent url
+			//  the user to provide their invitation url
 			qrCodeNonce = await displayProofQRCode(username, 'Verify Employment', 'connectionReqQR');
 		}
 
@@ -682,7 +682,7 @@ async function displayProofQRCode (username, schemaName, qrCodeParentId) {
 				data: {
 					name: verifierAgent.user,
 					nickname: verifierAgent.name,
-					verifier: verifierAgent.url,
+					verifier: verifierAgent.invitation_url,
 					proof_schema_id: verifierSchema.id,
 					wait: false,
 					meta: {
