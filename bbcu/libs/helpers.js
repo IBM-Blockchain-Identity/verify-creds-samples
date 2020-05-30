@@ -440,13 +440,13 @@ class InboundNonceWatcher {
 				}
 				if ((!updated_request || (updated_request.hasOwnProperty('length') && updated_request.length === 0)) && (type & InboundNonceWatcher.REQUEST_TYPES.VERIFICATION)) {
 					queryObj = {};
-					queryObj['properties.meta.nonce'] = qr_code_nonce;
+					queryObj['connection.remote.properties.meta.nonce'] = qr_code_nonce;
 					updated_request = await this.agent.getVerifications(queryObj);
 				}
 				if (!updated_request || (updated_request.length > 0 && !updated_request[0].state)) {
 					throw new Error(`${type} state could not be determined`);
 				} else if (updated_request.length > 0) {
-					if ((type & InboundNonceWatcher.REQUEST_TYPES.CONNECTION && [ 'inbound_offer' ].indexOf(updated_request[0].state) >= 0) ||
+					if ((type & InboundNonceWatcher.REQUEST_TYPES.CONNECTION && [ 'connected' ].indexOf(updated_request[0].state) >= 0) ||
 						(type & InboundNonceWatcher.REQUEST_TYPES.VERIFICATION && [ 'inbound_verification_request' ].indexOf(updated_request[0].state) >= 0)) {
 
 						return updated_request[0];

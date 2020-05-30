@@ -298,15 +298,28 @@ async function ProcessSignon (vcSignonModal, vcSignonCarousel, mobileCredMgr=fal
 
 	let qrCodeNonce = null;
 	try {
+		// Build a proof request using the latest cred defs from from
+		//  ibmhr and govdmv
+		let response = await $.ajax({
+			url: '/login/proofschema',
+			method: 'POST',
+			dataType: 'json',
+			contentType: 'application/json',
+			data: {}
+		});
+		console.log(`Signup proofschema response: ${JSON.stringify(response)}`);
+		const verifierSchema = response.proof_schema;
+
 		if (mobileCredMgr) {
 			// If the user selected for a signon for a mobile app, establish a
 			//  connection and verification using a QR code rather than forcing
 			//  the user to provide their invitation url
-			qrCodeNonce = await displayProofQRCode(data.username, 'BBCU Login Request', 'connectionReqQRLogin');
+			qrCodeNonce = await displayProofQRCode(data.username, verifierSchema, 'connectionReqQRLogin');
+			data['proof_schema_id'] = verifierSchema.id;
 			data['qr_code_nonce'] = qrCodeNonce;
 		}
 
-		const response = await $.ajax({
+		response = await $.ajax({
 			url: '/login/vc',
 			method: 'POST',
 			dataType: 'json',
@@ -318,7 +331,6 @@ async function ProcessSignon (vcSignonModal, vcSignonCarousel, mobileCredMgr=fal
 
 		let tries_left = 300;
 		const interval = 4000; // milliseconds
-		let connection_shown = false;
 		let verification_shown = false;
 		const running = true;
 		while (running) {
@@ -458,13 +470,23 @@ async function ProcessSignup (vcSignupCarousel, mobileCredMgr=false) {
 	console.log(`Creating signup for user ${username}`);
 	let qrCodeNonce = null;
 	try {
+		// Build a proof request using the latest cred defs from from
+		//  ibmhr and govdmv
+		let response = await $.ajax({
+			url: '/signup/proofschema',
+			method: 'POST',
+			dataType: 'json',
+			contentType: 'application/json',
+			data: {}
+		});
+		console.log(`Signup proofschema response: ${JSON.stringify(response)}`);
+		const verifierSchema = response.proof_schema;
 
-		let response = null;
 		if (mobileCredMgr) {
 			// If the user selected for a signon for a mobile app, establish a
 			//  connection and verification using a QR code rather than forcing
 			//  the user to provide their invitation url
-			qrCodeNonce = await displayProofQRCode(username, 'Verify Employment', 'connectionReqQR');
+			qrCodeNonce = await displayProofQRCode(username, verifierSchema, 'connectionReqQR');
 		}
 
 		// The user selected a "normal" signon, so needs to provide his/her
@@ -478,6 +500,7 @@ async function ProcessSignup (vcSignupCarousel, mobileCredMgr=false) {
 				password: password,
 				username: username,
 				invitation_url: invitation_url,
+				proof_schema_id: verifierSchema.id,
 				qr_code_nonce: mobileCredMgr ? qrCodeNonce: null,
 			})
 		});
@@ -486,7 +509,6 @@ async function ProcessSignup (vcSignupCarousel, mobileCredMgr=false) {
 
 		let tries_left = 300;
 		const interval = 4000; // milliseconds
-		let connection_shown = false;
 		let verification_shown = false;
 		let credential_shown = false;
 		const running = true;
@@ -597,18 +619,18 @@ async function ProcessSignup (vcSignupCarousel, mobileCredMgr=false) {
 	}
 }
 
-async function displayProofQRCode (username, schemaName, qrCodeParentId) {
+async function displayProofQRCode (username, verifierSchema, qrCodeParentId) {
 
 	return new Promise(async (resolve, reject) => {
 		try {
 			if (username === undefined || username === null || typeof username !== 'string') {
 				throw new TypeError('Invalid username was provided to displayProofQRCode');
 			}
-			if (!schemaName || typeof schemaName !== 'string') {
-				throw new TypeError('Invalid schemaName was provided to displayProofQRCode');
-			}
 			if (!qrCodeParentId || typeof qrCodeParentId !== 'string') {
 				throw new TypeError('Invalid qrCode parent element was provided to displayProofQRCode');
+			}
+			if (!verifierSchema || typeof verifierSchema !== 'object') {
+				throw new Error('Verifier schema not found');
 			}
 
 			let response = null;
@@ -624,32 +646,7 @@ async function displayProofQRCode (username, schemaName, qrCodeParentId) {
 				throw new Error(`No agent information returned in response: ${JSON.stringify(response)}`);
 			const verifierAgent = response.agent;
 
-			// get the schemas registered by the agent
-			response = await $.ajax({
-				url: '/api/proof_schemas',
-				method: 'GET',
-				dataType: 'json',
-				contentType: 'application/json',
-				data: {name: schemaName, sort: true},
-			});
-			if (!response || !response.schemas)
-				throw new Error(`No schema information returned in response: ${JSON.stringify(response)}`);
-			const verifierSchemasArray = response.schemas;
-
-			// schemas sorted by latest version number.  Look for the given schemaName to find
-			//  the correct name and most recent version number to use.
-			let verifierSchema = null;
-			for (let i=0; i<verifierSchemasArray.length; i++) {
-				if (verifierSchemasArray[i].name === schemaName) {
-					verifierSchema = verifierSchemasArray[i];
-					break;
-				}
-			}
-
-			if (!verifierSchema) {
-				throw new Error('Requested schema not found');
-			}
-			// Find most current schema versio
+			// Find most current schema version
 			console.log('Showing qrcode with connection+verification information');
 			// Proof request
 			// {
@@ -664,19 +661,6 @@ async function displayProofQRCode (username, schemaName, qrCodeParentId) {
 			// 	}
 			// }
 			const qrCodeNonce = window.makeid(20);
-			let protocol = verifierAgent.url.indexOf('https://');
-			// create the agent url from the account url
-			if (protocol === 0) {
-				protocol = 'https://';
-			} else {
-				protocol = verifierAgent.url.indexOf('http://');
-				if (protocol === 0) {
-					protocol = 'http://';
-				}
-			}
-			if (protocol && protocol.length) {
-				verifierAgent.url = `${protocol}${verifierAgent.user}:@${verifierAgent.url.slice(protocol.length)}`;
-			}
 			const qrcodeContent = JSON.stringify({
 				type: 'proof',
 				data: {

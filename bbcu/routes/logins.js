@@ -17,6 +17,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const compression = require('compression');
+const semverCompare = require('semver-compare');
 
 const LOGIN_STEPS = require('../libs/logins.js').LOGIN_STEPS;
 
@@ -26,12 +27,15 @@ const logger = Logger.makeLogger(Logger.logPrefix(__filename));
 
 /**
  * Creates an express router for all the REST endpoints related to logging in and out of the app.
+ * @param {Agent} agent An agent instance associated with this web app.
  * @param {object} users_instance An instance of the Users class with a backend user database.
  * @param {object} login_manager A LoginManager to manage login flows.
  * @returns {object} An express router for the login API.
  */
-exports.createRouter = function (users_instance, login_manager) {
+exports.createRouter = function (agent, users_instance, login_manager) {
 
+	if (!agent || typeof agent.getCredentialDefinitions !== 'function')
+		throw new TypeError('Login API was not given an Agent');
 	if (!users_instance || typeof users_instance.read_user !== 'function')
 		throw new TypeError('Login API was not given a Users instance');
 
@@ -99,7 +103,7 @@ exports.createRouter = function (users_instance, login_manager) {
 
 	// Start VC login flow
 	router.post('/login/vc', (req, res, next) => {
-		if (!req.body ||
+		if (!req.body || !req.body.proof_schema_id || typeof req.body.proof_schema_id !== 'string' ||
 			(req.body.qr_code_nonce && (req.body.username === undefined || req.body.username === null)) ||
 			(!req.body.qr_code_nonce && !req.body.username) ||
 			typeof req.body.username !== 'string') {
@@ -111,7 +115,7 @@ exports.createRouter = function (users_instance, login_manager) {
 			});
 		}
 		const username = req.body.username;
-		const login_id = login_manager.create_login(username, req.body.qr_code_nonce);
+		const login_id = login_manager.create_login(username, req.body.proof_schema_id, req.body.qr_code_nonce);
 
 		// Calls to the status API will be determined by the login associated with the session
 		req.session.vc_login = login_id;
@@ -153,13 +157,53 @@ exports.createRouter = function (users_instance, login_manager) {
 		}
 	});
 
+	/* create new proof schema from latest credential definition */
+	router.post('/login/proofschema', async (req, res, next) => {
+		try {
+			const my_credential_definitions = await agent.getCredentialDefinitions();
+			logger.debug(`${agent.user}'s list of credential definitions: ${JSON.stringify(my_credential_definitions, 0, 1)}`);
+
+			if (!my_credential_definitions.length) {
+				const err = new Error(`No credential definitions were found for issuer ${agent.user}!`);
+				err.code = LOGIN_API_ERRORS.LOGIN_NO_CREDENTIAL_DEFINITIONS;
+				throw err;
+			}
+			my_credential_definitions.sort(sortSchemas).reverse();
+			const cred_def_id = my_credential_definitions[0].id;
+
+			logger.debug(`Checking for attributes with credential definition id ${cred_def_id}`);
+			const proof_request = await login_manager.getProofSchema({
+				restrictions: [ {cred_def_id: my_credential_definitions[0].id} ]
+			});
+
+			const account_proof_schema = await agent.createProofSchema(proof_request.name, proof_request.version,
+				proof_request.requested_attributes, proof_request.requested_predicates);
+			logger.debug(`Created proof schema: ${JSON.stringify(account_proof_schema)}`);
+		} catch (error) {
+			error.code = error.code ? error.code : LOGIN_API_ERRORS.UNKNOWN_LOGIN_API_ERROR;
+			return res.status(500).send({error: error.code, reason: error.message});
+		}
+	});
+
 	return router;
 };
+
+/**
+ * Sorts schema objects from the cloud agent API based on their schema version number, which
+ * we assume is the order in which they were meant to be published (1.1 then 1.2 then 1.3...)
+ * @param {object} a A schema object.
+ * @param {object} b A schema object.
+ * @return {number} <0 if a comes before b, 0 if they are the same, >0 if b comes before a
+ */
+function sortSchemas (a, b) {
+	return semverCompare(a.version, b.version);
+}
 
 const LOGIN_API_ERRORS = {
 	BAD_REQUEST: 'BAD_REQUEST',
 	NOT_AUTHORIZED: 'NOT_AUTHORIZED',
 	NOT_LOGGING_IN: 'NOT_LOGGING_IN',
+	LOGIN_NO_CREDENTIAL_DEFINITIONS: 'LOGIN_NO_CREDENTIAL_DEFINITIONS',
 	UNKNOWN_LOGIN_API_ERROR: 'UNKNOWN_LOGIN_API_ERROR'
 };
 

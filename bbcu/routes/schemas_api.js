@@ -22,7 +22,7 @@ const semverCompare = require('semver-compare');
 
 /**
  * Creates an express router representing a REST API for managing schemas.
- * @param {Agent} agent An instance of the Schemas class with a backend schema database.
+ * @param {Agent} agent An agent instance associated with this web app.
  * @param {string} schema_path A path to the default schema for this issuer.
  * @param {Middleware} middleware Authentication middleware used to protect API endpoints.
  * @returns {object} An express router for the schemas API.
@@ -105,7 +105,7 @@ exports.createRouter = function (agent, schema_path, middleware) {
 		}
 	});
 
-	/* GET all schemas */
+	/* GET all proof schemas */
 	router.get('/proof_schemas', async (req, res, next) => {
 		try {
 			let queryObj = {};

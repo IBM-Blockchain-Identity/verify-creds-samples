@@ -26,13 +26,16 @@ const logger = Logger.makeLogger(Logger.logPrefix(__filename));
 
 /**
  * Creates an express router for all the REST endpoints related to logging in and out of the app.
+ * @param {Agent} agent An agent instance associated with this web app.
  * @param {SignupManager} signup_manager A SignupManager instance for managing new user signups.
  * @returns {object} An express router for the login API.
  */
-exports.createRouter = function (signup_manager) {
+exports.createRouter = function (agent, signup_manager) {
 
+	if (!agent || typeof agent.getCredentialDefinitions !== 'function')
+		throw new TypeError('Signups API was not given an Agent');
 	if (!signup_manager || typeof signup_manager.create_signup !== 'function')
-		throw new TypeError('Users API was not given a signup manager');
+		throw new TypeError('Signups API was not given a signup manager');
 
 	const router = express.Router();
 	router.use(bodyParser.urlencoded({extended: true}));
@@ -83,9 +86,28 @@ exports.createRouter = function (signup_manager) {
 		});
 	});
 
+	/* create new proof schema from latest credential definition */
+	router.post('/signup/proofschema', async (req, res, next) => {
+		try {
+
+			const proof_request = await signup_manager.get_signup_schema();
+
+			const account_proof_schema = await agent.createProofSchema(proof_request.name, proof_request.version,
+				proof_request.requested_attributes, proof_request.requested_predicates);
+			logger.debug(`Created proof schema: ${JSON.stringify(account_proof_schema)}`);
+			res.status(201).json({
+				message: 'Signup proof schema created',
+				proof_schema: account_proof_schema
+			});
+		} catch (error) {
+			error.code = error.code ? error.code : SIGNUP_API_ERRORS.UNKNOWN_SIGNUP_API_ERROR;
+			return res.status(500).send({error: error.code, reason: error.message});
+		}
+	});
+
 	/* POST start a new account signup flow */
 	router.post('/signup', [ middleware ], (req, res) => {
-		if (!req.body ||
+		if (!req.body || !req.body.proof_schema_id ||
 			(req.body.qr_code_nonce && (req.body.username === undefined || req.body.username === null)) ||
 			(!req.body.qr_code_nonce && !req.body.username) ||
 			typeof req.body.username !== 'string') {
@@ -93,7 +115,7 @@ exports.createRouter = function (signup_manager) {
 			// if this signup is triggered from a QR code, an emtpy username is fine
 			return res.status(400).json({
 				error: SIGNUP_API_ERRORS.MISSING_REQUIRED_PARAMETERS,
-				reason: 'You must supply a username in order to log in'
+				reason: 'You must supply appropriate information in order to signup'
 			});
 		}
 		const username = req.body.username;
@@ -113,7 +135,7 @@ exports.createRouter = function (signup_manager) {
 			});
 		}
 		const invitation_url = req.body.invitation_url;
-		const signup_id = signup_manager.create_signup(username, invitation_url, password, req.body.qr_code_nonce);
+		const signup_id = signup_manager.create_signup(username, invitation_url, password, req.body.proof_schema_id, req.body.qr_code_nonce);
 		req.session.signup = signup_id;
 		res.status(201).json({
 			message: 'Signup process initiated',

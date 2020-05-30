@@ -240,7 +240,7 @@ class Issuance {
 			}
 
 			this.status = Issuance.ISSUANCE_STEPS.ESTABLISHING_CONNECTION;
-			logger.info(`Connection to user via invitation`);
+			logger.info('Connection to user via invitation');
 			const connection_opts = icon ? {icon: icon} : null;
 			let connection;
 

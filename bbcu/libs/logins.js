@@ -15,7 +15,6 @@
  */
 
 const uuidv4 = require('uuid/v4');
-const semverCompare = require('semver-compare');
 const InboundNonceWatcher = require('./helpers.js').InboundNonceWatcher;
 
 const Logger = require('./logger.js').Logger;
@@ -52,10 +51,14 @@ class LoginManager {
 	/**
 	 * Creates an Login flow for the given user.
 	 * @param {string} user The app user we want to log in.
+	 * @param {string} proof_schema_id The id of the proof schema to use to request login information.
 	 * @param {string} qr_code_nonce The nonce in the QR code that initiated this login flow.
 	 * @returns {string} A Login instance ID to be used to check the status of the Login later.
 	 */
-	create_login (user, qr_code_nonce) {
+	create_login (user, proof_schema_id, qr_code_nonce) {
+		if (!proof_schema_id || typeof proof_schema_id !== 'string') {
+			throw new TypeError('Invalid proof_schema_id was provided to login manager');
+		}
 		if ((!qr_code_nonce && (!user || typeof user !== 'string')) ||
 			(qr_code_nonce && (user === undefined || user === null || typeof user !== 'string'))) {
 			throw new TypeError('Invalid user was provided to login manager');
@@ -63,7 +66,7 @@ class LoginManager {
 
 		const login_id = uuidv4();
 		logger.info(`Creating login ${login_id}`);
-		this.logins[login_id] = new Login(login_id, this.agent, user, this.user_records, this.connection_icon_provider, this.login_helper, qr_code_nonce);
+		this.logins[login_id] = new Login(login_id, this.agent, user, this.user_records, this.connection_icon_provider, this.login_helper, proof_schema_id, qr_code_nonce);
 		this.logins[login_id].start();
 		return login_id;
 	}
@@ -183,9 +186,10 @@ class Login {
 	 * @param {Users} user_records The database of app Users where personal information is stored.
 	 * @param {ImageProvider} connection_icon_provider Provides the image data for connection offers.
 	 * @param {ProofHelper} login_helper Provides proof schemas and checks proof responses.
+	 * @param {string} proof_schema_id The id of the proof schema to use to request login information.
 	 * @param {string} qr_code_nonce The nonce in the QR code that initiated this login flow.
 	 */
-	constructor (id, agent, user, user_records, connection_icon_provider, login_helper, qr_code_nonce) {
+	constructor (id, agent, user, user_records, connection_icon_provider, login_helper, proof_schema_id, qr_code_nonce) {
 		this.id = id;
 		this.agent = agent;
 		this.user = user;
@@ -197,6 +201,7 @@ class Login {
 		this.login_helper = login_helper;
 		this.connection_offer = null;
 		this.verification = null;
+		this.proof_schema_id = proof_schema_id;
 		this.qr_code_nonce = qr_code_nonce;
 	}
 
@@ -220,33 +225,12 @@ class Login {
 				user_doc = await this.user_records.read_user(this.user);
 			}
 
-			const my_credential_definitions = await this.agent.getCredentialDefinitions();
-			logger.debug(`${this.agent.user}'s list of credential definitions: ${JSON.stringify(my_credential_definitions, 0, 1)}`);
-
-			if (!my_credential_definitions.length) {
-				const err = new Error(`No credential definitions were found for issuer ${this.agent.user}!`);
-				err.code = LOGIN_ERRORS.LOGIN_NO_CREDENTIAL_DEFINITIONS;
-				throw err;
-			}
-			my_credential_definitions.sort(sortSchemas).reverse();
-			const cred_def_id = my_credential_definitions[0].id;
-
-			logger.debug(`Checking for attributes with credential definition id ${cred_def_id}`);
-			const proof_request = await this.login_helper.getProofSchema({
-				restrictions: [ {cred_def_id: my_credential_definitions[0].id} ]
-			});
-
-			const account_proof_schema = await this.agent.createProofSchema(proof_request.name, proof_request.version,
-				proof_request.requested_attributes, proof_request.requested_predicates);
-			logger.debug(`Created proof schema: ${JSON.stringify(account_proof_schema)}`);
-
 			if (this.qr_code_nonce) {
 				this.status = Login.LOGIN_STEPS.WAITING_FOR_OFFER;
 			} else {
 				this.status = Login.LOGIN_STEPS.ESTABLISHING_CONNECTION;
 			}
-			logger.info(`Connection to user`);
-			const connection_opts = icon ? {icon: icon} : null;
+			logger.info('Connection to user');
 			let connection;
 
 			try {
@@ -320,7 +304,7 @@ class Login {
 					this.verification = await this.agent.createVerification({
 						did: connection.remote.pairwise.did
 					},
-					account_proof_schema.id,
+					this.proof_schema_id,
 					'outbound_proof_request',
 					{
 						icon: icon
@@ -437,17 +421,6 @@ class Login {
 
 		return ret;
 	}
-}
-
-/**
- * Sorts schema objects from the cloud agent API based on their schema version number, which
- * we assume is the order in which they were meant to be published (1.1 then 1.2 then 1.3...)
- * @param {object} a A schema object.
- * @param {object} b A schema object.
- * @return {number} <0 if a comes before b, 0 if they are the same, >0 if b comes before a
- */
-function sortSchemas (a, b) {
-	return semverCompare(a.schema.version, b.schema.version);
 }
 
 exports.LOGIN_STEPS = Login.LOGIN_STEPS;

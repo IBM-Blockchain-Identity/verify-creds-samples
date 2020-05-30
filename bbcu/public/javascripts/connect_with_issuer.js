@@ -160,7 +160,6 @@ async function issue_credential () {
 
 		let tries_left = 300;
 		const interval = 3000; // milliseconds
-		let connection_shown = false;
 		let credential_shown = false;
 		const running = true;
 		while (running) {

@@ -40,9 +40,9 @@ exports.createRouter = function (agent) {
 
 	/* Get the status of the current signup flow */
 	router.get('/agentinfo', [], async (req, res) => {
-		const invitations = await agent.getInvitations({"max_acceptances": "-1"});
+		const invitations = await agent.getInvitations({'max_acceptances': '-1'});
 		let invitation = null;
-		if (!invitations || invitations.length === 0 ) {
+		if (!invitations || invitations.length === 0) {
 			invitation = agent.createInvitation();
 		} else {
 			invitation = invitations[0];

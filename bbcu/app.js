@@ -85,9 +85,9 @@ function createApp (ev, nano, agent, card_renderer, users, connection_icon_provi
 
 	// UI routers
 	app.use('/', UserUI.createRouter(users, ev, middleware));
-	app.use('/', LoginAPI.createRouter(users, login_manager));
+	app.use('/', LoginAPI.createRouter(agent, users, login_manager));
 	if (signup_helper)
-		app.use('/', SignupAPI.createRouter(signup_manager));
+		app.use('/', SignupAPI.createRouter(agent, signup_manager));
 
 	// API routers
 	app.use('/api', UserAPI.createRouter(users, agent, middleware));
