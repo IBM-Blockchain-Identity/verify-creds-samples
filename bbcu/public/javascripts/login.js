@@ -307,7 +307,7 @@ async function ProcessSignon (vcSignonModal, vcSignonCarousel, mobileCredMgr=fal
 			contentType: 'application/json',
 			data: {}
 		});
-		console.log(`Signup proofschema response: ${JSON.stringify(response)}`);
+		console.log(`Login proofschema response: ${JSON.stringify(response)}`);
 		const verifierSchema = response.proof_schema;
 
 		if (mobileCredMgr) {

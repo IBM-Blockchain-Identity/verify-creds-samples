@@ -172,13 +172,18 @@ exports.createRouter = function (agent, users_instance, login_manager) {
 			const cred_def_id = my_credential_definitions[0].id;
 
 			logger.debug(`Checking for attributes with credential definition id ${cred_def_id}`);
-			const proof_request = await login_manager.getProofSchema({
+			const proof_request = await login_manager.get_login_schema({
 				restrictions: [ {cred_def_id: my_credential_definitions[0].id} ]
 			});
 
 			const account_proof_schema = await agent.createProofSchema(proof_request.name, proof_request.version,
 				proof_request.requested_attributes, proof_request.requested_predicates);
 			logger.debug(`Created proof schema: ${JSON.stringify(account_proof_schema)}`);
+
+			res.status(201).json({
+				message: 'Signup proof schema created',
+				proof_schema: account_proof_schema
+			});
 		} catch (error) {
 			error.code = error.code ? error.code : LOGIN_API_ERRORS.UNKNOWN_LOGIN_API_ERROR;
 			return res.status(500).send({error: error.code, reason: error.message});

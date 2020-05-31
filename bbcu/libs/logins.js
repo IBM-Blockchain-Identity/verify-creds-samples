@@ -136,6 +136,18 @@ class LoginManager {
 		}
 		login.stop();
 	}
+
+	/**
+	 * Get schema used for signups.
+	 *
+	 * @returns {any} The signup proof schema
+	 */
+	async get_login_schema () {
+		if (!this.login_helper)
+			throw new TypeError('Signup manager has no signup helper');
+
+		return await this.login_helper.getProofSchema();
+	}
 }
 exports.LoginManager = LoginManager;
 
@@ -241,17 +253,17 @@ class Login {
 						this.agent,
 						InboundNonceWatcher.REQUEST_TYPES.CONNECTION | InboundNonceWatcher.REQUEST_TYPES.VERIFICATION,
 						this.qr_code_nonce, 30, 3000);
-					const inbound_offer = await watcher.start();
-					if (inbound_offer && inbound_offer.state) {
-						if (inbound_offer.state === 'inbound_offer') {
-							// found a connection offer with the given nonce
-							logger.info(`Received offer with nonce: ${this.qr_code_nonce}, offer: ${this.connection_offer.id}`);
-							this.agent.acceptConnection(this.connection_offer.id);
-							connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
-						} else if (inbound_offer.state === 'inbound_verification_request') {
+					const nonce_item = await watcher.start();
+					if (nonce_item && nonce_item.state) {
+						if (nonce_item.state === 'connected') {
+							// found a connection with the given nonce, invitation
+							//  has been accepted
+							logger.info(`Received connection with nonce: ${this.qr_code_nonce}, connection: ${nonce_item.id}`);
+							connection = nonce_item;
+						} else if (nonce_item.state === 'inbound_verification_request') {
 							// found a verification request
-							connection = inbound_offer.connection;
-							this.verification = inbound_offer;
+							connection = nonce_item.connection;
+							this.verification = nonce_item;
 						}
 					}
 
