@@ -310,12 +310,12 @@ async function ProcessSignon (vcSignonModal, vcSignonCarousel, mobileCredMgr=fal
 		console.log(`Login proofschema response: ${JSON.stringify(response)}`);
 		const verifierSchema = response.proof_schema;
 
+		data['proof_schema_id'] = verifierSchema.id;
 		if (mobileCredMgr) {
 			// If the user selected for a signon for a mobile app, establish a
 			//  connection and verification using a QR code rather than forcing
 			//  the user to provide their invitation url
 			qrCodeNonce = await displayProofQRCode(data.username, verifierSchema, 'connectionReqQRLogin');
-			data['proof_schema_id'] = verifierSchema.id;
 			data['qr_code_nonce'] = qrCodeNonce;
 		}
 

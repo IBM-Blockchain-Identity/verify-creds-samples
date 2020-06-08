@@ -276,6 +276,7 @@ class Login {
 
 					logger.info(`Accepting invitation from ${this.user}`);
 					connection = await this.agent.acceptInvitation(user_doc.opts.invitation_url);
+					connection = await this.agent.waitForConnection(connection.id);
 				}
 
 			} catch (error) {
