@@ -9,9 +9,9 @@ For more information on the project surrounding these samples, take a look at [o
 We've provided some live samples that you can play with without needing to download or build any code.  Use these if
 you're going through these demos for the first time.
 
-- [Gov DMV](https://gov.livedemo.verify-creds.com)
-- [IBM HR](https://employer.livedemo.verify-creds.com)
-- [Big Blue Credit Union](https://bbcu.livedemo.verify-creds.com)
+- [Gov DMV](https://gov-dmv-dev.ti-agency-dev.us-east.containers.appdomain.cloud/)
+- [IBM HR](https://ibm-hr-dev.ti-agency-dev.us-east.containers.appdomain.cloud/)
+- [Big Blue Credit Union](https://bbcu-dev.ti-agency-dev.us-east.containers.appdomain.cloud/)
 
 ### Passwordless Authentication
 
@@ -52,7 +52,7 @@ build your own sample websites from the templates we've provided.
 1. Visit your agent account management page and provision three new agents, `govdmv`, `ibmhr`, and `bbcu`.  Make sure the
 box marking the new agents as issuers is checked.
 
-2. Find your account url and record the passwords for the three agents that you created.  You can find this information
+2. Find your account url and record the ids and passwords for the three agents that you created.  You can find this information
 by visiting your account dashboard, clicking on each agent, clicking the `Add Device` on the `General` page for the agent,
 and clicking on `Manual Entry` in the `Register Device` popup panel.
 
@@ -63,23 +63,23 @@ and clicking on `Manual Entry` in the `Register Device` popup panel.
         Agent DID: WpAsRjUvWNdJhgcpcir1TL
         Agent Role: Issuer
         ```
-    2. Use curl to check the agent's `role`, making sure it is set to `TRUST_ANCHOR`.  Use this curl command to check the
+    2. Use curl to check the agent's `issuer` property, making sure it is set to `true`.  Use this curl command to check the
     agent's role:
         ```
-        curl -u <agent_name>:<agent_password> <account_url>/api/v1/info
+        curl -u <agent_id>:<agent_password> <account_url>/api/v1/info
         ```
 4. If any of the agents are not issuers, use the following `curl` command to update their role:
     ```
-    curl -u <account_admin_agent_name>:<account_admin_agent_password> -X PATCH \
-        <account_url>/api/v1/identities/<agent_name> \
+    curl -u <agent_id>:<agent_password> -X PATCH \
+        <account_url>/api/v1/agents/<agent_id> \
         -H 'Content-Type: application/json' \
         -d '{ "role": "TRUST_ANCHOR" }'
     ```
 
 5. Install...
-    - [the Verify Creds mobile app](https://docs.info.verify-creds.com/explore/mobile_app/).
+    - [the Verify Creds mobile app](https://doc.ibmsecurity.verify-creds.com/explore/mobile_app/)
     OR
-    - [the Verify Creds browser extension](https://docs.info.verify-creds.com/explore/browser_extension/).
+    - [the Verify Creds browser extension](https://doc.ibmsecurity.verify-creds.com/explore/browser_extension/)
 
 ### Building the samples
 
@@ -101,13 +101,18 @@ and clicking on `Manual Entry` in the `Register Device` popup panel.
     
     $ cat .env
     ACCOUNT_URL=https://my-account.example.com
-    
+
+    DMV_AGENT_ID=<govdmv_agent_id> 
     DMV_AGENT_NAME=govdmv
     DMV_AGENT_PASSWORD=****
+    DMV_AGENT_DID=<govdmv_agent_did>
     
+    IBMHR_AGENT_ID=<ibmhr_agent_id>
     IBMHR_AGENT_NAME=ibmhr
     IBMHR_AGENT_PASSWORD=****
+    IBMHR_AGENT_DID=<ibmhr_agent_did>
     
+    BBCU_AGENT_ID=<bbcu_agent_id>
     BBCU_AGENT_NAME=bbcu
     BBCU_AGENT_PASSWORD=****
 
@@ -180,6 +185,7 @@ list of the existing configuration parameters:
   app will attempt to create it at startup. ex. `dmv_db`
 - `ACCOUNT_URL`: The URL that is assigned to an account on our Public Agency and associated with a single IBMid.  The
   issuer agent should be registered under this account url. ex. `https://<account_uuid>.staging-cloud-agents.us-east.containers.appdomain.cloud/`
+- `AGENT_ID`: The id of the issuer agent on the Public Agency account. ex. `01234567890`
 - `AGENT_NAME`: The name of the issuer agent on the Public Agency account. ex. `dmv`
 - `AGENT_PASSWORD`: The password associate with the issuer agent.
 - `FRIENDLY_NAME`: The friendly name to attach to connection offers, credential offers, verification requests, etc. If
