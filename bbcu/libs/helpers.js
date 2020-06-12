@@ -440,7 +440,7 @@ class InboundNonceWatcher {
 				}
 				if ((!updated_request || (updated_request.hasOwnProperty('length') && updated_request.length === 0)) && (type & InboundNonceWatcher.REQUEST_TYPES.VERIFICATION)) {
 					queryObj = {};
-					queryObj['connection.remote.properties.meta.nonce'] = qr_code_nonce;
+					queryObj['properties.meta.nonce'] = qr_code_nonce;
 					updated_request = await this.agent.getVerifications(queryObj);
 				}
 				if (!updated_request || (updated_request.length > 0 && !updated_request[0].state)) {
