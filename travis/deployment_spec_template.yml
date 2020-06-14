@@ -184,9 +184,9 @@ spec:
               value: "Big Blue Credit Union"
             - name: AGENT_PASSWORD
               value: "BBCU_AGENT_PASSWORD_HERE"
-            - name: SIGNUP_DMV_ISSUER_AGENT
+            - name: SIGNUP_DMV_ISSUER_AGENT_DID
               value: "DMV_AGENT_DID_HERE"
-            - name: SIGNUP_HR_ISSUER_AGENT
+            - name: SIGNUP_HR_ISSUER_AGENT_DID
               value: "HR_AGENT_DID_HERE"
             - name: CARD_IMAGE_RENDERING
               value: "branding_server"
