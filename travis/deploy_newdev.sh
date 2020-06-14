@@ -34,6 +34,8 @@ export COUCHDB_USER_PASSWORD=$NEWDEV_COUCHDB_USER_PASSWORD
 export DMV_AGENT_URL=$DMV_AGENT_NAME
 export IBMHR_AGENT_URL=$IBMHR_AGENT_NAME
 
+export IBMCLOUD_DEPLOYMENT_CLUSTER=$NEWDEV_IBMCLOUD_DEPLOYMENT_CLUSTER
+
 # INGRESS_URLs
 export CLUSTER_INGRESS_URL=ti-agency-dev.us-east.containers.appdomain.cloud
 export DMV_CLUSTER_INGRESS_URL=gov-dmv-dev.ti-agency-dev.us-east.containers.appdomain.cloud
