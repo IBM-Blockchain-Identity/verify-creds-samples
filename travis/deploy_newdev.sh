@@ -12,7 +12,7 @@ export GOVDMV_IMAGE_TAG=verifycreds/gov-dmv-ti-dev:$VERSION
 export IBMHR_IMAGE_TAG=verifycreds/ibm-hr-ti-dev:$VERSION
 export BBCU_IMAGE_TAG=verifycreds/bbcu-ti-dev:$VERSION
 
-export ACCOUNT_URL=$NEWDEV_ACCOUNT_URL
+export NEW_ACCOUNT_URL=$NEWDEV_ACCOUNT_URL
 
 export NEW_DMV_AGENT_ID=$NEWDEV_DMV_AGENT_ID
 export NEW_DMV_AGENT_NAME=govdmv
