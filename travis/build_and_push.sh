@@ -8,10 +8,15 @@ VERSION=${TRAVIS_TAG:-latest}
 
 if [ "$TRAVIS_BRANCH" = "newagency" ]
 then
+  GOVDMV_IMAGE_TAG=${GOVDMV_IMAGE_TAG:-verifycreds/gov-dmv-ti-dev:$VERSION}
+  IBMHR_IMAGE_TAG=${IBMHR_IMAGE_TAG:-verifycreds/ibm-hr-ti-dev:$VERSION}
+  BBCU_IMAGE_TAG=${BBCU_IMAGE_TAG:-verifycreds/bbcu-ti-dev:$VERSION}
+  TESTHOLDER_IMAGE_TAG=${TESTHOLDER_IMAGE_TAG:-verifycreds/test-holder-ti-dev:$VERSION}
+elif [ "$TRAVIS_BRANCH" = "newagencyprod" ]
   GOVDMV_IMAGE_TAG=${GOVDMV_IMAGE_TAG:-verifycreds/gov-dmv-ti:$VERSION}
   IBMHR_IMAGE_TAG=${IBMHR_IMAGE_TAG:-verifycreds/ibm-hr-ti:$VERSION}
   BBCU_IMAGE_TAG=${BBCU_IMAGE_TAG:-verifycreds/bbcu-ti:$VERSION}
-  TESTHOLDER_IMAGE_TAG=${TESTHOLDER_IMAGE_TAG:-verifycreds/test-holder-ti:$VERSION}
+  TESTHOLDER_IMAGE_TAG=${TESTHOLDER_IMAGE_TAG:-verifycreds/test-holder:$VERSION}
 else
   GOVDMV_IMAGE_TAG=${GOVDMV_IMAGE_TAG:-verifycreds/gov-dmv:$VERSION}
   IBMHR_IMAGE_TAG=${IBMHR_IMAGE_TAG:-verifycreds/ibm-hr:$VERSION}
