@@ -20,11 +20,14 @@ DMV_SESSION_SECRET=${DMV_SESSION_SECRET:-$(head /dev/urandom | tr -dc A-Za-z0-9 
 IBMHR_SESSION_SECRET=${IBMHR_SESSION_SECRET:-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13 ; echo '')}
 BBCU_SESSION_SECRET=${BBCU_SESSION_SECRET:-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13 ; echo '')}
 
+# TLS cert secret name
+CLUSTER_SECRET_NAME=${CLUSTER_SECRET_NAME:-ti-agency-prod-4b1acfb86e8a8765489de45437c57938-0000}
+
 # INGRESS_URLs
-CLUSTER_INGRESS_URL=${CLUSTER_INGRESS_URL:-ti-agency-prod.us-east.containers.appdomain.cloud}
-DMV_CLUSTER_INGRESS_URL=${DMV_CLUSTER_INGRESS_URL:-gov-dmv.ti-agency-prod.us-east.containers.appdomain.cloud}
-IBMHR_CLUSTER_INGRESS_URL=${IBMHR_CLUSTER_INGRESS_URL:-ibm-hr.ti-agency-prod.us-east.containers.appdomain.cloud}
-BBCU_CLUSTER_INGRESS_URL=${BBCU_CLUSTER_INGRESS_URL:-bbcu.ti-agency-prod.us-east.containers.appdomain.cloud}
+CLUSTER_INGRESS_URL=${CLUSTER_INGRESS_URL:-ti-agency-prod-4b1acfb86e8a8765489de45437c57938-0000.us-east.containers.appdomain.cloud}
+DMV_CLUSTER_INGRESS_URL=${DMV_CLUSTER_INGRESS_URL:-gov-dmv.ti-agency-prod-4b1acfb86e8a8765489de45437c57938-0000.us-east.containers.appdomain.cloud}
+IBMHR_CLUSTER_INGRESS_URL=${IBMHR_CLUSTER_INGRESS_URL:-ibm-hr.ti-agency-prod-4b1acfb86e8a8765489de45437c57938-0000.us-east.containers.appdomain.cloud}
+BBCU_CLUSTER_INGRESS_URL=${BBCU_CLUSTER_INGRESS_URL:-bbcu.ti-agency-prod-4b1acfb86e8a8765489de45437c57938-0000.us-east.containers.appdomain.cloud}
 
 DMV_VANITY_URL=${DMV_VANITY_URL:-gov.livedemo.verify-creds.com}
 IBMHR_VANITY_URL=${IBMHR_VANITY_URL:-employer.livedemo.verify-creds.com}
@@ -77,6 +80,7 @@ sed -i "s+DMV_CLUSTER_INGRESS_URL_HERE+${DMV_CLUSTER_INGRESS_URL}+g" $INGRESS
 sed -i "s+IBMHR_CLUSTER_INGRESS_URL_HERE+${IBMHR_CLUSTER_INGRESS_URL}+g" $INGRESS
 sed -i "s+BBCU_CLUSTER_INGRESS_URL_HERE+${BBCU_CLUSTER_INGRESS_URL}+g" $INGRESS
 sed -i "s+CLUSTER_INGRESS_URL_HERE+${CLUSTER_INGRESS_URL}+g" $INGRESS
+sed -i "s+CLUSTER_SECRET_NAME_HERE+${CLUSTER_SECRET_NAME}+g" $INGRESS
 
 sed -i "s+DMV_VANITY_URL_HERE+${DMV_VANITY_URL}+g" $INGRESS
 sed -i "s+IBMHR_VANITY_URL_HERE+${IBMHR_VANITY_URL}+g" $INGRESS

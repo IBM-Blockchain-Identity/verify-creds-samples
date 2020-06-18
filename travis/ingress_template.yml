@@ -13,7 +13,7 @@ spec:
         - DMV_CLUSTER_INGRESS_URL_HERE
         - IBMHR_CLUSTER_INGRESS_URL_HERE
         - BBCU_CLUSTER_INGRESS_URL_HERE
-      secretName: ti-agency-dev
+      secretName: CLUSTER_SECRET_NAME_HERE
   rules:
     - host: DMV_CLUSTER_INGRESS_URL_HERE
       http:
