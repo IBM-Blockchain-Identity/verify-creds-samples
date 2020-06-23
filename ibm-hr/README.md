@@ -10,7 +10,9 @@ The mock application is a Node.js [express](https://expressjs.com/) web app that
 
 [Visit this page](https://employer.livedemo.verify-creds.com) to play with a running instance of this sample.
 
-### Creating a HR user account
+The following instructions assume that you are running the sample web apps locally and have access to the Admin page.  To enter the Admin page, click on the `Admin` button from the IBM HR home page.
+
+### Creating a HR user account - Admin
 
 Now, you're going to pretend you work for IBM's Human Resources department, and you're creating an employee profile for
 a new hire. You're going to fill out their information in IBM's employee database.
@@ -21,6 +23,18 @@ a new hire. You're going to fill out their information in IBM's employee databas
 3. Enter the remaining required information such as email address (which will be used as the username of the account), a password, and first and last name.  All values can be fictitious.  Your password will be used in subsequent instructions.
 4. Review the information in the user creation form and click the `Create` button on the bottom of the form.
   ![create_user.png](docs/create_user.png)
+
+### Creating a DMV user account - User
+
+If you are running the live samples, you can create your own user account without having Admin access.  On the IBM HR home page, click on the `create an account` link.
+
+Now, you're going to pretend you are an employee and already have information on file at IBM HR associated with an email address.  You're going to create an online account and look at your imaginary documents.
+
+1. Enter a first and last name for the account.
+2. Enter the Agent URL for the user.  This endpoint will be used to connect to the user's agent and issue their driver's license.
+3. Enter the remaining required information such as email address (which will be used as the username of the account), portrait picture and a password.  All values on this form can be fictitious.  Your password will be used in subsequent instructions.
+4. Review the information in the user creation form and click the `Create` button on the bottom of the form.
+  ![create_user2.png](docs/create_user2.png)
 
 ### Issuing the proof of employment
 
