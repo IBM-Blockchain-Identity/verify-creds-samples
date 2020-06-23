@@ -2,16 +2,16 @@
 
 Play with these samples to learn how to integrate the [openssi-websdk](https://github.com/IBM-Blockchain-Identity/openssi-websdk) into your own website.
 
-For more information on the project surrounding these samples, take a look at [our docs](https://docs.info.verify-creds.com/).
+For more information on the project surrounding these samples, take a look at [our docs](https://doc.ibmsecurity.verify-creds.com/).
 
 ## Try it out
 
 We've provided some live samples that you can play with without needing to download or build any code.  Use these if
 you're going through these demos for the first time.
 
-- [Gov DMV](https://gov-dmv-dev.ti-agency-dev.us-east.containers.appdomain.cloud/)
-- [IBM HR](https://ibm-hr-dev.ti-agency-dev.us-east.containers.appdomain.cloud/)
-- [Big Blue Credit Union](https://bbcu-dev.ti-agency-dev.us-east.containers.appdomain.cloud/)
+- [Gov DMV](https://gov.ibmsecurity.verify-creds.com/)
+- [IBM HR](https://employer.ibmsecurity.verify-creds.com/)
+- [Big Blue Credit Union](https://bbcu.ibmsecurity.verify-creds.com/)
 
 ### Passwordless Authentication
 

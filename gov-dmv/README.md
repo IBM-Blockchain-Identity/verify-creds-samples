@@ -8,7 +8,7 @@ license.
 
 [Click here](../README.md#passwordless-authentication-demo) to start the demo over.
 
-[Visit this page](https://gov-dmv-dev.ti-agency-dev.us-east.containers.appdomain.cloud/) to play with a running instance of this sample.
+[Visit this page](https://gov.ibmsecurity.verify-creds.com/) to play with a running instance of this sample.
 
 The following instructions assume that you are running the sample web apps locally and have access to the Admin page.  To enter the Admin page, click on the `Admin` button from the Gov DMV home page.
 
