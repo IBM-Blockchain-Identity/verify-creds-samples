@@ -19,8 +19,8 @@ const bodyParser = require('body-parser');
 const compression = require('compression');
 
 // Logging setup
-// const Logger = require('../libs/logger.js').Logger;
-// const logger = Logger.makeLogger(Logger.logPrefix(__filename));
+const Logger = require('../libs/logger.js').Logger;
+const logger = Logger.makeLogger(Logger.logPrefix(__filename));
 
 /**
  * Creates an express router for all the REST endpoints related to logging in and out of the app.
@@ -41,11 +41,22 @@ exports.createRouter = function (agent) {
 	/* Get the status of the current signup flow */
 	router.get('/agentinfo', [], async (req, res) => {
 		const invitations = await agent.getInvitations({'max_acceptances': '-1'});
-		let invitation = null;
-		if (!invitations || invitations.length === 0) {
-			invitation = agent.createInvitation();
+		let autoAcceptInvitation = null;
+		if (!invitations) {
+			logger.error("unexpected error: getInvitations returned nothing");
+			res.status(500).json({ message: "unexpected error: getInvitations returned nothing" });
+		}
+		for (let i = 0; i < invitations.length; i++) {
+			const invitation = invitations[i];
+			if (invitation.manual_accept === false) {
+				autoAcceptInvitation = invitation;
+				break;
+			}
+		}
+		if (!autoAcceptInvitation) {
+			invitation = await agent.createInvitation();
 		} else {
-			invitation = invitations[0];
+			invitation = autoAcceptInvitation;
 		}
 		res.status(200).json({agent: {url: agent.url, name: agent.name, user: agent.user, invitation_url: invitation.url}});
 	});
