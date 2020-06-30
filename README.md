@@ -73,7 +73,7 @@ and clicking on `Manual Entry` in the `Register Device` popup panel.
     curl -u <agent_id>:<agent_password> -X PATCH \
         <account_url>/api/v1/agents/<agent_id> \
         -H 'Content-Type: application/json' \
-        -d '{ "role": "TRUST_ANCHOR" }'
+        -d '{"role":{"name":"ENDORSER"}}'
     ```
 
 5. Install...
@@ -100,7 +100,7 @@ and clicking on `Manual Entry` in the `Register Device` popup panel.
     # edit your .env file
     
     $ cat .env
-    ACCOUNT_URL=https://my-account.example.com
+    ACCOUNT_URL=https://my-agency.example.com
 
     DMV_AGENT_ID=<govdmv_agent_id> 
     DMV_AGENT_NAME=govdmv
@@ -183,18 +183,18 @@ list of the existing configuration parameters:
   Compose environment.
 - `DB_USERS`: The name of the Couchdb database where user records will be stored.  If the database is not present, the
   app will attempt to create it at startup. ex. `dmv_db`
-- `ACCOUNT_URL`: The URL that is assigned to an account on our Public Agency and associated with a single IBMid.  The
-  issuer agent should be registered under this account url. ex. `https://<account_uuid>.staging-cloud-agents.us-east.containers.appdomain.cloud/`
+- `ACCOUNT_URL`: The URL that refers to a Public Agency.  The
+  issuer agent should be registered under this agency. ex. `https://agency.ibmsecurity.verify-creds.com/`
 - `AGENT_ID`: The id of the issuer agent on the Public Agency account. ex. `01234567890`
 - `AGENT_NAME`: The name of the issuer agent on the Public Agency account. ex. `dmv`
 - `AGENT_PASSWORD`: The password associate with the issuer agent.
 - `FRIENDLY_NAME`: The friendly name to attach to connection offers, credential offers, verification requests, etc. If
   not provided, the issuer's agent name will be used. ex. `Big Blue Credit Union`
 - `AGENT_LOG_LEVEL`: The log level to set for the `openssi-websdk`.  Defaults to `info`.
-- `AGENT_ADMIN_NAME`: The agent name for the first agent on your Public Agency account.  These agent credentials are used
-  to create the issuer agent if it doesn't already exist.  Due to performance issues with creating agents, using these
-  parameters is not recommended or supported.
-- `AGENT_ADMIN_PASSWORD`: The password for the admin agent.
+- `AGENT_ADMIN_NAME`: The agent name for the account agent on your Public Agency account.  These agent credentials are used
+  to create the issuer agent if it doesn't already exist.  Using these AGENT_ADMIN_*
+  parameters is not recommended or supported and remain only for legacy purposes.
+- `AGENT_ADMIN_PASSWORD`: The password for the account agent.
 - `CARD_IMAGE_RENDERING`: The type of rendering that should be used for credentials.  Credential rendering only comes
   into play when the issuer's credential schema has `card_front` and/or `card_back` attributes.  The available options are
   described below:
@@ -244,9 +244,6 @@ list of the existing configuration parameters:
 - `SCHEMA_TEMPLATE_PATH`: The path to a JSON file describing the credential schema for the issuer.  This parameter is configured
   in the Docker image file for each sample issuer and describes the locations of the driver's license, employment badge, and
   bank account schema files.
-- `ACCEPT_INCOMING_CONNECTIONS`: A toggle that causes the sample app to pole for incoming connection offers and accept
-  them.  This is the mechanism that allows BBCU to connect to Gov DMV and IBM HR in order to get a list of credential schemas
-  when `SIGNUP_PROOF_PROVIDER === 'account'`.
 - `ADMIN_API_USERNAME`: The username to use to protect the admin UI/API.  If this and `ADMIN_API_PASSWORD`
   are left blank, the admin panel will not be protected by authentication.
 - `ADMIN_API_PASSWORD`: The password to use to protect the admin UI/API.
