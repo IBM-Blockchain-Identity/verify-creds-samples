@@ -86,7 +86,7 @@ window.makeid = function (length) {
 };
 
 const default_attributes = {
-	'Date of Birth': '04-15-1982',
+	'Date of Birth': '04/15/1982',
 	'Social Security Number': window.makeid(10),
 	'Company': 'IBM',
 	'Job Title': 'Software Developer',

@@ -123,7 +123,7 @@ const default_attributes = {
 	'customer_identifier': window.makeid(16),
 	'height': '5\'7"',
 	'cardholder_sex': 'Male',
-	'dob': '04-15-1982',
+	'dob': '04/15/1982',
 	'dob_timestamp': 1000000,
 	'signature': 'xXx.John Doe.xXx',
 	'endorsements': 'P',
