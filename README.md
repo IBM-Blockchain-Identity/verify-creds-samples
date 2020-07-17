@@ -15,6 +15,8 @@ you're going through these demos for the first time.
 
 ### Passwordless Authentication
 
+Here is our scenario:
+
 Several institutions, including a fictional DMV called Gov DMV and a fictional company called IBM, have begun issuing
 verifiable credentials.  Gov DMV requires customers to show up at a physical location with traditional, paper-based
 documents to verify their identity before they can be issued a credential.  IBM's HR department performs background
