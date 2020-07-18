@@ -68,9 +68,11 @@ $(document).ready(() => {
 		delete formObject.confirm_password;
 
 		const opts = {
-			agent_name: formObject.agent_name
+			agent_name: formObject.agent_name,
+			invitation_url: formObject.invitation_url
 		};
 		delete formObject.agent_name;
+		delete formObject.invitation_url;
 
 		// Start the loading animation
 		const loader = $('#createUserButton');
