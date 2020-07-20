@@ -14,7 +14,7 @@
  limitations under the License.
  */
 
-const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 const semverCompare = require('semver-compare');
 const InboundNonceWatcher = require('./helpers.js').InboundNonceWatcher;
 

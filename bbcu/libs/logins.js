@@ -14,7 +14,7 @@
  limitations under the License.
  */
 
-const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 const InboundNonceWatcher = require('./helpers.js').InboundNonceWatcher;
 
 const Logger = require('./logger.js').Logger;

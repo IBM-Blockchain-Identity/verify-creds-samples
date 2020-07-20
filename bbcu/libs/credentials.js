@@ -13,7 +13,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
  */
-const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 const semverCompare = require('semver-compare');
 
 const Logger = require('./logger.js').Logger;
