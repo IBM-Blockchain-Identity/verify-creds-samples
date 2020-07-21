@@ -16,7 +16,8 @@
 
 const fs = require('fs');
 const path = require('path');
-const request = require('request');
+const axios = require('axios');
+const qs = require('qs');
 
 const MIMETYPES = Object.freeze({
 	bmp: {mime: 'image/bmp', description: 'Bitmap'},
@@ -177,29 +178,22 @@ async function request_card_image (server_url, template_name, user_data) {
 		const underscored_key = key.replace(/\s/g, '_');
 		form[underscored_key] = user_data[key];
 	}
-	return new Promise((resolve, reject) => {
-		form.brand = template_name;
-		// signature is a keyword in the branding server api, don't use it in schemas for now
-		delete form.signature;
-		const options = {
-			method: 'POST',
-			url: server_url,
-			headers: {
-				'cache-control': 'no-cache',
-				'Content-Type': 'application/x-www-form-urlencoded'
-			},
-			form: form
-		};
+	form.brand = template_name;
+	// signature is a keyword in the branding server api, don't use it in schemas for now
+	delete form.signature;
+	const options = {
+		method: 'POST',
+		url: server_url,
+		headers: {
+			'cache-control': 'no-cache',
+			'Content-Type': 'application/x-www-form-urlencoded'
+		},
+		data: qs.stringify(form)
+	};
 
-		request(options, (error, response, body) => {
-			if (error) return reject(error);
-
-			// The branding server tacks a newline onto the end of the image data string for some reason
-			body = body.replace(/(\r\n|\n|\r)/gm, '');
-			resolve(body);
-		});
-
-	});
+	let response = await axios(options);
+	let body = response.data.replace(/(\r\n|\n|\r)/gm, '');
+	return body;
 }
 
 /**

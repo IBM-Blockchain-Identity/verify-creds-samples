@@ -20,7 +20,7 @@
 
 const http = require('http');
 const crypto = require('crypto');
-const request = require('request');
+const axios = require('axios');
 const async = require('async');
 const Nano = require('nano');
 const Agent = require('openssi-websdk').Agent;
@@ -411,23 +411,22 @@ async function wait_for_url (url, max_attempts, max_backoff_period) {
 		async.retry(retry_opts, (callback) => {
 
 			logger.info(`Connecting to ${url}.  Attempt ${++attempts} out of ${max_attempts}`);
-			request({url: url, method: 'HEAD'}, (error, response, body) => {
-				if (error) {
+			axios({url: url, method: 'HEAD'})
+				.then(response => {
+					if (response.status >= 300) {
+						logger.info(`Connected but got invalid response code: ${response.statusCode}`);
+						logger.debug(`Full response: ${JSON.stringify(response)}`);
+						return callback(new Error(`Invalid response code ${response.statusCode}`));
+					}
+
+					logger.info(`Connected to ${url}`);
+					callback(null, response.data);
+				})
+				.catch(error => {
 					logger.info('Could not connect, sleeping...');
 					logger.debug(`Connection attempt error: ${error}`);
 					return callback(error);
-				}
-
-				if (response.statusCode >= 300) {
-					logger.info(`Connected but got invalid response code: ${response.statusCode}`);
-					logger.debug(`Full response: ${JSON.stringify(response)}`);
-					return callback(new Error(`Invalid response code ${response.statusCode}`));
-				}
-
-				logger.info(`Connected to ${url}`);
-				logger.debug(`Connection response: ${JSON.stringify(response)}`);
-				callback(null, body);
-			});
+				});
 		}, (error, result) => {
 			if (error) {
 				logger.error(`Failed to connect to ${url}: ${error}`);

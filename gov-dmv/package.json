@@ -2,7 +2,7 @@
   "name": "gov-dmv",
   "author": "Dale Avery <davery@us.ibm.com>",
   "contributors": [
-    "Bryce Curtis <bcurtis@us.ibm.com",
+    "Bryce Curtis <bcurtis@us.ibm.com>",
     "Rachel Radulovich <rachel.elizabeth.radulovich@ibm.com>"
   ],
   "version": "0.0.0",
@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "async": "^3.2.0",
+    "axios": "^0.19.2",
     "bcrypt": "^5.0.0",
     "body-parser": "^1.18.3",
     "compression": "^1.7.2",
@@ -25,7 +26,7 @@
     "nano": "^8.0.1",
     "openssi-websdk": "github:joevolleyball/openssi-websdk",
     "pug": "^3.0.0",
-    "request": "^2.88.0",
+    "qs": "^6.9.4",
     "semver-compare": "^1.0.0",
     "uuid": "^8.2.0",
     "winston": "^3.0.0"
