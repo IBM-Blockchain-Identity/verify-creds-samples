@@ -431,7 +431,7 @@ class InboundNonceWatcher {
 		return new Promise((resolve, reject) => {
 			async.retry(retry_opts, async () => {
 
-				logger.debug(`Checking status of request, type: ${type}, nonce: ${qr_code_nonce}. Attempt ${++attempts}/${retry_opts.times}`);
+				logger.debug(`Checking status of request, type: ${InboundNonceWatcher.REQUEST_TYPES_KEYS_AS_STRINGS[type]}, nonce: ${qr_code_nonce}. Attempt ${++attempts}/${retry_opts.times}`);
 				let queryObj = {};
 				let updated_request = null;
 				if (type & InboundNonceWatcher.REQUEST_TYPES.CONNECTION) {
@@ -444,22 +444,22 @@ class InboundNonceWatcher {
 					updated_request = await this.agent.getVerifications(queryObj);
 				}
 				if (!updated_request || (updated_request.length > 0 && !updated_request[0].state)) {
-					throw new Error(`${type} state could not be determined`);
+					throw new Error(`${InboundNonceWatcher.REQUEST_TYPES_KEYS_AS_STRINGS[type]} state could not be determined`);
 				} else if (updated_request.length > 0) {
 					if ((type & InboundNonceWatcher.REQUEST_TYPES.CONNECTION && [ 'connected' ].indexOf(updated_request[0].state) >= 0) ||
 						(type & InboundNonceWatcher.REQUEST_TYPES.VERIFICATION && [ 'inbound_verification_request' ].indexOf(updated_request[0].state) >= 0)) {
 
 						return updated_request[0];
 					} else {
-						throw new Error(`${type} with nonce ${qr_code_nonce} is in an unexpected state`);
+						throw new Error(`${InboundNonceWatcher.REQUEST_TYPES_KEYS_AS_STRINGS[type]} with nonce ${qr_code_nonce} is in an unexpected state`);
 					}
 				} else {
-					throw new Error(`Still waiting on ${type} to be complete`);
+					throw new Error(`Still waiting on ${InboundNonceWatcher.REQUEST_TYPES_KEYS_AS_STRINGS[type]} to be complete`);
 				}
 			}, (error, found_request) => {
 				if (error) {
-					logger.error(`Failed to establish ${type} with nonce ${qr_code_nonce}: ${error}`);
-					return reject(new Error(`${type} with nonce ${qr_code_nonce} failed: ${error}`));
+					logger.error(`Failed to establish ${InboundNonceWatcher.REQUEST_TYPES_KEYS_AS_STRINGS[type]} with nonce ${qr_code_nonce}: ${error}`);
+					return reject(new Error(`${InboundNonceWatcher.REQUEST_TYPES_KEYS_AS_STRINGS[type]} with nonce ${qr_code_nonce} failed: ${error}`));
 				}
 
 				let agent_did = null;
@@ -468,7 +468,7 @@ class InboundNonceWatcher {
 				} else if (found_request.connection && found_request.connection.remote) {
 					agent_did = found_request.connection.remote.pairwise.did;
 				}
-				logger.info(`${type} with nonce ${qr_code_nonce} successfully established with agent ${agent_did}`);
+				logger.info(`${InboundNonceWatcher.REQUEST_TYPES_KEYS_AS_STRINGS[type]} with nonce ${qr_code_nonce} successfully established with agent ${agent_did}`);
 				resolve (found_request);
 			});
 		});
@@ -490,6 +490,12 @@ InboundNonceWatcher.REQUEST_TYPES = {
 	CREDENTIAL: 2,
 	VERIFICATION: 4,
 };
+
+InboundNonceWatcher.REQUEST_TYPES_KEYS_AS_STRINGS = {
+	[InboundNonceWatcher.REQUEST_TYPES.CONNECTION]: "CONNECTION",
+	[InboundNonceWatcher.REQUEST_TYPES.CREDENTIAL]: "CREDENTIAL",
+	[InboundNonceWatcher.REQUEST_TYPES.VERIFICATION]: "VERIFICATION",
+}
 
 module.exports = {
 	LoginHelper,

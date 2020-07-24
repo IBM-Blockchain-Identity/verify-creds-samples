@@ -251,7 +251,7 @@ class Login {
 					// look for connection offer that has the nonce from the qr code
 					const watcher = new InboundNonceWatcher(
 						this.agent,
-						InboundNonceWatcher.REQUEST_TYPES.CONNECTION | InboundNonceWatcher.REQUEST_TYPES.VERIFICATION,
+						InboundNonceWatcher.REQUEST_TYPES.CONNECTION,
 						this.qr_code_nonce, 30, 3000);
 					const nonce_item = await watcher.start();
 					if (nonce_item && nonce_item.state) {
