@@ -27,7 +27,9 @@ const logger = Logger.makeLogger(Logger.logPrefix(__filename));
  * @param {Agent} agent An agent instance associated with this web app.
  * @returns {object} An express router for the login API.
  */
-exports.createRouter = function (agent) {
+exports.createRouter = function (agent, connection_icon_provider) {
+
+	this.connection_icon_provider = connection_icon_provider
 
 	if (!agent || typeof agent.getCredentialDefinitions !== 'function')
 		throw new TypeError('Agent API was not given an Agent');
@@ -48,13 +50,14 @@ exports.createRouter = function (agent) {
 		}
 		for (let i = 0; i < invitations.length; i++) {
 			const invitation = invitations[i];
-			if (invitation.manual_accept === false) {
+			if (invitation.manual_accept === false && invitation.properties && !!invitation.properties.icon) {
 				autoAcceptInvitation = invitation;
 				break;
 			}
 		}
 		if (!autoAcceptInvitation) {
-			invitation = await agent.createInvitation();
+			const icon = await connection_icon_provider.getImage();
+			invitation = await agent.createInvitation(true, false, false, {icon: icon});
 		} else {
 			invitation = autoAcceptInvitation;
 		}
