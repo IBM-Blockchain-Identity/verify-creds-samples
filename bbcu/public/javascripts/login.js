@@ -387,6 +387,7 @@ async function ProcessSignon (vcSignonModal, vcSignonCarousel, mobileCredMgr=fal
 
 				// Redirect to account page.  The user's session should be logged in at this point.
 				window.location.href = '/account';
+				return;
 			}
 
 			if ([ 'STOPPED', 'ERROR' ].indexOf(response.status) >= 0) {
@@ -558,6 +559,7 @@ async function ProcessSignup (vcSignupCarousel, mobileCredMgr=false) {
 					setTimeout(resolve, 3000);
 				});
 				window.location.href = '/account';
+				return;
 
 			} else if (signup_status === REMOTE_SIGNUP_STEPS.STOPPED) {
 				vcSignupCarousel.carousel(vcSignupCarouselSlides.NOT_ALLOWED);
