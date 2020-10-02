@@ -178,6 +178,19 @@ async function issue_credential () {
 
 			if (use_extension) {
 				// TODO render the connection offer as a QR code
+				if (!connection_shown && response.connection_offer) {
+					connection_shown = true;
+					console.log('Accepting connection offer via extension');
+					try {
+						window.verifyCreds({
+							operation: 'respondToConnectionOffer',
+							connectionOffer: response.connection_offer
+						});
+					} catch (error) {
+						console.error(`Extension failed to show connection offer: ${JSON.stringify(error)}`);
+					}
+				}
+
 				if (!credential_shown && response.credential && response.credential.id) {
 					credential_shown = true;
 					console.log('Accepting credential offer via extension');

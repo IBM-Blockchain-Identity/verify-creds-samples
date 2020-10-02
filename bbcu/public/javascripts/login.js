@@ -396,6 +396,19 @@ async function ProcessSignon (vcSignonModal, vcSignonCarousel, mobileCredMgr=fal
 
 			if (use_extension) {
 				// TODO render the connection offer as a QR code
+				if (!connection_shown && response.connection_offer) {
+					connection_shown = true;
+					console.log('Accepting connection offer via extension');
+					try {
+						window.verifyCreds({
+							operation: 'respondToConnectionOffer',
+							connectionOffer: response.connection_offer
+						});
+					} catch (error) {
+						console.error(`Extension failed to show connection offer: ${JSON.stringify(error)}`);
+					}
+				}
+
 				if (!verification_shown && response.verification) {
 					verification_shown = true;
 					console.log('Accepting proof request via extension');
