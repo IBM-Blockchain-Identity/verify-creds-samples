@@ -331,6 +331,7 @@ async function ProcessSignon (vcSignonModal, vcSignonCarousel, mobileCredMgr=fal
 
 		let tries_left = 300;
 		const interval = 4000; // milliseconds
+		let connection_shown = false;
 		let verification_shown = false;
 		const running = true;
 		while (running) {
@@ -523,6 +524,7 @@ async function ProcessSignup (vcSignupCarousel, mobileCredMgr=false) {
 
 		let tries_left = 300;
 		const interval = 4000; // milliseconds
+		let connection_shown = false;
 		let verification_shown = false;
 		let credential_shown = false;
 		const running = true;
@@ -616,6 +618,19 @@ async function ProcessSignup (vcSignupCarousel, mobileCredMgr=false) {
 						});
 					} catch (error) {
 						console.error(`Extension failed to show proof request: ${JSON.stringify(error)}`);
+					}
+				}
+
+				if (!credential_shown && response.credential && response.credential.id) {
+					credential_shown = true;
+					console.log('Accepting credential offer via extension');
+					try {
+						window.verifyCreds({
+							operation: 'respondToCredentialOffer',
+							credentialOfferId: response.credential.id
+						});
+					} catch (error) {
+						console.error(`Extension failed to show credential offer: ${JSON.stringify(error)}`);
 					}
 				}
 			}
