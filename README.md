@@ -124,7 +124,7 @@ and clicking on `Manual Entry` in the `Register Device` popup panel.
 
     *Note:* If you have previously run these samples, the COUCHDB_xxx values need to reflect those of your current couch database.  The default values used to be admin/password.  If you can no longer remember the credentials for your couch database, you can always remove the `couchdb` directory and restart the container using `docker-compose build couchdb && docker-compose up -d couchdb`.
 
-2. Start the issuers.
+2. Start the issuers now.
     ```
     docker-compose up -d
     ```
