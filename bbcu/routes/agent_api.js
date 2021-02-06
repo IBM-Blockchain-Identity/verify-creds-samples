@@ -57,7 +57,7 @@ exports.createRouter = function (agent, connection_icon_provider) {
 		}
 		if (!autoAcceptInvitation) {
 			const icon = await connection_icon_provider.getImage();
-			invitation = await agent.createInvitation(true, false, false, {icon: icon});
+			invitation = await agent.createInvitation(true, false, -1, {icon: icon});
 		} else {
 			invitation = autoAcceptInvitation;
 		}
