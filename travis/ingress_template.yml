@@ -11,7 +11,7 @@ spec:
         - DMV_CLUSTER_INGRESS_URL_HERE
         - IBMHR_CLUSTER_INGRESS_URL_HERE
         - BBCU_CLUSTER_INGRESS_URL_HERE
-      secretName: credimi-dev
+      secretName: CLUSTER_SECRET_NAME_HERE
   rules:
     - host: DMV_CLUSTER_INGRESS_URL_HERE
       http:
@@ -41,50 +41,5 @@ spec:
             backend:
               service:
                 name: bbcu
-                port:
-                  number: 80
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: vanityingressresource
-  annotations:
-    kubernetes.io/ingress.class: "public-iks-k8s-nginx"
-spec:
-  tls:
-    - hosts:
-        - DMV_VANITY_URL_HERE
-        - BBCU_VANITY_URL_HERE
-        - IBMHR_VANITY_URL_HERE
-      secretName: vanity
-  rules:
-    - host: BBCU_VANITY_URL_HERE
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: bbcu
-                port:
-                  number: 80
-    - host: DMV_VANITY_URL_HERE
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: gov-dmv
-                port:
-                  number: 80
-    - host: IBMHR_VANITY_URL_HERE
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: ibm-hr
                 port:
                   number: 80
