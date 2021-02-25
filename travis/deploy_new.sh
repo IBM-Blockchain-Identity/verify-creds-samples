@@ -29,9 +29,9 @@ DMV_CLUSTER_INGRESS_URL=${DMV_CLUSTER_INGRESS_URL:-gov-dmv.ti-agency-prod-4b1acf
 IBMHR_CLUSTER_INGRESS_URL=${IBMHR_CLUSTER_INGRESS_URL:-ibm-hr.ti-agency-prod-4b1acfb86e8a8765489de45437c57938-0000.us-east.containers.appdomain.cloud}
 BBCU_CLUSTER_INGRESS_URL=${BBCU_CLUSTER_INGRESS_URL:-bbcu.ti-agency-prod-4b1acfb86e8a8765489de45437c57938-0000.us-east.containers.appdomain.cloud}
 
-DMV_VANITY_URL=${DMV_VANITY_URL:-gov.livedemo.verify-creds.com}
-IBMHR_VANITY_URL=${IBMHR_VANITY_URL:-employer.livedemo.verify-creds.com}
-BBCU_VANITY_URL=${BBCU_VANITY_URL:-bbcu.livedemo.verify-creds.com}
+DMV_VANITY_URL=${DMV_VANITY_URL:-gov.ibmsecurity.verify-creds.com}
+IBMHR_VANITY_URL=${IBMHR_VANITY_URL:-employer.ibmsecurity.verify-creds.com}
+BBCU_VANITY_URL=${BBCU_VANITY_URL:-bbcu.ibmsecurity.verify-creds.com}
 
 # Configure deployment spec
 DEPLOYMENT_SPEC=$DIR/deployment_spec.yml

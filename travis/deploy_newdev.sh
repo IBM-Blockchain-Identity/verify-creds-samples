@@ -45,8 +45,8 @@ export DMV_CLUSTER_INGRESS_URL=gov-dmv-dev.ti-agency-dev.us-east.containers.appd
 export IBMHR_CLUSTER_INGRESS_URL=ibm-hr-dev.ti-agency-dev.us-east.containers.appdomain.cloud
 export BBCU_CLUSTER_INGRESS_URL=bbcu-dev.ti-agency-dev.us-east.containers.appdomain.cloud
 
-export DMV_VANITY_URL=gov-dev.livedemo.verify-creds.com
-export IBMHR_VANITY_URL=employer-dev.livedemo.verify-creds.com
-export BBCU_VANITY_URL=bbcu-dev.livedemo.verify-creds.com
+export DMV_VANITY_URL=gov.dev.ti.verify-creds.com
+export IBMHR_VANITY_URL=employer.dev.ti.verify-creds.com
+export BBCU_VANITY_URL=bbcu.dev.ti.verify-creds.com
 
 $DIR/deploy_new.sh
