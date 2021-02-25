@@ -7,13 +7,12 @@ metadata:
 spec:
   tls:
     - hosts:
-        - CLUSTER_INGRESS_URL_HERE
-        - DMV_CLUSTER_INGRESS_URL_HERE
-        - IBMHR_CLUSTER_INGRESS_URL_HERE
-        - BBCU_CLUSTER_INGRESS_URL_HERE
+        - DMV_VANITY_URL_HERE
+        - BBCU_VANITY_URL_HERE
+        - IBMHR_VANITY_URL_HERE
       secretName: CLUSTER_SECRET_NAME_HERE
   rules:
-    - host: DMV_CLUSTER_INGRESS_URL_HERE
+    - host: DMV_VANITY_URL_HERE
       http:
         paths:
           - path: /
@@ -23,7 +22,7 @@ spec:
                 name: gov-dmv
                 port:
                   number: 80
-    - host: IBMHR_CLUSTER_INGRESS_URL_HERE
+    - host: IBMHR_VANITY_URL_HERE
       http:
         paths:
           - path: /
@@ -33,7 +32,7 @@ spec:
                 name: ibm-hr
                 port:
                   number: 80
-    - host: BBCU_CLUSTER_INGRESS_URL_HERE
+    - host: BBCU_VANITY_URL_HERE
       http:
         paths:
           - path: /
