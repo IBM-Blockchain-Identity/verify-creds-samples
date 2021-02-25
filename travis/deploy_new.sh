@@ -21,7 +21,7 @@ IBMHR_SESSION_SECRET=${IBMHR_SESSION_SECRET:-$(head /dev/urandom | tr -dc A-Za-z
 BBCU_SESSION_SECRET=${BBCU_SESSION_SECRET:-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13 ; echo '')}
 
 # TLS cert secret name
-CLUSTER_SECRET_NAME=${CLUSTER_SECRET_NAME:-ti-agency-prod-4b1acfb86e8a8765489de45437c57938-0000}
+CLUSTER_SECRET_NAME=${CLUSTER_SECRET_NAME:-ti-agency}
 
 # INGRESS_URLs
 CLUSTER_INGRESS_URL=${CLUSTER_INGRESS_URL:-ti-agency-prod-4b1acfb86e8a8765489de45437c57938-0000.us-east.containers.appdomain.cloud}
