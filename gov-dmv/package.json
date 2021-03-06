@@ -3,7 +3,8 @@
   "author": "Dale Avery <davery@us.ibm.com>",
   "contributors": [
     "Bryce Curtis <bcurtis@us.ibm.com>",
-    "Rachel Radulovich <rachel.elizabeth.radulovich@ibm.com>"
+    "Rachel Radulovich <rachel.elizabeth.radulovich@ibm.com>",
+    "Aaron Reed <aaronr@us.ibm.com>"
   ],
   "version": "0.0.0",
   "private": true,
@@ -15,7 +16,7 @@
   },
   "dependencies": {
     "async": "^3.2.0",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "bcrypt": "^5.0.0",
     "body-parser": "^1.18.3",
     "compression": "^1.7.2",
@@ -23,8 +24,8 @@
     "express-session": "^1.15.6",
     "http-errors": "^1.7.1",
     "morgan": "~1.10.0",
-    "nano": "^8.0.1",
-    "openssi-websdk": "github:joevolleyball/openssi-websdk",
+    "nano": "^9.0.3",
+    "openssi-websdk": "^1.0.0-alpha",
     "pug": "^3.0.0",
     "qs": "^6.9.4",
     "semver-compare": "^1.0.0",
