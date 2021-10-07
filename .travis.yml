@@ -8,8 +8,8 @@ git:
   depth: 1
 
 before_install:
-  - curl -kfsSL --insecure https://clis.cloud.ibm.com/install/linux | sh
-  #- curl -ksL https://ibm.biz/idt-installer | bash
+  - curl -sL --insecure https://ibm.biz/idt-installer | bash
+  #- curl -kfsSL https://clis.cloud.ibm.com/install/linux | sh
 
 script:
   - ibmcloud login -a https://api.ng.bluemix.net --apikey $IBMCLOUD_API_KEY > /dev/null
