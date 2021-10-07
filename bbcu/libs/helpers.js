@@ -301,46 +301,6 @@ class AccountSignupHelper {
 	async checkProof (verification, opts) {
 		if (!verification || !verification.id || !verification.info || !verification.info.attributes)
 			throw new TypeError('Invalid verification');
-
-		logger.debug(`Displaying proof values for verification ${verification.id}:`);
-		const proof_attributes = verification.info.attributes;
-		const attributes = {};
-		for (const i in proof_attributes) {
-			const attr = proof_attributes[i];
-			if (attr.cred_def_id)
-				attributes[attr.name] = attr.value;
-
-			logger.debug(`  ${attr['cred_def_id'] ? '*' : ' '}${attr.name} = ${attr.value}`);
-		}
-		logger.debug('(*Verified values from credential)');
-
-		// Make sure the fields we need were provided
-		if (!attributes.first_name || !attributes.firstname) // 'First Name' is converted to 'firstname' in Hyperledger Indy
-			throw new Error('Two verified attestations of first name were not provided');
-
-		if (!attributes.last_name || !attributes.lastname)
-			throw new Error('Two verified attestations of last name were not provided');
-
-		if (!attributes.address_line_1 || !attributes.state || !attributes.zip_code || !attributes.country)
-			throw new Error('A verified attestation of address was not provided');
-
-		if (!attributes.socialsecuritynumber)
-			throw new Error('A verified attestation of a social security number was not provided');
-
-		if (!attributes.dob)
-			throw new Error('A verified attestation of date of birth was not provided');
-
-		// Make sure matchable attributes match
-		if (attributes.first_name.toLowerCase().trim() !== attributes.firstname.toLowerCase().trim())
-			throw new Error('Provided first names did not match');
-
-		if (attributes.last_name.toLowerCase().trim() !== attributes.lastname.toLowerCase().trim())
-			throw new Error('Provided last names did not match');
-
-		// Make sure the user didn't try to sign up from the wrong country
-		if (!attributes.country || [ 'united states', 'us' ].indexOf(attributes.country.toLowerCase().trim()) < 0)
-			throw new Error(`Account signups from country ${attributes.country} are not permitted`);
-
 		return verification;
 	}
 
