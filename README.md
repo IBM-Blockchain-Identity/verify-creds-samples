@@ -141,6 +141,10 @@ and clicking on `Manual Entry` in the `Register Device` popup panel.
 
 4. Browse to the [CouchDB UI](http://localhost:5984/_utils) to see what the apps are writing to the database.
 
+### Travis
+
+The CI is via travis at https://app.travis-ci.com/github/IBM-Blockchain-Identity/verify-creds-samples
+
 ### Troubleshooting
 
 If you don't see your apps running or they don't appear to be functioning properly, you can view the logs for the apps
