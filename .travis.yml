@@ -8,8 +8,8 @@ git:
   depth: 1
 
 before_install:
-  - cat /etc/ssl/certs/ca-certificates.crt
-  - curl -sL https://ibm.biz/idt-installer | bash
+  # - curl -sL https://ibm.biz/idt-installer | bash
+  - ./scripts/get-bluemix-tools
 
 script:
   - ibmcloud login -a https://api.ng.bluemix.net --apikey $IBMCLOUD_API_KEY > /dev/null
