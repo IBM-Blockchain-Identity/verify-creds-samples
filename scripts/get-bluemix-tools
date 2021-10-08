@@ -1,10 +1,12 @@
 #!/bin/bash
 # Licensed Materials - Property of IBM
 #
-# © Copyright IBM Corp. 2019
+# © Copyright IBM Corp. 2021
 #
 # US Government Users Restricted Rights - Use, duplication or disclosure restricted by GSA ADP Schedule Contract with IBM Corp.
 
-#sh <(curl -fsSL https://clis.ng.bluemix.net/install/linux)
 #curl -sL https://ibm.biz/idt-installer | bash
-sh -x idt-installer
+
+BASE=$(dirname "$0")
+
+sh -x ${BASE}/idt-installer
