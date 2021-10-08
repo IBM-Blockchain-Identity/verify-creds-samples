@@ -6,6 +6,5 @@
 # US Government Users Restricted Rights - Use, duplication or disclosure restricted by GSA ADP Schedule Contract with IBM Corp.
 
 #sh <(curl -fsSL https://clis.ng.bluemix.net/install/linux)
-curl -sL https://ibm.biz/idt-installer | bash
-ibmcloud plugin install -f -r "IBM Cloud" container-service/kubernetes-service
-ibmcloud plugin install -f -r "IBM Cloud" container-registry
+#curl -sL https://ibm.biz/idt-installer | bash
+sh -x idt-installer
