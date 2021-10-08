@@ -304,7 +304,7 @@ function install_ibmcloud {
       ;;
     "Linux")
       log "Downloading and installing IBM Cloud 'ibmcloud' CLI from: ${IDT_INSTALL_BMX_URL}/linux"
-      sh <(curl -fsSL ${IDT_INSTALL_BMX_URL}/linux)
+      sh <(curl -fsSLk ${IDT_INSTALL_BMX_URL}/linux)
       ;;
     esac
     log "IBM Cloud 'ibmcloud' CLI install finished."
