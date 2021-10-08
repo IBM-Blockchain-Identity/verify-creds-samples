@@ -8,8 +8,11 @@ git:
   depth: 1
 
 before_install:
-  # - curl -sL https://ibm.biz/idt-installer | bash
+  - curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+
+install:
   - ./scripts/get-bluemix-tools
+  #- curl -sL https://ibm.biz/idt-installer | bash
 
 script:
   - ibmcloud login -a https://api.ng.bluemix.net --apikey $IBMCLOUD_API_KEY > /dev/null
