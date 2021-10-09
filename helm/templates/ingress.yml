@@ -1,0 +1,44 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: myingressresource
+  annotations:
+    kubernetes.io/ingress.class: "public-iks-k8s-nginx"
+spec:
+  tls:
+    - hosts:
+        - gov.{{ .Values.domain }}
+        - employer.{{ .Values.domain }}
+        - bbcu.{{ .Values.domain }}
+      secretName: tls-{{ .Values.domain }}
+  rules:
+    - host: gov.{{ .Values.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gov-dmv
+                port:
+                  number: 80
+    - host: employer.{{ .Values.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ibm-hr
+                port:
+                  number: 80
+    - host: bbcu.{{ .Values.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: bbcu
+                port:
+                  number: 80

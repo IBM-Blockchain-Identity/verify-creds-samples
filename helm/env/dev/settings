@@ -1,0 +1,9 @@
+# Licensed Materials - Property of IBM
+#
+# © Copyright IBM Corp. 2021	
+#
+# US Government Users Restricted Rights - Use, duplication or disclosure restricted by GSA ADP Schedule Contract with IBM Corp.
+export CLUSTER=ti-agency-dev
+export CLUSTER_TYPE=SL
+export NAMESPACE=dev
+export DOMAIN=dev.ti.verify-creds.com
