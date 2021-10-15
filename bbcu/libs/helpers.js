@@ -377,7 +377,7 @@ class AccountSignupHelper {
 			dob_timestamp: dob_timestamp,
 			address_line_1: attributes.address_line_1,
 			address_line_2: attributes.address_line_2 ? attributes.address_line_2 : '_',
-			ssn: attributes.socialsecuritynumber,
+			ssn: attributes["Social Security Number"],
 			state: attributes.state,
 			postal_code: attributes.zip_code,
 			institution_number: 'bbcu123',
