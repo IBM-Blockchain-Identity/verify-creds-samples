@@ -152,7 +152,9 @@ class LoginHelper {
 				const proof_attr = attributes[proof_index];
 				logger.info(`proof attr name: ${proof_attr.name} schema attr name: ${schema_attr.name} test`);
 				// Indy removes spaces and capital letters in proof response attribute names for some reason
-				if (!proof_attr.name || proof_attr.name !== schema_attr.name.toLowerCase().split(' ').join('')) continue;
+				if (!proof_attr.name) continue;
+                if (proof_attr.name && (proof_attr.name === schema_attr.name || proof_attr.name === schema_attr.name.toLowerCase().split(' ').join('')))
+					accepted_proof_attr = proof_attr;
 
 				// Make sure the requested attributes that had restrictions have a credential associated with them
 				if (schema_attr.restrictions && schema_attr.restrictions.length && !proof_attr.cred_def_id)
