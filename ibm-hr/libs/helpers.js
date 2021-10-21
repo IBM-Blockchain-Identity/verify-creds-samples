@@ -141,7 +141,7 @@ class LoginHelper {
 
 		logger.info('Checking the proof for the proper attributes');
 		const attributes = verification['info']['attributes'];
-
+		logger.info(`attrs: ${JSON.stringify(attributes)}`);
 		// Make sure the proof schema attributes are present
 		for (const key in this.proof_schema_template.requested_attributes) {
 			const schema_attr = this.proof_schema_template.requested_attributes[key];
@@ -150,7 +150,7 @@ class LoginHelper {
 			let accepted_proof_attr;
 			for (const proof_index in attributes) {
 				const proof_attr = attributes[proof_index];
-
+				logger.info(`proof attr name: ${proof_attr.name} schema attr name: ${schema_attr.name} test`);
 				// Indy removes spaces and capital letters in proof response attribute names for some reason
 				if (!proof_attr.name || proof_attr.name !== schema_attr.name.toLowerCase().split(' ').join('')) continue;
 
