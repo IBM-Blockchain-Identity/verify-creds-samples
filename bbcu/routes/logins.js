@@ -200,8 +200,11 @@ exports.createRouter = function (agent, users_instance, login_manager) {
  * @param {object} b A schema object.
  * @return {number} <0 if a comes before b, 0 if they are the same, >0 if b comes before a
  */
-function sortSchemas (a, b) {
-	return semverCompare(a.version, b.version);
+ function sortSchemas (a, b) {
+	if(a.hasOwnProperty("version")) {
+		return semverCompare(a.version, b.version);
+	}
+	return semverCompare(a.schema.version, b.schema.version);
 }
 
 const LOGIN_API_ERRORS = {
