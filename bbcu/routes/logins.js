@@ -201,7 +201,7 @@ exports.createRouter = function (agent, users_instance, login_manager) {
  * @return {number} <0 if a comes before b, 0 if they are the same, >0 if b comes before a
  */
  function sortSchemas (a, b) {
-	if(a.version) {
+	if(a.hasOwnProperty("version")) {
 		return semverCompare(a.version, b.version);
 	}
 	return semverCompare(a.schema.version, b.schema.version);
