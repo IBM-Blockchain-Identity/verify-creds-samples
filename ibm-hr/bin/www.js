@@ -185,18 +185,13 @@ async function start () {
 		}
 	}
 
-	if (!agent_info || agent_info.role !== 'TRUST_ANCHOR') {
-		if (ev.AGENT_ADMIN_NAME && ev.AGENT_ADMIN_PASSWORD) {
-			try {
-				logger.info(`Onboarding ${ev.AGENT_NAME} as trust anchor`);
-				agent_info = await agent.onboardAsTrustAnchor(ev.AGENT_ADMIN_NAME, ev.AGENT_ADMIN_PASSWORD);
-				logger.info(`${ev.AGENT_NAME} is now a trust anchor`);
-			} catch (error) {
-				logger.error(`Failed to registery ${ev.AGENT_NAME} as a trust anchor: ${error}`);
-				process.exit(1);
-			}
-		} else {
-			logger.error(`Agent ${ev.AGENT_NAME} must be a trust anchor!`);
+	if (!agent_info || agent_info.issuer !== true) {
+		try {
+			logger.info(`Onboarding ${ev.AGENT_NAME} as trust anchor`);
+			agent_info = await agent.onboardAsTrustAnchor(ev.AGENT_NAME, ev.AGENT_PASSWORD);
+			logger.info(`${ev.AGENT_NAME} is now a trust anchor`);
+		} catch (error) {
+			logger.error(`Failed to registery ${ev.AGENT_NAME} as a trust anchor: ${error}`);
 			process.exit(1);
 		}
 	}
