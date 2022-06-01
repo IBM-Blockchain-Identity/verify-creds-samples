@@ -23,8 +23,10 @@ services:
       - DB_USERS=dmv_db
       - LOG_LEVEL=debug
       - ACCOUNT_URL
+      - AGENT_ID=${DMV_AGENT_ID}
       - AGENT_NAME=${DMV_AGENT_NAME}
       - AGENT_PASSWORD=${DMV_AGENT_PASSWORD}
+      - AGENT_LOG_LEVEL=${AGENT_LOG_LEVEL}
       - FRIENDLY_NAME=Gov DMV
       - AGENT_ADMIN_NAME
       - AGENT_ADMIN_PASSWORD
@@ -49,8 +51,10 @@ services:
       - DB_USERS=ibm_hr_db
       - LOG_LEVEL=debug
       - ACCOUNT_URL
+      - AGENT_ID=${IBMHR_AGENT_ID}
       - AGENT_NAME=${IBMHR_AGENT_NAME}
       - AGENT_PASSWORD=${IBMHR_AGENT_PASSWORD}
+      - AGENT_LOG_LEVEL=${AGENT_LOG_LEVEL}
       - FRIENDLY_NAME=IBM HR
       - AGENT_ADMIN_NAME
       - AGENT_ADMIN_PASSWORD
@@ -75,8 +79,10 @@ services:
       - DB_USERS=bbcu_db
       - LOG_LEVEL=debug
       - ACCOUNT_URL
+      - AGENT_ID=${BBCU_AGENT_ID}
       - AGENT_NAME=${BBCU_AGENT_NAME}
       - AGENT_PASSWORD=${BBCU_AGENT_PASSWORD}
+      - AGENT_LOG_LEVEL=${AGENT_LOG_LEVEL}
       - FRIENDLY_NAME=Big Blue Credit Union
       - AGENT_ADMIN_NAME
       - AGENT_ADMIN_PASSWORD

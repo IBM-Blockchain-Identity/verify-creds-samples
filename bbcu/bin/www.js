@@ -38,6 +38,7 @@ const logger = Logger.makeLogger(Logger.logPrefix(__filename));
 const required = [
 	'DB_CONNECTION_STRING',
 	'DB_USERS',
+	'AGENT_ID',
 	'AGENT_NAME',
 	'AGENT_PASSWORD',
 	'FRIENDLY_NAME',
@@ -59,10 +60,11 @@ const ev = {
 	DB_CONNECTION_STRING: process.env['DB_CONNECTION_STRING'],
 	DB_USERS: process.env['DB_USERS'],
 	ACCOUNT_URL: process.env['ACCOUNT_URL'],
+	AGENT_ID: process.env['AGENT_ID'],
 	AGENT_NAME: process.env['AGENT_NAME'],
 	AGENT_PASSWORD: process.env['AGENT_PASSWORD'],
 	FRIENDLY_NAME: process.env['FRIENDLY_NAME'],
-	AGENT_LOG_LEVEL: process.env.AGENT_LOG_LEVEL,
+	AGENT_LOG_LEVEL: process.env.AGENT_LOG_LEVEL ? process.env.AGENT_LOG_LEVEL : 'info',
 	AGENT_ADMIN_NAME: process.env['AGENT_ADMIN_NAME'],
 	AGENT_ADMIN_PASSWORD: process.env['AGENT_ADMIN_PASSWORD'],
 	CARD_IMAGE_RENDERING: process.env['CARD_IMAGE_RENDERING'],
@@ -157,7 +159,7 @@ async function start () {
 	await wait_for_url(account_health_url, agent_retries, agent_retry_backoff_limit);
 
 	// Generally, you won't have to wait for your agent, so the above is optional
-	const agent = new Agent(ev.ACCOUNT_URL, ev.AGENT_NAME, ev.AGENT_PASSWORD, ev.FRIENDLY_NAME);
+	const agent = new Agent(ev.ACCOUNT_URL, ev.AGENT_ID, ev.AGENT_NAME, ev.AGENT_PASSWORD, ev.FRIENDLY_NAME, ev.AGENT_LOG_LEVEL);
 	agent.setLoggingLevel(ev.AGENT_LOG_LEVEL ? ev.AGENT_LOG_LEVEL : 'info');
 
 	let agent_info;
