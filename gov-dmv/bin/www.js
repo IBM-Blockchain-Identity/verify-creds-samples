@@ -81,8 +81,8 @@ const ev = {
 	LOGIN_PROOF_PATH: process.env.LOGIN_PROOF_PATH,
 	SIGNUP_PROOF_PROVIDER: process.env.SIGNUP_PROOF_PROVIDER,
 	SIGNUP_ACCOUNT_PROOF_PATH: process.env.SIGNUP_ACCOUNT_PROOF_PATH,
-	SIGNUP_DMV_ISSUER_AGENT: process.env.SIGNUP_DMV_ISSUER_AGENT,
-	SIGNUP_HR_ISSUER_AGENT: process.env.SIGNUP_HR_ISSUER_AGENT,
+	DMV_ISSUER_AGENT_INVITATION: process.env.DMV_ISSUER_AGENT_INVITATION,
+	HR_ISSUER_AGENT_INVITATION: process.env.HR_ISSUER_AGENT_INVITATION,
 	SCHEMA_TEMPLATE_PATH: process.env.SCHEMA_TEMPLATE_PATH,
 	ACCEPT_INCOMING_CONNECTIONS: process.env.ACCEPT_INCOMING_CONNECTIONS === 'true',
 	ADMIN_API_USERNAME: process.env.ADMIN_API_USERNAME,
@@ -274,18 +274,10 @@ async function start () {
 		throw new Error(`Invalid value for LOGIN_PROOF_PROVIDER: ${ev.LOGIN_PROOF_PROVIDER}`);
 	}
 
-	let signup_helper;
 	if (ev.SIGNUP_PROOF_PROVIDER === 'account') {
 		if (!ev.SIGNUP_ACCOUNT_PROOF_PATH)
 			throw new Error('SIGNUP_ACCOUNT_PROOF_PATH must be set in order to use `account` SIGNUP_PROOF_PROVIDER');
-		if (!ev.SIGNUP_DMV_ISSUER_AGENT)
-			throw new Error('SIGNUP_DMV_ISSUER_AGENT must be set in order to use `account` SIGNUP_PROOF_PROVIDER');
-		if (!ev.SIGNUP_HR_ISSUER_AGENT)
-			throw new Error('SIGNUP_HR_ISSUER_AGENT must be set in order to use `account` SIGNUP_PROOF_PROVIDER');
 		logger.info(`${ev.SIGNUP_PROOF_PROVIDER} signup proof selected.  Proof request path: ${ev.SIGNUP_ACCOUNT_PROOF_PATH}`);
-		signup_helper = new Helpers.AccountSignupHelper(ev.SIGNUP_HR_ISSUER_AGENT, ev.SIGNUP_DMV_ISSUER_AGENT, ev.SIGNUP_ACCOUNT_PROOF_PATH, agent);
-		await signup_helper.cleanup();
-		await signup_helper.setup();
 
 	} else if (ev.SIGNUP_PROOF_PROVIDER === 'none') {
 		logger.info('VC signups will be disabled');
@@ -296,7 +288,7 @@ async function start () {
 	if (ev.ACCEPT_INCOMING_CONNECTIONS) {
 		logger.info(`Listening for and accepting connection offers to my agent, ${agent.name}`);
 		const responder = new Helpers.ConnectionResponder(agent);
-		responder.start();
+		await responder.start();
 	} else {
 		logger.info(`Not listening for connection offers to my agent, ${agent.name}`);
 	}
@@ -319,7 +311,7 @@ async function start () {
 	const hash = crypto.createHash('sha256');
 	hash.update(ev.ACCOUNT_URL + ev.AGENT_NAME + ev.MY_URL);
 	ev.SESSION_SECRET = ev.SESSION_SECRET ? ev.SESSION_SECRET : hash.digest('hex');
-	const app = App(ev, nano, agent, card_renderer, users, connection_icon_provider, login_proof_helper, signup_helper);
+	const app = App(ev, nano, agent, card_renderer, users, connection_icon_provider, login_proof_helper, null);
 
 	// Get port from environment and store in Express.
 	app.set('port', port);

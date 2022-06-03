@@ -81,8 +81,7 @@ const ev = {
 	LOGIN_PROOF_PATH: process.env.LOGIN_PROOF_PATH,
 	SIGNUP_PROOF_PROVIDER: process.env.SIGNUP_PROOF_PROVIDER,
 	SIGNUP_ACCOUNT_PROOF_PATH: process.env.SIGNUP_ACCOUNT_PROOF_PATH,
-	SIGNUP_DMV_ISSUER_AGENT: process.env.SIGNUP_DMV_ISSUER_AGENT,
-	SIGNUP_HR_ISSUER_AGENT: process.env.SIGNUP_HR_ISSUER_AGENT,
+	DMV_ISSUER_AGENT_INVITATION: process.env.DMV_ISSUER_AGENT_INVITATION,
 	SCHEMA_TEMPLATE_PATH: process.env.SCHEMA_TEMPLATE_PATH,
 	ACCEPT_INCOMING_CONNECTIONS: process.env.ACCEPT_INCOMING_CONNECTIONS === 'true',
 	ADMIN_API_USERNAME: process.env.ADMIN_API_USERNAME,
@@ -278,12 +277,11 @@ async function start () {
 	if (ev.SIGNUP_PROOF_PROVIDER === 'account') {
 		if (!ev.SIGNUP_ACCOUNT_PROOF_PATH)
 			throw new Error('SIGNUP_ACCOUNT_PROOF_PATH must be set in order to use `account` SIGNUP_PROOF_PROVIDER');
-		if (!ev.SIGNUP_DMV_ISSUER_AGENT)
-			throw new Error('SIGNUP_DMV_ISSUER_AGENT must be set in order to use `account` SIGNUP_PROOF_PROVIDER');
-		if (!ev.SIGNUP_HR_ISSUER_AGENT)
-			throw new Error('SIGNUP_HR_ISSUER_AGENT must be set in order to use `account` SIGNUP_PROOF_PROVIDER');
+		if (!ev.DMV_ISSUER_AGENT_INVITATION)
+			throw new Error('DMV_ISSUER_AGENT_INVITATION must be set in order to use `account` SIGNUP_PROOF_PROVIDER');
+
 		logger.info(`${ev.SIGNUP_PROOF_PROVIDER} signup proof selected.  Proof request path: ${ev.SIGNUP_ACCOUNT_PROOF_PATH}`);
-		signup_helper = new Helpers.AccountSignupHelper(ev.SIGNUP_HR_ISSUER_AGENT, ev.SIGNUP_DMV_ISSUER_AGENT, ev.SIGNUP_ACCOUNT_PROOF_PATH, agent);
+		signup_helper = new Helpers.AccountSignupHelper(ev.DMV_ISSUER_AGENT_INVITATION, ev.SIGNUP_ACCOUNT_PROOF_PATH, agent);
 		await signup_helper.cleanup();
 		await signup_helper.setup();
 
