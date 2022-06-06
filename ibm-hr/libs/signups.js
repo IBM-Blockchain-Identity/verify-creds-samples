@@ -364,8 +364,8 @@ class Signup {
 			logger.debug(`User record: ${JSON.stringify(user_doc)}`);
 
 			const cred_attributes = {};
-			for (const index in schema.attr_names) {
-				const attr_name = schema.attr_names[index];
+			for (const index in schema.attrs) {
+				const attr_name = schema.attrs[index];
 				// Certain attributes are supposed to contain rendered images of the credential
 				if (attr_name === 'card_front') {
 					cred_attributes[attr_name] = await this.card_renderer.createCardFront(personal_info);

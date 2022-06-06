@@ -198,6 +198,10 @@ async function start () {
 
 	logger.debug(`Agent user data: ${JSON.stringify(agent_info)}`);
 
+	//Clean up connections
+	const signup_helper = new Helpers.AccountSignupHelper(agent);
+	await signup_helper.cleanup();
+
 	/*************************
 	 * SETUP CREDENTIAL RENDERING
 	 *************************/

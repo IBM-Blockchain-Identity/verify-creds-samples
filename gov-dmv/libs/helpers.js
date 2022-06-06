@@ -206,6 +206,40 @@ class NullProofHelper {
 	}
 }
 
+
+/**
+ * A helper class to mitigate the amount of hardcoding in the signup.js library.  Facilitates using a drivers license
+ * and employment credential to get a bank account.
+ * @class
+ * @implements {SignupHelper}
+ */
+class AccountSignupHelper {
+
+	/**
+	 * Creates a AccountSignupHelper that will create proof requests asking for a drivers license and employment badge.
+	 * @param {Agent} agent An Agent instance capable of looking up schemas.
+	 */
+	constructor (agent) {
+		this.agent = agent;
+	}
+
+	/**
+	 * Cleans up all the connections created for this signup flow.  Handy for when you need to change the properties
+	 * you want to set on the connections to the issuers.
+	 * @returns {Promise<void>} A promise that resolves when the connections created for this flow are deleted.
+	 */
+	async cleanup () {
+		logger.info(`Cleaning up connections to the issuers: ${this.dmv_invitation_url}`);
+		const connections = await this.agent.getConnections();
+		logger.info(`Cleaning up connections ${connections.length}`);
+		for (const index in connections) {
+			logger.debug(`Cleaning up connection ${connections[index].id}`);
+			await this.agent.deleteConnection(connections[index].id);
+		}
+	}
+
+}
+
 class ConnectionResponder {
 	constructor (agent, interval) {
 		if (!agent || typeof agent.getConnections !== 'function')
@@ -271,5 +305,6 @@ class ConnectionResponder {
 module.exports = {
 	LoginHelper,
 	NullProofHelper,
-	ConnectionResponder
+	ConnectionResponder,
+	AccountSignupHelper
 };
