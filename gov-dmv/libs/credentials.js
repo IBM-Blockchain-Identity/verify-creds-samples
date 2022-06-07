@@ -255,7 +255,7 @@ class Issuance {
 			const connection = connections[0];
 
 			if (!connection) {
-				const err = new Error('User agent is not connected.');
+				const err = new Error(`User agent is not connected. Query: ${JSON.stringify(search)}`);
 				err.code = CREDENTIAL_ERRORS.CREDENTIAL_CONNECTION_FAILED;
 				throw err;
 			}
