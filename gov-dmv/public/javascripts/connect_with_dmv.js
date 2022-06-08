@@ -310,6 +310,14 @@ function populate_user_info () {
 
 	const user_id = window.user_id;
 	console.log(`Getting personal info for ${user_id}`);
+
+	$.ajax({
+		url: '/invitation',
+		method: 'GET'
+	}).done((invitation) => {
+		$('.agent-invitation').html(invitation.url);
+	});
+
 	$.ajax({
 		url: `/api/users/${user_id}`,
 		method: 'GET'

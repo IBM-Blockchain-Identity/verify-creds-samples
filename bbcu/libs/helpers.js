@@ -223,9 +223,9 @@ class AccountSignupHelper {
 	 */
 	constructor (hr_invitation_url, dmv_invitation_url, proof_schema_path, agent) {
 		if (!hr_invitation_url || typeof hr_invitation_url !== 'string')
-			throw new TypeError('Invalid HR invitation');
+			throw new TypeError('Invalid HR invitation ' + hr_invitation_url);
 		if (!dmv_invitation_url || typeof dmv_invitation_url !== 'string')
-			throw new TypeError('Invalid DMV invitation');
+			throw new TypeError('Invalid DMV invitation ' + dmv_invitation_url);
 		if (!proof_schema_path || typeof proof_schema_path !== 'string')
 			throw new TypeError('Invalid proof schema path for signup helper');
 		if (!agent || typeof agent.getCredentialDefinitions !== 'function')
@@ -244,6 +244,15 @@ class AccountSignupHelper {
 		this.dmv_invitation_url = dmv_invitation_url;
 		this.proof_schema_path = proof_schema_path;
 		this.agent = agent;
+	}
+
+	async createInvitation () {
+		const direct_route = true; // messages will be sent directly to the inviter
+		const manual_accept = false; // the inviter's agent will automatically accept any cunnetcion offer from this invitation
+		const max_acceptances = -1; // set no limit on how many times this invitaton may be accepted
+		const properties = null; // properties to set on the inviter's side of the connection
+
+		return await this.agent.createInvitation(direct_route, manual_accept, max_acceptances, properties);
 	}
 
 	/**
@@ -602,6 +611,17 @@ class InboundNonceWatcher {
 	}
 }
 
+class Utils {
+	static async createAgentInvitation (agent) {
+		const direct_route = true; // messages will be sent directly to the inviter
+		const manual_accept = false; // the inviter's agent will automatically accept any cunnetcion offer from this invitation
+		const max_acceptances = -1; // set no limit on how many times this invitaton may be accepted
+		const properties = null; // properties to set on the inviter's side of the connection
+
+		return agent.createInvitation(direct_route, manual_accept, max_acceptances, properties);
+	}
+}
+
 InboundNonceWatcher.REQUEST_TYPES = {
 	CONNECTION: 1,
 	CREDENTIAL: 2,
@@ -614,4 +634,5 @@ module.exports = {
 	AccountSignupHelper,
 	ConnectionResponder,
 	InboundNonceWatcher,
+	Utils
 };

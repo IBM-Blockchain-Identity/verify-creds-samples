@@ -475,9 +475,21 @@ class ConnectionResponder {
 	}
 }
 
+class Utils {
+	static async createAgentInvitation (agent) {
+		const direct_route = true; // messages will be sent directly to the inviter
+		const manual_accept = false; // the inviter's agent will automatically accept any cunnetcion offer from this invitation
+		const max_acceptances = -1; // set no limit on how many times this invitaton may be accepted
+		const properties = null; // properties to set on the inviter's side of the connection
+
+		return agent.createInvitation(direct_route, manual_accept, max_acceptances, properties);
+	}
+}
+
 module.exports = {
 	LoginHelper,
 	NullProofHelper,
 	AccountSignupHelper,
-	ConnectionResponder
+	ConnectionResponder,
+	Utils
 };

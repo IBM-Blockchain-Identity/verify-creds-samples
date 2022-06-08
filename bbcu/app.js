@@ -33,6 +33,7 @@ const SchemaAPI = require('./routes/schemas_api.js');
 const CredDefsAPI = require('./routes/cred_def_api.js');
 const CredentialsAPI = require('./routes/credentials_api.js');
 const AgentAPI = require('./routes/agent_api.js');
+const Helpers = require('./libs/helpers.js');
 
 // Logging setup
 const Logger = require('./libs/logger.js').Logger;
@@ -72,6 +73,12 @@ function createApp (ev, nano, agent, card_renderer, users, connection_icon_provi
 			expires: 600000
 		}
 	}));
+
+	Helpers.Utils.createAgentInvitation(agent).then(
+		(invitation) => {
+			ev.AGENT_INVITATION_URL = invitation.short_url;
+		}
+	);
 
 	// Set up all the backend libraries for managing users, schemas, credentials, etc.
 	const issuance_manager = new IssuanceManager(agent, users, card_renderer, connection_icon_provider);

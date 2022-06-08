@@ -249,6 +249,13 @@ function populate_user_info () {
 		}
 	};
 
+	$.ajax({
+		url: '/invitation',
+		method: 'GET'
+	}).done((invitation) => {
+		$('.agent-invitation').html(invitation.url);
+	});
+
 	const user_id = window.user_id;
 	console.log(`Getting personal info for ${user_id}`);
 	$.ajax({
