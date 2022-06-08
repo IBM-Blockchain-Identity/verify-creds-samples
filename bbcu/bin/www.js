@@ -38,6 +38,7 @@ const logger = Logger.makeLogger(Logger.logPrefix(__filename));
 const required = [
 	'DB_CONNECTION_STRING',
 	'DB_USERS',
+	'AGENT_ID',
 	'AGENT_NAME',
 	'AGENT_PASSWORD',
 	'FRIENDLY_NAME',
@@ -46,7 +47,9 @@ const required = [
 	'CONNECTION_IMAGE_PROVIDER',
 	'LOGIN_PROOF_PROVIDER',
 	'SIGNUP_PROOF_PROVIDER',
-	'SCHEMA_TEMPLATE_PATH'
+	'SCHEMA_TEMPLATE_PATH',
+	'DMV_ISSUER_AGENT_INVITATION',
+	'HR_ISSUER_AGENT_INVITATION'
 ];
 for (const index in required) {
 	if (!process.env[required[index]]) {
@@ -59,10 +62,11 @@ const ev = {
 	DB_CONNECTION_STRING: process.env['DB_CONNECTION_STRING'],
 	DB_USERS: process.env['DB_USERS'],
 	ACCOUNT_URL: process.env['ACCOUNT_URL'],
+	AGENT_ID: process.env['AGENT_ID'],
 	AGENT_NAME: process.env['AGENT_NAME'],
 	AGENT_PASSWORD: process.env['AGENT_PASSWORD'],
 	FRIENDLY_NAME: process.env['FRIENDLY_NAME'],
-	AGENT_LOG_LEVEL: process.env.AGENT_LOG_LEVEL,
+	AGENT_LOG_LEVEL: process.env.AGENT_LOG_LEVEL ? process.env.AGENT_LOG_LEVEL : 'info',
 	AGENT_ADMIN_NAME: process.env['AGENT_ADMIN_NAME'],
 	AGENT_ADMIN_PASSWORD: process.env['AGENT_ADMIN_PASSWORD'],
 	CARD_IMAGE_RENDERING: process.env['CARD_IMAGE_RENDERING'],
@@ -79,12 +83,13 @@ const ev = {
 	LOGIN_PROOF_PATH: process.env.LOGIN_PROOF_PATH,
 	SIGNUP_PROOF_PROVIDER: process.env.SIGNUP_PROOF_PROVIDER,
 	SIGNUP_ACCOUNT_PROOF_PATH: process.env.SIGNUP_ACCOUNT_PROOF_PATH,
-	SIGNUP_DMV_ISSUER_AGENT: process.env.SIGNUP_DMV_ISSUER_AGENT,
-	SIGNUP_HR_ISSUER_AGENT: process.env.SIGNUP_HR_ISSUER_AGENT,
+	DMV_ISSUER_AGENT_INVITATION: process.env.DMV_ISSUER_AGENT_INVITATION,
+	HR_ISSUER_AGENT_INVITATION: process.env.HR_ISSUER_AGENT_INVITATION,
 	SCHEMA_TEMPLATE_PATH: process.env.SCHEMA_TEMPLATE_PATH,
 	ACCEPT_INCOMING_CONNECTIONS: process.env.ACCEPT_INCOMING_CONNECTIONS === 'true',
 	ADMIN_API_USERNAME: process.env.ADMIN_API_USERNAME,
-	ADMIN_API_PASSWORD: process.env.ADMIN_API_PASSWORD
+	ADMIN_API_PASSWORD: process.env.ADMIN_API_PASSWORD,
+	AGENT_INVITATION_URL: null
 };
 
 for (const key in ev) {
@@ -157,7 +162,7 @@ async function start () {
 	await wait_for_url(account_health_url, agent_retries, agent_retry_backoff_limit);
 
 	// Generally, you won't have to wait for your agent, so the above is optional
-	const agent = new Agent(ev.ACCOUNT_URL, ev.AGENT_NAME, ev.AGENT_PASSWORD, ev.FRIENDLY_NAME);
+	const agent = new Agent(ev.ACCOUNT_URL, ev.AGENT_ID, ev.AGENT_NAME, ev.AGENT_PASSWORD, ev.FRIENDLY_NAME, ev.AGENT_LOG_LEVEL);
 	agent.setLoggingLevel(ev.AGENT_LOG_LEVEL ? ev.AGENT_LOG_LEVEL : 'info');
 
 	let agent_info;
@@ -183,18 +188,13 @@ async function start () {
 		}
 	}
 
-	if (!agent_info || agent_info.role !== 'TRUST_ANCHOR') {
-		if (ev.AGENT_ADMIN_NAME && ev.AGENT_ADMIN_PASSWORD) {
-			try {
-				logger.info(`Onboarding ${ev.AGENT_NAME} as trust anchor`);
-				agent_info = await agent.onboardAsTrustAnchor(ev.AGENT_ADMIN_NAME, ev.AGENT_ADMIN_PASSWORD);
-				logger.info(`${ev.AGENT_NAME} is now a trust anchor`);
-			} catch (error) {
-				logger.error(`Failed to registery ${ev.AGENT_NAME} as a trust anchor: ${error}`);
-				process.exit(1);
-			}
-		} else {
-			logger.error(`Agent ${ev.AGENT_NAME} must be a trust anchor!`);
+	if (!agent_info || agent_info.issuer !== true) {
+		try {
+			logger.info(`Onboarding ${ev.AGENT_NAME} as trust anchor`);
+			agent_info = await agent.onboardAsTrustAnchor(ev.AGENT_NAME, ev.AGENT_PASSWORD);
+			logger.info(`${ev.AGENT_NAME} is now a trust anchor`);
+		} catch (error) {
+			logger.error(`Failed to registery ${ev.AGENT_NAME} as a trust anchor: ${error}`);
 			process.exit(1);
 		}
 	}
@@ -281,12 +281,12 @@ async function start () {
 	if (ev.SIGNUP_PROOF_PROVIDER === 'account') {
 		if (!ev.SIGNUP_ACCOUNT_PROOF_PATH)
 			throw new Error('SIGNUP_ACCOUNT_PROOF_PATH must be set in order to use `account` SIGNUP_PROOF_PROVIDER');
-		if (!ev.SIGNUP_DMV_ISSUER_AGENT)
-			throw new Error('SIGNUP_DMV_ISSUER_AGENT must be set in order to use `account` SIGNUP_PROOF_PROVIDER');
-		if (!ev.SIGNUP_HR_ISSUER_AGENT)
-			throw new Error('SIGNUP_HR_ISSUER_AGENT must be set in order to use `account` SIGNUP_PROOF_PROVIDER');
+		if (!ev.DMV_ISSUER_AGENT_INVITATION)
+			throw new Error('DMV_ISSUER_AGENT_INVITATION must be set in order to use `account` SIGNUP_PROOF_PROVIDER');
+		if (!ev.HR_ISSUER_AGENT_INVITATION)
+			throw new Error('HR_ISSUER_AGENT_INVITATION must be set in order to use `account` SIGNUP_PROOF_PROVIDER');
 		logger.info(`${ev.SIGNUP_PROOF_PROVIDER} signup proof selected.  Proof request path: ${ev.SIGNUP_ACCOUNT_PROOF_PATH}`);
-		signup_helper = new Helpers.AccountSignupHelper(ev.SIGNUP_HR_ISSUER_AGENT, ev.SIGNUP_DMV_ISSUER_AGENT, ev.SIGNUP_ACCOUNT_PROOF_PATH, agent);
+		signup_helper = new Helpers.AccountSignupHelper(ev.HR_ISSUER_AGENT_INVITATION, ev.DMV_ISSUER_AGENT_INVITATION, ev.SIGNUP_ACCOUNT_PROOF_PATH, agent);
 		await signup_helper.cleanup();
 		await signup_helper.setup();
 

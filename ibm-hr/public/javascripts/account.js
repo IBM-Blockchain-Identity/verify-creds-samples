@@ -20,6 +20,13 @@ $(document).ready(() => {
 
 	const connectButton = $('.issueButton');
 
+	$.ajax({
+		url: '/invitation',
+		method: 'GET'
+	}).done((invitation) => {
+		$('.agent-invitation').html(invitation.url);
+	});
+
 	/**
 	 * Click handler for credential button. Creates a connection invitation, displays the invitation to the user,
 	 * and waits for the connection to be accepted or rejected.

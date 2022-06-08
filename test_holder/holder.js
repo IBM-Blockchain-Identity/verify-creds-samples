@@ -25,7 +25,7 @@ const jsonPrint = function (o) {
 	return JSON.stringify(o, 2, ' ');
 };
 
-const required = [ 'AGENT_NAME', 'AGENT_PASSWORD', 'ACCOUNT_URL' ];
+const required = [ 'AGENT_ID', 'AGENT_NAME', 'AGENT_PASSWORD', 'ACCOUNT_URL' ];
 for (const index in required) {
 	if (!process.env[required[index]]) {
 		throw new Error(`Missing environment parameter ${required[index]}`);
@@ -35,6 +35,7 @@ for (const index in required) {
 // Pull required configuration parameters from environment variables
 const ev = {
 	ACCOUNT_URL: process.env.ACCOUNT_URL,
+	AGENT_ID: process.env.AGENT_ID,
 	AGENT_NAME: process.env.AGENT_NAME,
 	AGENT_PASSWORD: process.env.AGENT_PASSWORD,
 	FRIENDLY_NAME: process.env.FRIENDLY_NAME ? process.env.FRIENDLY_NAME : 'Test Holder',
@@ -55,7 +56,7 @@ for (const key in ev) {
 }
 
 // Create Agent for dmv
-const agent = new Agent(ev.ACCOUNT_URL, ev.AGENT_NAME, ev.AGENT_PASSWORD, ev.FRIENDLY_NAME);
+const agent = new Agent(ev.ACCOUNT_URL, ev.AGENT_ID, ev.AGENT_NAME, ev.AGENT_PASSWORD);
 agent.setLoggingLevel(ev.AGENT_LOG_LEVEL);
 
 (async () => {

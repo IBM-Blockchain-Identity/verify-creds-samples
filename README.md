@@ -229,10 +229,10 @@ list of the existing configuration parameters:
     additional parameters:
     - `SIGNUP_ACCOUNT_PROOF_PATH`: The path to a JSON file describing a signup proof request.  This file should describe
       attributes from a driver's license and attributes from an employment badge.
-    - `SIGNUP_DMV_ISSUER_AGENT`: The agent name or agent URL for the DMV issuer.  The sample will attempt to establish a
+    - `DMV_ISSUER_AGENT_INVITATION`: The agent name or agent URL for the DMV issuer.  The sample will attempt to establish a
       connection to this agent in order to acquire a list of published driver's license schemas.  Each of these schemas
       will be added to the restriction list for each driver's license attribute in the proof request.
-    - `SIGNUP_HR_ISSUER_AGENT`: The agent name of agent URL for the HR issuer.  Serves the same purpose as `SIGNUP_DMV_ISSUER_AGENT`.
+    - `HR_ISSUER_AGENT_INVITATION`: The agent name of agent URL for the HR issuer.  Serves the same purpose as `DMV_ISSUER_AGENT_INVITATION`.
 - `SCHEMA_TEMPLATE_PATH`: The path to a JSON file describing the credential schema for the issuer.  This parameter is configured
   in the Docker image file for each sample issuer and describes the locations of the driver's license, employment badge, and
   bank account schema files.

@@ -210,7 +210,8 @@ class Issuance {
 			}
 
 			my_credential_definitions.sort(sortSchemas).reverse();
-			const schema_id = my_credential_definitions[0].schema_id;
+			const my_credential_definition = my_credential_definitions[0];
+			const schema_id = my_credential_definition.schema.id;
 			logger.debug(`Issuing credential with schema ${schema_id}`);
 
 			const schema = await this.agent.getCredentialSchema(schema_id);
@@ -222,8 +223,8 @@ class Issuance {
 
 			logger.debug(`User record: ${JSON.stringify(user_doc)}`);
 			const attributes = {};
-			for (const index in schema.attr_names) {
-				const attr_name = schema.attr_names[index];
+			for (const index in schema.attrs) {
+				const attr_name = schema.attrs[index];
 				// Certain attributes are supposed to contain rendered images of the credential
 				if (attr_name === 'card_front') {
 					attributes[attr_name] = await this.card_renderer.createCardFront(user_doc.personal_info);
@@ -245,55 +246,21 @@ class Issuance {
 			}
 
 			this.status = Issuance.ISSUANCE_STEPS.ESTABLISHING_CONNECTION;
-			logger.info(`Connection to user via the ${this.connection_method} method`);
-			const connection_opts = icon ? {icon: icon} : null;
-			let connection;
 
-			try {
+			const search = {};
+			if (user_doc.opts.agent_name.toLowerCase().indexOf('http') >= 0)
+				search['remote.url'] = user_doc.opts.agent_name;
+			else
+				search['remote.name'] = user_doc.opts.agent_name;
 
-				if (this.connection_method === 'in_band') {
+			const connections = await this.agent.getConnections(search);
+			const connection = connections[0];
 
-					if (!user_doc.opts || !user_doc.opts.agent_name) {
-						const err = new Error('User record does not have an associated agent name');
-						err.code = CREDENTIAL_ERRORS.CREDENTIAL_USER_AGENT_NOT_FOUND;
-						throw err;
-					}
-
-					let connection_to = user_doc.opts.agent_name;
-					if (typeof connection_to === 'string') {
-						if (connection_to.toLowerCase().indexOf('http') >= 0)
-							connection_to = {url: connection_to};
-						else
-							connection_to = {name: connection_to};
-					}
-					logger.info(`Sending connection offer to ${JSON.stringify(connection_to)}`);
-					this.connection_offer = await this.agent.createConnection(connection_to, connection_opts);
-					logger.info(`Sent connection offer ${this.connection_offer.id} to ${user_doc.opts.agent_name}`);
-					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
-
-				} else if (this.connection_method === 'out_of_band') {
-
-					this.connection_offer = await this.agent.createConnection(null, connection_opts);
-					logger.info(`Created out-of-band connection offer ${this.connection_offer.id}`);
-					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
-
-				} else {
-					const error = new Error(`An invalid connection method was used: ${this.connection_method}`);
-					logger.error(`Credential issuance could not proceed: ${error}`);
-					error.code = CREDENTIAL_ERRORS.CREDENTIAL_INVALID_CONNECTION_METHOD;
-					throw error;
-				}
-
-			} catch (error) {
-				logger.error(`Failed to establish a connection with the user. error: ${error}`);
-				error.code = error.code ? error.code : CREDENTIAL_ERRORS.CREDENTIAL_CONNECTION_FAILED;
-				if (this.connection_offer && this.connection_offer.id) {
-					logger.info(`Cleaning up connection offer ${this.connection_offer.id}`);
-					await this.agent.deleteConnection(this.connection_offer.id);
-				}
-				throw error;
+			if (!connection) {
+				const err = new Error(`User agent is not connected. Query: ${JSON.stringify(search)}`);
+				err.code = CREDENTIAL_ERRORS.CREDENTIAL_CONNECTION_FAILED;
+				throw err;
 			}
-			logger.info(`Established connection ${connection.id}.  Their DID: ${connection.remote.pairwise.did}`);
 
 			this.status = Issuance.ISSUANCE_STEPS.ISSUING_CREDENTIAL;
 
@@ -301,12 +268,7 @@ class Issuance {
 			try {
 				this.credential = await this.agent.offerCredential({
 					did: connection.remote.pairwise.did
-				}, {
-					schema_name: schema.name,
-					schema_version: schema.version
-				}, attributes, {
-					icon: icon
-				});
+				}, my_credential_definition.id, attributes);
 			} catch (error) {
 				logger.error(`Failed to offer credential. Deleting connection ${connection.id}. error: ${error}`);
 				error.code = error.code ? error.code : CREDENTIAL_ERRORS.CREDENTIAL_CONNECTION_FAILED;
@@ -399,7 +361,7 @@ class Issuance {
  * @return {number} <0 if a comes before b, 0 if they are the same, >0 if b comes before a
  */
 function sortSchemas (a, b) {
-	return semverCompare(a.schema_version, b.schema_version);
+	return semverCompare(a.schema.version, b.schema.version);
 }
 
 exports.ISSUANCE_STEPS = Issuance.ISSUANCE_STEPS;

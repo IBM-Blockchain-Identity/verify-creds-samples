@@ -216,15 +216,12 @@ class AccountSignupHelper {
 
 	/**
 	 * Creates a AccountSignupHelper that will create proof requests asking for a drivers license and employment badge.
-	 * @param {string} hr_issuer The agent name for the HR issuer.
-	 * @param {string} dmv_issuer The agent name for the dmv issuer.
+	 * @param {string} dmv_invitation_url The DML agent invitation.
 	 * @param {string} proof_schema_path The path to a proof schema file.
 	 * @param {Agent} agent An Agent instance capable of looking up schemas.
 	 */
-	constructor (hr_issuer, dmv_issuer, proof_schema_path, agent) {
-		if (!hr_issuer || typeof hr_issuer !== 'string')
-			throw new TypeError('Invalid HR issuer');
-		if (!dmv_issuer || typeof dmv_issuer !== 'string')
+	constructor (dmv_invitation_url, proof_schema_path, agent) {
+		if (!dmv_invitation_url || typeof dmv_invitation_url !== 'string')
 			throw new TypeError('Invalid DMV issuer');
 		if (!proof_schema_path || typeof proof_schema_path !== 'string')
 			throw new TypeError('Invalid proof schema path for signup helper');
@@ -240,8 +237,7 @@ class AccountSignupHelper {
 		if (!fs.existsSync(proof_schema_path))
 			throw new Error(`File ${proof_schema_path} does not exist`);
 
-		this.hr_issuer = hr_issuer;
-		this.dmv_issuer = dmv_issuer;
+		this.dmv_invitation_url = dmv_invitation_url;
 		this.proof_schema_path = proof_schema_path;
 		this.agent = agent;
 	}
@@ -252,31 +248,8 @@ class AccountSignupHelper {
 	 * @returns {Promise<void>} A promise that resolves when the tagged connections are established.
 	 */
 	async setup () {
-		let to = {};
-		if (this.dmv_issuer.toLowerCase().indexOf('http') >= 0)
-			to.url = this.dmv_issuer;
-		else
-			to.name = this.dmv_issuer;
-
-		logger.info(`Setting up a connection to trusted issuer: ${JSON.stringify(to)}`);
-		let connection_offer = await this.agent.createConnection(to, {
-			trustedDMV: 'true'
-		});
-		await this.agent.waitForConnection(connection_offer.id);
-		logger.info(`Connection ${connection_offer.id} established`);
-
-		to = {};
-		if (this.hr_issuer.toLowerCase().indexOf('http') >= 0)
-			to.url = this.hr_issuer;
-		else
-			to.name = this.hr_issuer;
-
-		logger.info(`Setting up a connection to trusted issuer: ${JSON.stringify(to)}`);
-		connection_offer = await this.agent.createConnection(to, {
-			trustedHR: 'true'
-		});
-		await this.agent.waitForConnection(connection_offer.id);
-		logger.info(`Connection ${connection_offer.id} established`);
+		const gov_connection = await this.agent.acceptInvitation(this.dmv_invitation_url);
+		logger.info(`Connection ${gov_connection.id} established, state ${gov_connection.state}`);
 	}
 
 	/**
@@ -285,14 +258,14 @@ class AccountSignupHelper {
 	 * @returns {Promise<void>} A promise that resolves when the connections created for this flow are deleted.
 	 */
 	async cleanup () {
-		logger.info(`Cleaning up connections to the issuers: ${this.dmv_issuer} and ${this.hr_issuer}`);
+		logger.info(`Cleaning up connections to the issuers: ${this.dmv_invitation_url}`);
 		const connections = await this.agent.getConnections({
 			$or: [
 				{
-					'remote.name': {$in: [ this.hr_issuer, this.dmv_issuer ]}
+					'remote.name': {$in:this.dmv_invitation_url}
 				},
 				{
-					'remote.url': {$in: [ this.hr_issuer, this.dmv_issuer ]}
+					'remote.url': {$in:this.dmv_invitation_url}
 				}
 			]
 		});
@@ -315,9 +288,9 @@ class AccountSignupHelper {
 			});
 		});
 
-		logger.info(`Looking up credential definitions for issuer ${this.dmv_issuer}`);
+		logger.info(`Looking up credential definitions for issuer ${this.dmv_invitation_url}`);
 		const dmv_cred_defs = await this.agent.getCredentialDefinitions(null, {trustedDMV: 'true'});
-		logger.debug(`${this.dmv_issuer}'s credential definitions: ${JSON.stringify(dmv_cred_defs, 0, 1)}`);
+		logger.debug(`${this.dmv_invitation_url}'s credential definitions: ${JSON.stringify(dmv_cred_defs, 0, 1)}`);
 		const dmv_restrictions = [];
 		for (const agent_index in dmv_cred_defs.agents) {
 			const agent = dmv_cred_defs.agents[agent_index];
@@ -329,22 +302,6 @@ class AccountSignupHelper {
 			}
 		}
 
-		logger.info(`Making sure we still have a connection to ${this.hr_issuer} and ${this.dmv_issuer}`);
-		await this.setup();
-
-		logger.info(`Looking up credential definitions for issuer ${this.hr_issuer}`);
-		const hr_cred_defs = await this.agent.getCredentialDefinitions(null, {trustedHR: 'true'});
-		logger.debug(`${this.hr_issuer}'s credential definitions: ${JSON.stringify(hr_cred_defs, 0, 1)}`);
-		const hr_restrictions = [];
-		for (const agent_index in hr_cred_defs.agents) {
-			const agent = hr_cred_defs.agents[agent_index];
-
-			for (const cred_def_index in agent.results.items) {
-				const cred_def_id = agent.results.items[cred_def_index].id;
-
-				hr_restrictions.push({cred_def_id: cred_def_id});
-			}
-		}
 
 		const proof_request = {
 			'name': PROOF_FORMAT.name,
@@ -357,8 +314,6 @@ class AccountSignupHelper {
 			let restrictions = [];
 			if (key.toLowerCase().indexOf('mdl') >= 0) {
 				restrictions = dmv_restrictions;
-			} else if (key.toLowerCase().indexOf('hr') >= 0) {
-				restrictions = hr_restrictions;
 			}
 			proof_request.requested_attributes[attribute] = {
 				name: attribute,
@@ -520,9 +475,21 @@ class ConnectionResponder {
 	}
 }
 
+class Utils {
+	static async createAgentInvitation (agent) {
+		const direct_route = true; // messages will be sent directly to the inviter
+		const manual_accept = false; // the inviter's agent will automatically accept any cunnetcion offer from this invitation
+		const max_acceptances = -1; // set no limit on how many times this invitaton may be accepted
+		const properties = null; // properties to set on the inviter's side of the connection
+
+		return agent.createInvitation(direct_route, manual_accept, max_acceptances, properties);
+	}
+}
+
 module.exports = {
 	LoginHelper,
 	NullProofHelper,
 	AccountSignupHelper,
-	ConnectionResponder
+	ConnectionResponder,
+	Utils
 };

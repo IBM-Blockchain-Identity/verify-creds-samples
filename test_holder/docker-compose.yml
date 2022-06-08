@@ -5,6 +5,7 @@ services:
     image: test-holder
     environment:
       - ACCOUNT_URL
+      - AGENT_ID
       - AGENT_NAME
       - AGENT_PASSWORD
       - AGENT_ADMIN_NAME

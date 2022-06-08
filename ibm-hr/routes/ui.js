@@ -47,6 +47,13 @@ exports.createRouter = function (users_instance, ev, middleware) {
 		});
 	});
 
+	// Agent invitation
+	router.get('/invitation', (req, res, next) => {
+		res.json({
+			url: ev.AGENT_INVITATION_URL,
+		});
+	});
+
 	// Login page
 	router.get('/login', (req, res, next) => {
 		if (req.session && req.session.user_id)
