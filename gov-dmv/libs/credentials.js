@@ -359,7 +359,7 @@ class Issuance {
  * @return {number} <0 if a comes before b, 0 if they are the same, >0 if b comes before a
  */
 function sortSchemas (a, b) {
-	return semverCompare(a.schema_version, b.schema_version);
+	return semverCompare(a.schema.version, b.schema.version);
 }
 
 exports.ISSUANCE_STEPS = Issuance.ISSUANCE_STEPS;
