@@ -19,25 +19,13 @@ script:
 deploy:
   - provider: script
     skip_cleanup: true
-    script: ./travis/deploy.sh
+    script: ./travis/deploy_new.sh
     on:
       repo: IBM-Blockchain-Identity/verify-creds-samples
       tags: true
   - provider: script
     skip_cleanup: true
-    script: ./travis/deploy_dev.sh
-    on:
-      repo: IBM-Blockchain-Identity/verify-creds-samples
-      branch: master
-  - provider: script
-    skip_cleanup: true
-    script: ./travis/deploy_new.sh
-    on:
-      repo: IBM-Blockchain-Identity/verify-creds-samples
-      branch: newagencyprod
-  - provider: script
-    skip_cleanup: true
     script: ./travis/deploy_newdev.sh
     on:
       repo: IBM-Blockchain-Identity/verify-creds-samples
-      branch: newagency
+      branch: master
