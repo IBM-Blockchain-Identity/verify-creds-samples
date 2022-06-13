@@ -1,5 +1,5 @@
 /**
- © Copyright IBM Corp. 2019, 2019
+ © Copyright IBM Corp. 2019, 2020
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  limitations under the License.
  */
 
-const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 const semverCompare = require('semver-compare');
 const InboundNonceWatcher = require('./helpers.js').InboundNonceWatcher;
 
@@ -58,11 +58,11 @@ class SignupManager {
 	 * @param {string} user The app user we want to sign up.
 	 * @param {string} agent_name The agent name associated with the user.
 	 * @param {string} password The new user's password.
-	 * @param {ConnectionMethod} connection_method The method for connecting to the user.
+	 * @param {string} proof_schema_id The proof schema to use to request signup information.
 	 * @param {string} qr_code_nonce The nonce provided in the qrCode that is initiating this signup.
 	 * @returns {string} A Signup instance ID to be used to check the status of the Signup later.
 	 */
-	create_signup (user, agent_name, password, connection_method, qr_code_nonce=null) {
+	create_signup (user, agent_name, password, proof_schema_id, qr_code_nonce=null) {
 		if ((!qr_code_nonce && (!user || typeof user !== 'string')) ||
 			(qr_code_nonce && (user === undefined || user === null || typeof user !== 'string')))
 			throw new TypeError('Invalid user was provided to signup manager');
@@ -70,12 +70,12 @@ class SignupManager {
 			throw new TypeError('Invalid agent name provided to signup manager');
 		if (!qr_code_nonce && (!password || typeof password !== 'string'))
 			throw new TypeError('Invalid password provided to signup manager');
-		if (!connection_method || typeof connection_method !== 'string')
-			throw new TypeError('Invalid connection method for issuing credentials');
+		if (!proof_schema_id || typeof proof_schema_id !== 'string')
+			throw new TypeError('Invalid proof schema id provided to signup manager');
 
 		const signup_id = uuidv4();
 		logger.info(`Creating signup ${signup_id}`);
-		this.signups[signup_id] = new Signup(signup_id, agent_name, this.agent, user, password, this.user_records, this.card_renderer, this.connection_icon_provider, this.signup_helper, connection_method, qr_code_nonce);
+		this.signups[signup_id] = new Signup(signup_id, agent_name, this.agent, user, password, this.user_records, this.card_renderer, this.connection_icon_provider, this.signup_helper, proof_schema_id, qr_code_nonce);
 		this.signups[signup_id].start();
 		return signup_id;
 	}
@@ -202,7 +202,7 @@ class Signup {
 
 	/**
 	 * @param {string} id The ID for looking up this Signup instance.
-	 * @param {string} agent_name An agent name to associate with the user.
+	 * @param {string} invitation_url An invitation url used to establish connections with the user's agent.
 	 * @param {Agent} agent An agent to connect to users and send credential offers.
 	 * @param {string} user The user to connect with.
 	 * @param {string} password The new user's password.
@@ -210,16 +210,16 @@ class Signup {
 	 * @param {CardRenderer} card_renderer The renderer for the credentials.
 	 * @param {ImageProvider} connection_icon_provider Provides the image data for connection offers.
 	 * @param {SignupHelper} signup_helper Manages proof schemas and user record creation.
-	 * @param {ConnectionMethod} connection_method The method for establishing the connection to the user
+	 * @param {string} proof_schema_id The id of the proof schema to use to request signup information.
 	 * @param {string} qr_code_nonce The nonce provided in the qrCode that is initiating this signup.
 	 * @returns {Signup} The created Signup object
 	 */
-	constructor (id, agent_name, agent, user, password, user_records, card_renderer, connection_icon_provider, signup_helper, connection_method, qr_code_nonce=null) {
+	constructor (id, invitation_url, agent, user, password, user_records, card_renderer, connection_icon_provider, signup_helper, proof_schema_id, qr_code_nonce=null) {
 		this.id = id;
 		this.agent = agent;
 		this.user = user;
 		this.password = password;
-		this.agent_name = agent_name;
+		this.invitation_url = invitation_url;
 		this.user_records = user_records;
 		this.status = Signup.SIGNUP_STEPS.CREATED;
 		this.error = null;
@@ -229,7 +229,7 @@ class Signup {
 		this.connection_offer = null;
 		this.verification = null;
 		this.credential = null;
-		this.connection_method = connection_method;
+		this.proof_schema_id = proof_schema_id;
 		this.qr_code_nonce = qr_code_nonce;
 	}
 
@@ -256,7 +256,7 @@ class Signup {
 			}
 
 			my_credential_definitions.sort(sortSchemas).reverse();
-			const schema_id = my_credential_definitions[0].schema_id;
+			const schema_id = my_credential_definitions[0].schema.id;
 			logger.debug(`Issuing credential to new user with schema ${schema_id}`);
 
 			const schema = await this.agent.getCredentialSchema(schema_id);
@@ -266,76 +266,50 @@ class Signup {
 				throw err;
 			}
 
-			logger.info(`Creating signup proof schema for schema ID: ${schema_id}`);
-			const proof_request = await this.signup_helper.getProofSchema();
-
-			const account_proof_schema = await this.agent.createProofSchema(proof_request.name, proof_request.version,
-				proof_request.requested_attributes, proof_request.requested_predicates);
-			logger.debug(`Created proof schema: ${JSON.stringify(account_proof_schema)}`);
-
 			if (this.qr_code_nonce) {
 				this.status = Signup.SIGNUP_STEPS.WAITING_FOR_OFFER;
 			} else {
 				this.status = Signup.SIGNUP_STEPS.ESTABLISHING_CONNECTION;
 			}
-			logger.info(`Connection to user via the ${this.connection_method} method`);
+			logger.info('Connection to user via an invitation');
 			const connection_opts = icon ? {icon: icon} : null;
 			let connection;
 
 			try {
 
 				if (this.qr_code_nonce) {
-					// look for connection offer that has the nonce from the qr code
+					// look for connection that has the nonce from the qr code
 					const watcher = new InboundNonceWatcher(
 						this.agent,
 						InboundNonceWatcher.REQUEST_TYPES.CONNECTION | InboundNonceWatcher.REQUEST_TYPES.VERIFICATION,
 						this.qr_code_nonce, 30, 3000);
-					const inbound_offer = await watcher.start();
-					if (inbound_offer && inbound_offer.state) {
-						if (inbound_offer.state === 'inbound_offer') {
-							// found a connection offer with the given nonce
-							this.connection_offer = inbound_offer;
-							logger.info(`Received connection offer with nonce: ${this.qr_code_nonce}, offer: ${this.connection_offer.id}`);
-							this.agent.acceptConnection(this.connection_offer.id);
-							connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
-						} else if (inbound_offer.state === 'inbound_verification_request') {
+					const nonce_item = await watcher.start();
+					if (nonce_item && nonce_item.state) {
+						if (nonce_item.state === 'connected') {
+							// found a connection with the given nonce, invitation
+							//  has been accepted
+							logger.info(`Received connection with nonce: ${this.qr_code_nonce}, connection: ${nonce_item.id}`);
+							connection = nonce_item;
+						} else if (nonce_item.state === 'inbound_verification_request') {
 							// found a verification request
-							connection = inbound_offer.connection;
-							this.verification = inbound_offer;
+							connection = nonce_item.connection;
+							this.verification = nonce_item;
 						}
 					}
 
-				} else if (this.connection_method === 'in_band') {
+				} else {
 
-					if (!this.agent_name) {
-						const err = new Error('User record does not have an associated agent name');
+					if (!this.invitation_url) {
+						const err = new Error('User information does not have an associated invitation url');
 						err.code = SIGNUP_ERRORS.AGENT_NOT_FOUND;
 						throw err;
 					}
 
-					let connection_to = this.agent_name;
-					if (typeof connection_to === 'string') {
-						if (connection_to.toLowerCase().indexOf('http') >= 0)
-							connection_to = {url: connection_to};
-						else
-							connection_to = {name: connection_to};
-					}
-					logger.info(`Sending connection offer to ${JSON.stringify(connection_to)}`);
-					this.connection_offer = await this.agent.createConnection(connection_to, connection_opts);
-					logger.info(`Sent connection offer ${this.connection_offer.id} to ${JSON.stringify(connection_to)}`);
+					logger.info(`Accepting invitation from ${this.user}`);
+					this.connection_offer = await this.agent.acceptInvitation(this.invitation_url, connection_opts);
+					logger.info(`Sent connection offer ${this.connection_offer.id} to ${this.user}`);
 					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
 
-				} else if (this.connection_method === 'out_of_band') {
-
-					this.connection_offer = await this.agent.createConnection(null, connection_opts);
-					logger.info(`Created out-of-band connection offer ${this.connection_offer.id}`);
-					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
-
-				} else {
-					const error = new Error(`An invalid connection method was used: ${this.connection_method}`);
-					logger.error(`Credential issuance could not proceed: ${error}`);
-					error.code = SIGNUP_ERRORS.SIGNUP_INVALID_CONNECTION_METHOD;
-					throw error;
 				}
 
 			} catch (error) {
@@ -378,7 +352,7 @@ class Signup {
 					this.verification = await this.agent.createVerification({
 						did: connection.remote.pairwise.did
 					},
-					account_proof_schema.id,
+					this.proof_schema_id,
 					'outbound_proof_request',
 					{
 						icon: icon
@@ -433,13 +407,14 @@ class Signup {
 
 			const user_doc = await this.user_records.create_user(this.user, this.password, personal_info, {
 				agent_name: this.agent_name ? this.agent_name : connection.remote.iurl,
+				invitation_url: this.invitation_url,
 				mobile_user: this.qr_code_nonce ? true : false
 			});
 			logger.debug(`User record: ${JSON.stringify(user_doc)}`);
 
 			const cred_attributes = {};
-			for (const index in schema.attr_names) {
-				const attr_name = schema.attr_names[index];
+			for (const index in schema.attrs) {
+				const attr_name = schema.attrs[index];
 				// Certain attributes are supposed to contain rendered images of the credential
 				if (attr_name === 'card_front') {
 					cred_attributes[attr_name] = await this.card_renderer.createCardFront(personal_info);
@@ -552,7 +527,7 @@ class Signup {
  * @return {number} <0 if a comes before b, 0 if they are the same, >0 if b comes before a
  */
 function sortSchemas (a, b) {
-	return semverCompare(a.schema_version, b.schema_version);
+	return semverCompare(a.schema.version, b.schema.version);
 }
 
 exports.SIGNUP_STEPS = Signup.SIGNUP_STEPS;
@@ -566,7 +541,6 @@ const SIGNUP_ERRORS = {
 	SIGNUP_VERIFICATION_REQUEST_NOT_FOUND: 'SIGNUP_VERIFICATION_REQUEST_NOT_FOUND',
 	SIGNUP_UNKNOWN_ERROR: 'SIGNUP_UNKNOWN_ERROR',
 	SIGNUP_NO_CREDENTIAL_DEFINITIONS: 'SIGNUP_NO_CREDENTIAL_DEFINITIONS',
-	SIGNUP_INVALID_CONNECTION_METHOD: 'SIGNUP_INVALID_CONNECTION_METHOD',
 	SIGNUP_CONNECTION_FAILED: 'SIGNUP_CONNECTION_FAILED'
 };
 

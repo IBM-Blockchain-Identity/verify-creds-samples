@@ -1,5 +1,5 @@
 /**
- © Copyright IBM Corp. 2019, 2019
+ © Copyright IBM Corp. 2019, 2020
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ $(document).ready(() => {
 		connectButton.attr('disabled', true);
 
 		try {
-			await issue_credential('in_band');
+			await issue_credential();
 		} catch (error) {
 			console.error(`Credential issuance failed: ${error}`);
 		}
@@ -129,7 +129,7 @@ $.when(docReady, extensionReady).done(async () => {
 	use_extension = true;
 });
 
-async function issue_credential (connection_method) {
+async function issue_credential () {
 	const carousel = $('#issuanceCarousel');
 	const ISSUANCE_STEPS = {
 		CREATED: 0,
@@ -153,14 +153,13 @@ async function issue_credential (connection_method) {
 			method: 'POST',
 			contentType: 'application/json',
 			dataType: 'json',
-			data: JSON.stringify({connection_method: connection_method})
+			data: JSON.stringify({})
 		});
 
 		console.log(`Issuance process created: ${JSON.stringify(issuance_info)}`);
 
 		let tries_left = 300;
 		const interval = 3000; // milliseconds
-		let connection_shown = false;
 		let credential_shown = false;
 		const running = true;
 		while (running) {

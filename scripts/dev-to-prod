@@ -1,0 +1,19 @@
+#!/bin/bash
+# Licensed Materials - Property of IBM
+#
+# © Copyright IBM Corp. 2020
+#
+# US Government Users Restricted Rights - Use, duplication or disclosure restricted by GSA ADP Schedule Contract with IBM Corp.
+
+set -e
+
+echo "Pushing dev to prod ..."
+echo "Checking out prod ..."
+git checkout newagencyprod
+echo "Merging dev into prod ..."
+git merge newagency
+echo "Pushing prod ..."
+git push origin newagencyprod
+echo "Switching back to newagency branch ..."
+git checkout newagency
+echo "Successfully pushed dev to prod"

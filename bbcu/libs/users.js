@@ -1,5 +1,5 @@
 /**
- © Copyright IBM Corp. 2019, 2019
+ © Copyright IBM Corp. 2019, 2020
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ class Users {
 	 * Extensible fields for a user record.  These are just examples.
 	 * @typedef {object} UserOpts
 	 * @property {string} [agent_name] An Agent Name for connecting to the user.
-	 * @property {string} [agent_url] An Agent URL for connectin to the user.
+	 * @property {string} [invitation_url] An Invitation URL for connectin to the user.
 	 * @property {string} [did] A DID for connecting to the user.
 	 */
 

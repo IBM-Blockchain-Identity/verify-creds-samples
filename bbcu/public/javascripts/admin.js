@@ -1,5 +1,5 @@
 /**
- © Copyright IBM Corp. 2019, 2019
+ © Copyright IBM Corp. 2019, 2020
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -68,9 +68,11 @@ $(document).ready(() => {
 		delete formObject.confirm_password;
 
 		const opts = {
-			agent_name: formObject.agent_name
+			agent_name: formObject.agent_name,
+			invitation_url: formObject.invitation_url
 		};
 		delete formObject.agent_name;
+		delete formObject.invitation_url;
 
 		// Start the loading animation
 		const loader = $('#createUserButton');
@@ -672,7 +674,7 @@ function create_cred_def_table (cred_defs) {
 
 	for (const cred_def_id in cred_defs) {
 		const def = cred_defs[cred_def_id];
-		table.data.push(def);
+		table.data.push({id: def.id, schema_id: def.schema.id});
 	}
 
 	const credDefTable = $('#credDefTable');

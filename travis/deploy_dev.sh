@@ -8,18 +8,23 @@ export KUBERNETES_NAMESPACE=ssi-samples-dev
 
 export VERSION=latest
 
-export GOVDMV_IMAGE_TAG=verifycreds/gov-dmv:$VERSION
-export IBMHR_IMAGE_TAG=verifycreds/ibm-hr:$VERSION
-export BBCU_IMAGE_TAG=verifycreds/bbcu:$VERSION
+export GOVDMV_IMAGE_TAG=verifycreds/gov-dmv-ti:$VERSION
+export IBMHR_IMAGE_TAG=verifycreds/ibm-hr-ti:$VERSION
+export BBCU_IMAGE_TAG=verifycreds/bbcu-ti:$VERSION
 
 export ACCOUNT_URL=$DEV_ACCOUNT_URL
 
+export DMV_AGENT_ID=$DEV_DMV_AGENT_ID
 export DMV_AGENT_NAME=govdmv
 export DMV_AGENT_PASSWORD=$DEV_DMV_AGENT_PASSWORD
+export DMV_AGENT_DID=$DEV_DMV_AGENT_DID
 
+export IBMHR_AGENT_ID=$DEV_IBMHR_AGENT_ID
 export IBMHR_AGENT_NAME=ibmhr
 export IBMHR_AGENT_PASSWORD=$DEV_IBMHR_AGENT_PASSWORD
+export IBMHR_AGENT_DID=$DEV_IBMHR_AGENT_DID
 
+export BBCU_AGENT_ID=$DEV_BBCU_AGENT_ID
 export BBCU_AGENT_NAME=bbcu
 export BBCU_AGENT_PASSWORD=$DEV_BBCU_AGENT_PASSWORD
 

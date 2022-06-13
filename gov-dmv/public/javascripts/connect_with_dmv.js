@@ -1,5 +1,5 @@
 /**
- © Copyright IBM Corp. 2019, 2019
+ © Copyright IBM Corp. 2019, 2020
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ $(document).ready(() => {
 		connectButton.attr('disabled', true);
 
 		try {
-			await issue_credential('in_band');
+			await issue_credential();
 		} catch (error) {
 			console.error(`Credential issuance failed: ${error}`);
 		}
@@ -106,7 +106,7 @@ $.when(docReady, extensionReady).done(async () => {
 	use_extension = true;
 });
 
-async function issue_credential (connection_method) {
+async function issue_credential () {
 	const carousel = $('#issuanceCarousel');
 	const ISSUANCE_STEPS = {
 		CREATED: 0,
@@ -131,7 +131,7 @@ async function issue_credential (connection_method) {
 			method: 'POST',
 			contentType: 'application/json',
 			dataType: 'json',
-			data: JSON.stringify({connection_method: connection_method})
+			data: JSON.stringify({})
 		});
 
 		console.log(`Issuance process created: ${JSON.stringify(issuance_info)}`);
@@ -179,7 +179,6 @@ async function issue_credential (connection_method) {
 			}
 
 			if (use_extension) {
-				// TODO render the connection offer as a QR code
 				if (!connection_shown && response.connection_offer) {
 					connection_shown = true;
 					console.log('Accepting connection offer via extension');

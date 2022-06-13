@@ -189,7 +189,7 @@ block extra
                                     a.vcSignupCancel.ml-2.text-decoration-underline(href="#") Cancel
 
                             .carousel-item.text-center
-                                h2 Please enter an email, password, and agent URL to create a BBCU account
+                                h2 Please enter an email, password, and invitation URL to create a BBCU account
                                 .signup-form.text-left
                                     form#signupForm
                                         .form-group
@@ -206,8 +206,8 @@ block extra
                                             input#signupConfirmPassword.form-control(type="password" name="confirm_password" placeholder="Confirm Password" required)
                                             span#signupPasswordMessage
                                         .form-group
-                                            label.hidden-form-label(for="signupAgentName") Agent URL
-                                            input#signupAgentName.form-control(type="text" name="agent_name" placeholder="Agent URL" required)
+                                            label.hidden-form-label(for="signupInvitationURL") Invitation URL
+                                            input#signupInvitationURL.form-control(type="text" name="invitation_url" placeholder="Invitation URL" required)
                                 div
                                     button#signupNextButton.btn.btn-bbcu(disabled) Next
                                     a.vcSignupCancel.ml-2.text-decoration-underline(href="#") Cancel

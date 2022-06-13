@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gov-dmv
+spec:
+  selector:
+    app: gov-dmv
+  ports:
+    - protocol: TCP
+      name: http
+      port: 80
+      targetPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ibm-hr
+spec:
+  selector:
+    app: ibm-hr
+  ports:
+    - protocol: TCP
+      name: http
+      port: 80
+      targetPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bbcu
+spec:
+  selector:
+    app: bbcu
+  ports:
+    - protocol: TCP
+      name: http
+      port: 80
+      targetPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: couchdb
+spec:
+  selector:
+    app: couchdb
+  ports:
+    - protocol: TCP
+      name: couchdb
+      port: 5984
+      targetPort: 5984
+

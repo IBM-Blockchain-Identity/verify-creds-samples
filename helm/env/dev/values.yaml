@@ -1,0 +1,17 @@
+# Licensed Materials - Property of IBM
+#
+# © Copyright IBM Corp. 2021
+#
+# US Government Users Restricted Rights - Use, duplication or disclosure restricted by GSA ADP Schedule Contract with IBM Corp.
+# env is the name of the environment
+env: "dev"
+# domain is the DNS domain for all external endpoints
+domain: "dev.ti.verify-creds.com"
+# registryHost is the registry host for images
+registryHost: "us.icr.io"
+# namespace is the kubernetes namespace of the registry and services
+namespace: "dev"
+# The DID of the dmv-gov agent
+dmvGovAgentDid: "8HW15i4fZ5ga1nzAHjAxJV"
+# The DID of the ibm-hr agent
+ibmHrAgentDid: "UCvEihN5oBodpQ9Dpz4Kvo"

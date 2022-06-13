@@ -1,5 +1,5 @@
 /**
- © Copyright IBM Corp. 2019, 2019
+ © Copyright IBM Corp. 2019, 2020
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -44,13 +44,7 @@ exports.createRouter = function (issuance_manager, middleware) {
 				reason: 'A user ID is required in order to issue a credential'
 			});
 
-		if (!req.body || !req.body.connection_method || typeof req.body.connection_method !== 'string')
-			return res.status(400).json({
-				error: CREDENTIAL_API_ERRORS.BAD_REQUEST,
-				reason: 'Invalid connection_method for issuing the credential'
-			});
-
-		req.session.issuance_id = issuance_manager.create_issuance(req.session.user_id, req.body.connection_method);
+		req.session.issuance_id = issuance_manager.create_issuance(req.session.user_id);
 		res.status(201).json({
 			message: 'Credential issuance started'
 		});

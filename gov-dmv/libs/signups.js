@@ -1,5 +1,5 @@
 /**
- © Copyright IBM Corp. 2019, 2019
+ © Copyright IBM Corp. 2019, 2020
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  limitations under the License.
  */
 
-const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 const semverCompare = require('semver-compare');
 
 const Logger = require('./logger.js').Logger;
@@ -57,22 +57,19 @@ class SignupManager {
 	 * @param {string} user The app user we want to sign up.
 	 * @param {string} agent_name The agent name associated with the user.
 	 * @param {string} password The new user's password.
-	 * @param {ConnectionMethod} connection_method The method for connecting to the user.
 	 * @returns {string} A Signup instance ID to be used to check the status of the Signup later.
 	 */
-	create_signup (user, agent_name, password, connection_method) {
+	create_signup (user, agent_name, password) {
 		if (!user || typeof user !== 'string')
 			throw new TypeError('Invalid user was provided to signup manager');
 		if (!agent_name || typeof agent_name !== 'string')
 			throw new TypeError('Invalid agent name provided to signup manager');
 		if (!password || typeof password !== 'string')
 			throw new TypeError('Invalid password provided to signup manager');
-		if (!connection_method || typeof connection_method !== 'string')
-			throw new TypeError('Invalid connection method for issuing credentials');
 
 		const signup_id = uuidv4();
 		logger.info(`Creating signup ${signup_id}`);
-		this.signups[signup_id] = new Signup(signup_id, agent_name, this.agent, user, password, this.user_records, this.card_renderer, this.connection_icon_provider, this.signup_helper, connection_method);
+		this.signups[signup_id] = new Signup(signup_id, agent_name, this.agent, user, password, this.user_records, this.card_renderer, this.connection_icon_provider, this.signup_helper);
 		this.signups[signup_id].start();
 		return signup_id;
 	}
@@ -194,9 +191,8 @@ class Signup {
 	 * @param {CardRenderer} card_renderer The renderer for the credentials.
 	 * @param {ImageProvider} connection_icon_provider Provides the image data for connection offers.
 	 * @param {SignupHelper} signup_helper Manages proof schemas and user record creation.
-	 * @param {ConnectionMethod} connection_method The method for establishing the connection to the user
 	 */
-	constructor (id, agent_name, agent, user, password, user_records, card_renderer, connection_icon_provider, signup_helper, connection_method) {
+	constructor (id, agent_name, agent, user, password, user_records, card_renderer, connection_icon_provider, signup_helper) {
 		this.id = id;
 		this.agent = agent;
 		this.user = user;
@@ -211,7 +207,6 @@ class Signup {
 		this.connection_offer = null;
 		this.verification = null;
 		this.credential = null;
-		this.connection_method = connection_method;
 	}
 
 	/**
@@ -237,7 +232,7 @@ class Signup {
 			}
 
 			my_credential_definitions.sort(sortSchemas).reverse();
-			const schema_id = my_credential_definitions[0].schema_id;
+			const schema_id = my_credential_definitions[0].schema.id;
 			logger.debug(`Issuing credential to new user with schema ${schema_id}`);
 
 			const schema = await this.agent.getCredentialSchema(schema_id);
@@ -255,44 +250,22 @@ class Signup {
 			logger.debug(`Created proof schema: ${JSON.stringify(account_proof_schema)}`);
 
 			this.status = Signup.SIGNUP_STEPS.ESTABLISHING_CONNECTION;
-			logger.info(`Connection to user via the ${this.connection_method} method`);
+			logger.info(`Connection to user via an invitation`);
 			const connection_opts = icon ? {icon: icon} : null;
 			let connection;
 
 			try {
 
-				if (this.connection_method === 'in_band') {
-
-					if (!this.agent_name) {
-						const err = new Error('User record does not have an associated agent name');
-						err.code = SIGNUP_ERRORS.AGENT_NOT_FOUND;
-						throw err;
-					}
-
-					let connection_to = this.agent_name;
-					if (typeof connection_to === 'string') {
-						if (connection_to.toLowerCase().indexOf('http') >= 0)
-							connection_to = {url: connection_to};
-						else
-							connection_to = {name: connection_to};
-					}
-					logger.info(`Sending connection offer to ${JSON.stringify(connection_to)}`);
-					this.connection_offer = await this.agent.createConnection(connection_to, connection_opts);
-					logger.info(`Sent connection offer ${this.connection_offer.id} to ${JSON.stringify(connection_to)}`);
-					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
-
-				} else if (this.connection_method === 'out_of_band') {
-
-					this.connection_offer = await this.agent.createConnection(null, connection_opts);
-					logger.info(`Created out-of-band connection offer ${this.connection_offer.id}`);
-					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
-
-				} else {
-					const error = new Error(`An invalid connection method was used: ${this.connection_method}`);
-					logger.error(`Credential issuance could not proceed: ${error}`);
-					error.code = SIGNUP_ERRORS.SIGNUP_INVALID_CONNECTION_METHOD;
-					throw error;
+				if (!user_doc.opts || !user_doc.opts.invitation_url) {
+					const err = new Error('User record does not have an associated invitation url');
+					err.code = SIGNUP_ERRORS.AGENT_NOT_FOUND;
+					throw err;
 				}
+
+				logger.info(`Accepting invitation from ${this.user}`);
+				this.connection_offer = await this.agent.acceptInvitation(user_doc.opts.invitation_url, connection_opts);
+				logger.info(`Sent connection offer ${this.connection_offer.id} to ${this.user}`);
+				connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
 
 			} catch (error) {
 				logger.error(`Failed to establish a connection with the user. error: ${error}`);
@@ -364,8 +337,8 @@ class Signup {
 			logger.debug(`User record: ${JSON.stringify(user_doc)}`);
 
 			const cred_attributes = {};
-			for (const index in schema.attr_names) {
-				const attr_name = schema.attr_names[index];
+			for (const index in schema.attrs) {
+				const attr_name = schema.attrs[index];
 				// Certain attributes are supposed to contain rendered images of the credential
 				if (attr_name === 'card_front') {
 					cred_attributes[attr_name] = await this.card_renderer.createCardFront(personal_info);
@@ -478,7 +451,7 @@ class Signup {
  * @return {number} <0 if a comes before b, 0 if they are the same, >0 if b comes before a
  */
 function sortSchemas (a, b) {
-	return semverCompare(a.schema_version, b.schema_version);
+	return semverCompare(a.schema.version, b.schema.version);
 }
 
 exports.SIGNUP_STEPS = Signup.SIGNUP_STEPS;
@@ -492,7 +465,6 @@ const SIGNUP_ERRORS = {
 	SIGNUP_VERIFICATION_REQUEST_NOT_FOUND: 'SIGNUP_VERIFICATION_REQUEST_NOT_FOUND',
 	SIGNUP_UNKNOWN_ERROR: 'SIGNUP_UNKNOWN_ERROR',
 	SIGNUP_NO_CREDENTIAL_DEFINITIONS: 'SIGNUP_NO_CREDENTIAL_DEFINITIONS',
-	SIGNUP_INVALID_CONNECTION_METHOD: 'SIGNUP_INVALID_CONNECTION_METHOD',
 	SIGNUP_CONNECTION_FAILED: 'SIGNUP_CONNECTION_FAILED'
 };
 

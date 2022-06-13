@@ -1,0 +1,12 @@
+#!/bin/bash
+# Licensed Materials - Property of IBM
+#
+# © Copyright IBM Corp. 2021
+#
+# US Government Users Restricted Rights - Use, duplication or disclosure restricted by GSA ADP Schedule Contract with IBM Corp.
+
+#curl -sL https://ibm.biz/idt-installer | bash
+
+BASE=$(dirname "$0")
+
+bash -x ${BASE}/idt-installer

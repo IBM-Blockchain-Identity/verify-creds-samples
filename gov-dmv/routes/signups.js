@@ -1,5 +1,5 @@
 /**
- © Copyright IBM Corp. 2019, 2019
+ © Copyright IBM Corp. 2019, 2020
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -97,13 +97,7 @@ exports.createRouter = function (signup_manager) {
 		}
 		const agent_name = req.body.agent_name;
 
-		if (!req.body || !req.body.connection_method || typeof req.body.connection_method !== 'string')
-			return res.status(400).json({
-				error: SIGNUP_API_ERRORS.MISSING_REQUIRED_PARAMETERS,
-				reason: 'Invalid connection_method for issuing the credential'
-			});
-
-		const signup_id = signup_manager.create_signup(username, agent_name, password, req.body.connection_method);
+		const signup_id = signup_manager.create_signup(username, agent_name, password);
 		req.session.signup = signup_id;
 		res.status(201).json({
 			message: 'Signup process initiated',

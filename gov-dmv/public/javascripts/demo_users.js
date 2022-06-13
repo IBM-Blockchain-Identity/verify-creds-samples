@@ -1,5 +1,5 @@
 /**
- © Copyright IBM Corp. 2019, 2019
+ © Copyright IBM Corp. 2019, 2020
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -123,7 +123,7 @@ const default_attributes = {
 	'customer_identifier': window.makeid(16),
 	'height': '5\'7"',
 	'cardholder_sex': 'Male',
-	'dob': '04-15-1982',
+	'dob': '04/15/1982',
 	'dob_timestamp': 1000000,
 	'signature': 'xXx.John Doe.xXx',
 	'endorsements': 'P',

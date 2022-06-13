@@ -1,5 +1,5 @@
 /**
- © Copyright IBM Corp. 2019, 2019
+ © Copyright IBM Corp. 2019, 2020
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 const path = require('path');
 const fs = require('fs');
-const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 const async = require('async');
 
 const Logger = require('./logger.js').Logger;
@@ -246,63 +246,6 @@ class AccountSignupHelper {
 		this.agent = agent;
 	}
 
-	/**
-	 * Sets up tagged connections to the DMV and HR apps so that we can use the `/credential_definitions?route=trustedDMV:true`
-	 * or `/credential_definitions?route=trustedDMV:true` API calls to get their credential definition list later.
-	 * @returns {Promise<void>} A promise that resolves when the tagged connections are established.
-	 */
-	async setup () {
-		let to = {};
-		if (this.dmv_issuer.toLowerCase().indexOf('http') >= 0)
-			to.url = this.dmv_issuer;
-		else
-			to.name = this.dmv_issuer;
-
-		logger.info(`Setting up a connection to trusted issuer: ${JSON.stringify(to)}`);
-		let connection_offer = await this.agent.createConnection(to, {
-			trustedDMV: 'true'
-		});
-		await this.agent.waitForConnection(connection_offer.id);
-		logger.info(`Connection ${connection_offer.id} established`);
-
-		to = {};
-		if (this.hr_issuer.toLowerCase().indexOf('http') >= 0)
-			to.url = this.hr_issuer;
-		else
-			to.name = this.hr_issuer;
-
-		logger.info(`Setting up a connection to trusted issuer: ${JSON.stringify(to)}`);
-		connection_offer = await this.agent.createConnection(to, {
-			trustedHR: 'true'
-		});
-		await this.agent.waitForConnection(connection_offer.id);
-		logger.info(`Connection ${connection_offer.id} established`);
-	}
-
-	/**
-	 * Cleans up all the connections created for this signup flow.  Handy for when you need to change the properties
-	 * you want to set on the connections to the issuers.
-	 * @returns {Promise<void>} A promise that resolves when the connections created for this flow are deleted.
-	 */
-	async cleanup () {
-		logger.info(`Cleaning up connections to the issuers: ${this.dmv_issuer} and ${this.hr_issuer}`);
-		const connections = await this.agent.getConnections({
-			$or: [
-				{
-					'remote.name': {$in: [ this.hr_issuer, this.dmv_issuer ]}
-				},
-				{
-					'remote.url': {$in: [ this.hr_issuer, this.dmv_issuer ]}
-				}
-			]
-		});
-		logger.info(`Cleaning up ${connections.length} issuer connections`);
-		for (const index in connections) {
-			logger.debug(`Cleaning up connection ${connections[index].id}`);
-			await this.agent.deleteConnection(connections[index].id);
-		}
-	}
-
 	async getProofSchema (opts) {
 		const PROOF_FORMAT = await new Promise((resolve, reject) => {
 			logger.info(`Loading proof schema: ${this.proof_schema_path}`);
@@ -454,75 +397,8 @@ class AccountSignupHelper {
 	}
 }
 
-/**
- * Listens for and accepts incoming connection requests.  The AccountSignupHelper needs the other issuers to be running
- * one of these so that it can establish a connection to look up their credential definitions and build a proof schema.
- */
-class ConnectionResponder {
-	constructor (agent, interval) {
-		if (!agent || typeof agent.getConnections !== 'function')
-			throw new TypeError('Invalid agent for ConnectionResponder');
-		if (interval !== undefined && typeof interval !== 'number' || interval < 0)
-			throw new TypeError('Invalid polling interval for ConnectionResponder');
-		this.agent = agent;
-		this.stopped = true;
-		this.interval = interval !== undefined ? interval : 3000;
-	}
-
-	async start () {
-		this.stopped = false;
-
-		async.until(
-			() => { return this.stopped; },
-			async () => {
-
-				try {
-
-					const offers = await this.agent.getConnections({
-						state: 'inbound_offer'
-					});
-					logger.info('Connection Offers: ' + offers.length);
-					if (offers.length > 0) {
-						const offer = offers[0];
-						try {
-							logger.info(`Accepting connection offer ${offer.id} from  ${offer.remote.name}`);
-							const r = await this.agent.acceptConnection(offer.id);
-							logger.info(`Accepted connection offer ${r.id} from ${r.remote.name}`);
-						} catch (error) {
-							logger.error(`Couldn't accept connection offer ${offer.id}. Error: ${error}`);
-							logger.info(`Deleting bad connection offer ${offer.id}`);
-							await this.agent.deleteConnection(offer.id);
-						}
-					}
-				} catch (error) {
-					logger.error(`Failed to respond to connection requests: ${error}`);
-				}
-
-				return new Promise((resolve, reject) => {
-					setTimeout(resolve, this.interval);
-				});
-			},
-			(error) => {
-				logger.error(`Stopping connection responder: ${error}`);
-				this.stopped = false;
-			}
-		);
-	}
-
-	set_interval (interval) {
-		if (typeof interval !== 'number' || interval < 0)
-			throw new TypeError('ConnectionResponder interval must be >= 0');
-		this.interval = interval;
-	}
-
-	async stop () {
-		this.stopped = true;
-	}
-}
-
 module.exports = {
 	LoginHelper,
 	NullProofHelper,
-	AccountSignupHelper,
-	ConnectionResponder
+	AccountSignupHelper
 };

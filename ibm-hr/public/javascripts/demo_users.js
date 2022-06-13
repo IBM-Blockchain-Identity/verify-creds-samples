@@ -1,5 +1,5 @@
 /**
- © Copyright IBM Corp. 2019, 2019
+ © Copyright IBM Corp. 2019, 2020
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ window.makeid = function (length) {
 };
 
 const default_attributes = {
-	'Date of Birth': '04-15-1982',
+	'Date of Birth': '04/15/1982',
 	'Social Security Number': window.makeid(10),
 	'Company': 'IBM',
 	'Job Title': 'Software Developer',

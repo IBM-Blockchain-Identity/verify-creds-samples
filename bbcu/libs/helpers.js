@@ -1,5 +1,5 @@
 /**
- © Copyright IBM Corp. 2019, 2019
+ © Copyright IBM Corp. 2019, 2020
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 const path = require('path');
 const fs = require('fs');
-const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 const async = require('async');
 
 const Logger = require('./logger.js').Logger;
@@ -216,15 +216,15 @@ class AccountSignupHelper {
 
 	/**
 	 * Creates a AccountSignupHelper that will create proof requests asking for a drivers license and employment badge.
-	 * @param {string} hr_issuer The agent name for the HR issuer.
-	 * @param {string} dmv_issuer The agent name for the dmv issuer.
+	 * @param {string} hr_issuer_did The agent DID for the HR issuer.
+	 * @param {string} dmv_issuer_did The agent DID for the dmv issuer.
 	 * @param {string} proof_schema_path The path to a proof schema file.
 	 * @param {Agent} agent An Agent instance capable of looking up schemas.
 	 */
-	constructor (hr_issuer, dmv_issuer, proof_schema_path, agent) {
-		if (!hr_issuer || typeof hr_issuer !== 'string')
+	constructor (hr_issuer_did, dmv_issuer_did, proof_schema_path, agent) {
+		if (!hr_issuer_did || typeof hr_issuer_did !== 'string')
 			throw new TypeError('Invalid HR issuer');
-		if (!dmv_issuer || typeof dmv_issuer !== 'string')
+		if (!dmv_issuer_did || typeof dmv_issuer_did !== 'string')
 			throw new TypeError('Invalid DMV issuer');
 		if (!proof_schema_path || typeof proof_schema_path !== 'string')
 			throw new TypeError('Invalid proof schema path for signup helper');
@@ -240,67 +240,10 @@ class AccountSignupHelper {
 		if (!fs.existsSync(proof_schema_path))
 			throw new Error(`File ${proof_schema_path} does not exist`);
 
-		this.hr_issuer = hr_issuer;
-		this.dmv_issuer = dmv_issuer;
+		this.hr_issuer_did = hr_issuer_did;
+		this.dmv_issuer_did = dmv_issuer_did;
 		this.proof_schema_path = proof_schema_path;
 		this.agent = agent;
-	}
-
-	/**
-	 * Sets up tagged connections to the DMV and HR apps so that we can use the `/credential_definitions?route=trustedDMV:true`
-	 * or `/credential_definitions?route=trustedDMV:true` API calls to get their credential definition list later.
-	 * @returns {Promise<void>} A promise that resolves when the tagged connections are established.
-	 */
-	async setup () {
-		let to = {};
-		if (this.dmv_issuer.toLowerCase().indexOf('http') >= 0)
-			to.url = this.dmv_issuer;
-		else
-			to.name = this.dmv_issuer;
-
-		logger.info(`Setting up a connection to trusted issuer: ${JSON.stringify(to)}`);
-		let connection_offer = await this.agent.createConnection(to, {
-			trustedDMV: 'true'
-		});
-		await this.agent.waitForConnection(connection_offer.id);
-		logger.info(`Connection ${connection_offer.id} established`);
-
-		to = {};
-		if (this.hr_issuer.toLowerCase().indexOf('http') >= 0)
-			to.url = this.hr_issuer;
-		else
-			to.name = this.hr_issuer;
-
-		logger.info(`Setting up a connection to trusted issuer: ${JSON.stringify(to)}`);
-		connection_offer = await this.agent.createConnection(to, {
-			trustedHR: 'true'
-		});
-		await this.agent.waitForConnection(connection_offer.id);
-		logger.info(`Connection ${connection_offer.id} established`);
-	}
-
-	/**
-	 * Cleans up all the connections created for this signup flow.  Handy for when you need to change the properties
-	 * you want to set on the connections to the issuers.
-	 * @returns {Promise<void>} A promise that resolves when the connections created for this flow are deleted.
-	 */
-	async cleanup () {
-		logger.info(`Cleaning up connections to the issuers: ${this.dmv_issuer} and ${this.hr_issuer}`);
-		const connections = await this.agent.getConnections({
-			$or: [
-				{
-					'remote.name': {$in: [ this.hr_issuer, this.dmv_issuer ]}
-				},
-				{
-					'remote.url': {$in: [ this.hr_issuer, this.dmv_issuer ]}
-				}
-			]
-		});
-		logger.info(`Cleaning up ${connections.length} issuer connections`);
-		for (const index in connections) {
-			logger.debug(`Cleaning up connection ${connections[index].id}`);
-			await this.agent.deleteConnection(connections[index].id);
-		}
 	}
 
 	async getProofSchema (opts) {
@@ -315,35 +258,22 @@ class AccountSignupHelper {
 			});
 		});
 
-		logger.info(`Looking up credential definitions for issuer ${this.dmv_issuer}`);
-		const dmv_cred_defs = await this.agent.getCredentialDefinitions(null, {trustedDMV: 'true'});
-		logger.debug(`${this.dmv_issuer}'s credential definitions: ${JSON.stringify(dmv_cred_defs, 0, 1)}`);
+		logger.info(`Looking up credential definitions for issuer ${this.dmv_issuer_did}`);
+		const dmv_cred_defs = await this.agent.getCredentialDefinitions(true, {owner_did: this.dmv_issuer_did});
+		logger.debug(`${this.dmv_issuer_did}'s credential definitions: ${JSON.stringify(dmv_cred_defs, 0, 1)}`);
 		const dmv_restrictions = [];
-		for (const agent_index in dmv_cred_defs.agents) {
-			const agent = dmv_cred_defs.agents[agent_index];
-
-			for (const cred_def_index in agent.results.items) {
-				const cred_def_id = agent.results.items[cred_def_index].id;
-
-				dmv_restrictions.push({cred_def_id: cred_def_id});
-			}
+		for (const cred_def_index in dmv_cred_defs) {
+			const cred_def = dmv_cred_defs[cred_def_index];
+			dmv_restrictions.push({cred_def_id: cred_def.id});
 		}
 
-		logger.info(`Making sure we still have a connection to ${this.hr_issuer} and ${this.dmv_issuer}`);
-		await this.setup();
-
-		logger.info(`Looking up credential definitions for issuer ${this.hr_issuer}`);
-		const hr_cred_defs = await this.agent.getCredentialDefinitions(null, {trustedHR: 'true'});
-		logger.debug(`${this.hr_issuer}'s credential definitions: ${JSON.stringify(hr_cred_defs, 0, 1)}`);
+		logger.info(`Looking up credential definitions for issuer ${this.hr_issuer_did}`);
+		const hr_cred_defs = await this.agent.getCredentialDefinitions(true, {owner_did: this.hr_issuer_did});
+		logger.debug(`${this.hr_issuer_did}'s credential definitions: ${JSON.stringify(hr_cred_defs, 0, 1)}`);
 		const hr_restrictions = [];
-		for (const agent_index in hr_cred_defs.agents) {
-			const agent = hr_cred_defs.agents[agent_index];
-
-			for (const cred_def_index in agent.results.items) {
-				const cred_def_id = agent.results.items[cred_def_index].id;
-
-				hr_restrictions.push({cred_def_id: cred_def_id});
-			}
+		for (const cred_def_index in hr_cred_defs) {
+			const cred_def = hr_cred_defs[cred_def_index];
+			hr_restrictions.push({cred_def_id: cred_def.id});
 		}
 
 		const proof_request = {
@@ -385,6 +315,8 @@ class AccountSignupHelper {
 		logger.debug('(*Verified values from credential)');
 
 		// Make sure the fields we need were provided
+		// Comment out the remainder because the info.attributes are now equal to the schema attributes
+                /*
 		if (!attributes.first_name || !attributes.firstname) // 'First Name' is converted to 'firstname' in Hyperledger Indy
 			throw new Error('Two verified attestations of first name were not provided');
 
@@ -410,6 +342,7 @@ class AccountSignupHelper {
 		// Make sure the user didn't try to sign up from the wrong country
 		if (!attributes.country || [ 'united states', 'us' ].indexOf(attributes.country.toLowerCase().trim()) < 0)
 			throw new Error(`Account signups from country ${attributes.country} are not permitted`);
+                */
 
 		return verification;
 	}
@@ -444,79 +377,13 @@ class AccountSignupHelper {
 			dob_timestamp: dob_timestamp,
 			address_line_1: attributes.address_line_1,
 			address_line_2: attributes.address_line_2 ? attributes.address_line_2 : '_',
-			ssn: attributes.socialsecuritynumber,
+			ssn: attributes["Social Security Number"],
 			state: attributes.state,
 			postal_code: attributes.zip_code,
 			institution_number: 'bbcu123',
 			transit_number: uuidv4(),
 			account_number: uuidv4()
 		};
-	}
-}
-
-/**
- * Listens for and accepts incoming connection requests.  The AccountSignupHelper needs the other issuers to be running
- * one of these so that it can establish a connection to look up their credential definitions and build a proof schema.
- */
-class ConnectionResponder {
-	constructor (agent, interval) {
-		if (!agent || typeof agent.getConnections !== 'function')
-			throw new TypeError('Invalid agent for ConnectionResponder');
-		if (interval !== undefined && typeof interval !== 'number' || interval < 0)
-			throw new TypeError('Invalid polling interval for ConnectionResponder');
-		this.agent = agent;
-		this.stopped = true;
-		this.interval = interval !== undefined ? interval : 3000;
-	}
-
-	async start () {
-		this.stopped = false;
-
-		async.until(
-			() => { return this.stopped; },
-			async () => {
-
-				try {
-
-					const offers = await this.agent.getConnections({
-						state: 'inbound_offer'
-					});
-					logger.info('Connection Offers: ' + offers.length);
-					if (offers.length > 0) {
-						const offer = offers[0];
-						try {
-							logger.info(`Accepting connection offer ${offer.id} from  ${offer.remote.name}`);
-							const r = await this.agent.acceptConnection(offer.id);
-							logger.info(`Accepted connection offer ${r.id} from ${r.remote.name}`);
-						} catch (error) {
-							logger.error(`Couldn't accept connection offer ${offer.id}. Error: ${error}`);
-							logger.info(`Deleting bad connection offer ${offer.id}`);
-							await this.agent.deleteConnection(offer.id);
-						}
-					}
-				} catch (error) {
-					logger.error(`Failed to respond to connection requests: ${error}`);
-				}
-
-				return new Promise((resolve, reject) => {
-					setTimeout(resolve, this.interval);
-				});
-			},
-			(error) => {
-				logger.error(`Stopping connection responder: ${error}`);
-				this.stopped = false;
-			}
-		);
-	}
-
-	set_interval (interval) {
-		if (typeof interval !== 'number' || interval < 0)
-			throw new TypeError('ConnectionResponder interval must be >= 0');
-		this.interval = interval;
-	}
-
-	async stop () {
-		this.stopped = true;
 	}
 }
 
@@ -553,6 +420,7 @@ class InboundNonceWatcher {
 		this.stopped = false;
 
 		let attempts = 0;
+		let step_number = 1;
 		const qr_code_nonce = this.nonce;
 		const type = this.type;
 		const retry_opts = {
@@ -567,12 +435,16 @@ class InboundNonceWatcher {
 		return new Promise((resolve, reject) => {
 			async.retry(retry_opts, async () => {
 
-				logger.debug(`Checking status of request, type: ${type}, nonce: ${qr_code_nonce}. Attempt ${++attempts}/${retry_opts.times}`);
+				logger.debug(`Checking status of request, type: ${InboundNonceWatcher.REQUEST_TYPES_KEYS_AS_STRINGS[step_number]}, nonce: ${qr_code_nonce}, step_number ${step_number}. Attempt ${++attempts}/${retry_opts.times}`);
 				let queryObj = {};
 				let updated_request = null;
 				if (type & InboundNonceWatcher.REQUEST_TYPES.CONNECTION) {
 					queryObj['remote.properties.meta.nonce'] = qr_code_nonce;
 					updated_request = await this.agent.getConnections(queryObj);
+					if (updated_request.hasOwnProperty('length') && updated_request.length > 0
+						&& ['connected'].indexOf(updated_request[0].state) >= 0) {
+						step_number = 4;
+					}
 				}
 				if ((!updated_request || (updated_request.hasOwnProperty('length') && updated_request.length === 0)) && (type & InboundNonceWatcher.REQUEST_TYPES.VERIFICATION)) {
 					queryObj = {};
@@ -580,22 +452,21 @@ class InboundNonceWatcher {
 					updated_request = await this.agent.getVerifications(queryObj);
 				}
 				if (!updated_request || (updated_request.length > 0 && !updated_request[0].state)) {
-					throw new Error(`${type} state could not be determined`);
+					throw new Error(`${InboundNonceWatcher.REQUEST_TYPES_KEYS_AS_STRINGS[step_number]} state could not be determined`);
 				} else if (updated_request.length > 0) {
-					if ((type & InboundNonceWatcher.REQUEST_TYPES.CONNECTION && [ 'inbound_offer' ].indexOf(updated_request[0].state) >= 0) ||
+					if ((type & InboundNonceWatcher.REQUEST_TYPES.CONNECTION && [ 'connected' ].indexOf(updated_request[0].state) >= 0) ||
 						(type & InboundNonceWatcher.REQUEST_TYPES.VERIFICATION && [ 'inbound_verification_request' ].indexOf(updated_request[0].state) >= 0)) {
-
 						return updated_request[0];
 					} else {
-						throw new Error(`${type} with nonce ${qr_code_nonce} is in an unexpected state`);
+						throw new Error(`${InboundNonceWatcher.REQUEST_TYPES_KEYS_AS_STRINGS[step_number]} with nonce ${qr_code_nonce} is in an unexpected state`);
 					}
 				} else {
-					throw new Error(`Still waiting on ${type} to be complete`);
+					throw new Error(`Still waiting on ${InboundNonceWatcher.REQUEST_TYPES_KEYS_AS_STRINGS[step_number]} to be complete`);
 				}
 			}, (error, found_request) => {
 				if (error) {
-					logger.error(`Failed to establish ${type} with nonce ${qr_code_nonce}: ${error}`);
-					return reject(new Error(`${type} with nonce ${qr_code_nonce} failed: ${error}`));
+					logger.error(`Failed to establish ${InboundNonceWatcher.REQUEST_TYPES_KEYS_AS_STRINGS[step_number]} with nonce ${qr_code_nonce}: ${error}`);
+					return reject(new Error(`${InboundNonceWatcher.REQUEST_TYPES_KEYS_AS_STRINGS[step_number]} with nonce ${qr_code_nonce} failed: ${error}`));
 				}
 
 				let agent_did = null;
@@ -604,7 +475,7 @@ class InboundNonceWatcher {
 				} else if (found_request.connection && found_request.connection.remote) {
 					agent_did = found_request.connection.remote.pairwise.did;
 				}
-				logger.info(`${type} with nonce ${qr_code_nonce} successfully established with agent ${agent_did}`);
+				logger.info(`${InboundNonceWatcher.REQUEST_TYPES_KEYS_AS_STRINGS[step_number]} with nonce ${qr_code_nonce} successfully established with agent ${agent_did}`);
 				resolve (found_request);
 			});
 		});
@@ -627,10 +498,15 @@ InboundNonceWatcher.REQUEST_TYPES = {
 	VERIFICATION: 4,
 };
 
+InboundNonceWatcher.REQUEST_TYPES_KEYS_AS_STRINGS = {
+	[InboundNonceWatcher.REQUEST_TYPES.CONNECTION]: "CONNECTION",
+	[InboundNonceWatcher.REQUEST_TYPES.CREDENTIAL]: "CREDENTIAL",
+	[InboundNonceWatcher.REQUEST_TYPES.VERIFICATION]: "VERIFICATION",
+}
+
 module.exports = {
 	LoginHelper,
 	NullProofHelper,
 	AccountSignupHelper,
-	ConnectionResponder,
 	InboundNonceWatcher,
 };

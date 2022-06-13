@@ -1,5 +1,5 @@
 /**
- © Copyright IBM Corp. 2019, 2019
+ © Copyright IBM Corp. 2019, 2020
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -14,8 +14,7 @@
  limitations under the License.
  */
 
-const uuidv4 = require('uuid/v4');
-const semverCompare = require('semver-compare');
+const { v4: uuidv4 } = require('uuid');
 const InboundNonceWatcher = require('./helpers.js').InboundNonceWatcher;
 
 const Logger = require('./logger.js').Logger;
@@ -52,21 +51,22 @@ class LoginManager {
 	/**
 	 * Creates an Login flow for the given user.
 	 * @param {string} user The app user we want to log in.
-	 * @param {ConnectionMethod} connection_method The method for connecting to the user.
+	 * @param {string} proof_schema_id The id of the proof schema to use to request login information.
 	 * @param {string} qr_code_nonce The nonce in the QR code that initiated this login flow.
 	 * @returns {string} A Login instance ID to be used to check the status of the Login later.
 	 */
-	create_login (user, connection_method, qr_code_nonce) {
+	create_login (user, proof_schema_id, qr_code_nonce) {
+		if (!proof_schema_id || typeof proof_schema_id !== 'string') {
+			throw new TypeError('Invalid proof_schema_id was provided to login manager');
+		}
 		if ((!qr_code_nonce && (!user || typeof user !== 'string')) ||
 			(qr_code_nonce && (user === undefined || user === null || typeof user !== 'string'))) {
 			throw new TypeError('Invalid user was provided to login manager');
 		}
-		if (!connection_method || typeof connection_method !== 'string')
-			throw new TypeError('Invalid connection method for logging in');
 
 		const login_id = uuidv4();
 		logger.info(`Creating login ${login_id}`);
-		this.logins[login_id] = new Login(login_id, this.agent, user, this.user_records, this.connection_icon_provider, this.login_helper, connection_method, qr_code_nonce);
+		this.logins[login_id] = new Login(login_id, this.agent, user, this.user_records, this.connection_icon_provider, this.login_helper, proof_schema_id, qr_code_nonce);
 		this.logins[login_id].start();
 		return login_id;
 	}
@@ -136,6 +136,18 @@ class LoginManager {
 		}
 		login.stop();
 	}
+
+	/**
+	 * Get schema used for signups.
+	 *
+	 * @returns {any} The signup proof schema
+	 */
+	async get_login_schema () {
+		if (!this.login_helper)
+			throw new TypeError('Signup manager has no signup helper');
+
+		return await this.login_helper.getProofSchema();
+	}
 }
 exports.LoginManager = LoginManager;
 
@@ -186,10 +198,10 @@ class Login {
 	 * @param {Users} user_records The database of app Users where personal information is stored.
 	 * @param {ImageProvider} connection_icon_provider Provides the image data for connection offers.
 	 * @param {ProofHelper} login_helper Provides proof schemas and checks proof responses.
-	 * @param {ConnectionMethod} connection_method The method for establishing the connection to the user
+	 * @param {string} proof_schema_id The id of the proof schema to use to request login information.
 	 * @param {string} qr_code_nonce The nonce in the QR code that initiated this login flow.
 	 */
-	constructor (id, agent, user, user_records, connection_icon_provider, login_helper, connection_method, qr_code_nonce) {
+	constructor (id, agent, user, user_records, connection_icon_provider, login_helper, proof_schema_id, qr_code_nonce) {
 		this.id = id;
 		this.agent = agent;
 		this.user = user;
@@ -201,7 +213,7 @@ class Login {
 		this.login_helper = login_helper;
 		this.connection_offer = null;
 		this.verification = null;
-		this.connection_method = connection_method;
+		this.proof_schema_id = proof_schema_id;
 		this.qr_code_nonce = qr_code_nonce;
 	}
 
@@ -225,33 +237,12 @@ class Login {
 				user_doc = await this.user_records.read_user(this.user);
 			}
 
-			const my_credential_definitions = await this.agent.getCredentialDefinitions();
-			logger.debug(`${this.agent.user}'s list of credential definitions: ${JSON.stringify(my_credential_definitions, 0, 1)}`);
-
-			if (!my_credential_definitions.length) {
-				const err = new Error(`No credential definitions were found for issuer ${this.agent.user}!`);
-				err.code = LOGIN_ERRORS.LOGIN_NO_CREDENTIAL_DEFINITIONS;
-				throw err;
-			}
-			my_credential_definitions.sort(sortSchemas).reverse();
-			const cred_def_id = my_credential_definitions[0].id;
-
-			logger.debug(`Checking for attributes with credential definition id ${cred_def_id}`);
-			const proof_request = await this.login_helper.getProofSchema({
-				restrictions: [ {cred_def_id: my_credential_definitions[0].id} ]
-			});
-
-			const account_proof_schema = await this.agent.createProofSchema(proof_request.name, proof_request.version,
-				proof_request.requested_attributes, proof_request.requested_predicates);
-			logger.debug(`Created proof schema: ${JSON.stringify(account_proof_schema)}`);
-
 			if (this.qr_code_nonce) {
 				this.status = Login.LOGIN_STEPS.WAITING_FOR_OFFER;
 			} else {
 				this.status = Login.LOGIN_STEPS.ESTABLISHING_CONNECTION;
 			}
-			logger.info(`Connection to user via the ${this.connection_method} method`);
-			const connection_opts = icon ? {icon: icon} : null;
+			logger.info('Connection to user');
 			let connection;
 
 			try {
@@ -262,51 +253,30 @@ class Login {
 						this.agent,
 						InboundNonceWatcher.REQUEST_TYPES.CONNECTION | InboundNonceWatcher.REQUEST_TYPES.VERIFICATION,
 						this.qr_code_nonce, 30, 3000);
-					const inbound_offer = await watcher.start();
-					if (inbound_offer && inbound_offer.state) {
-						if (inbound_offer.state === 'inbound_offer') {
-							// found a connection offer with the given nonce
-							logger.info(`Received offer with nonce: ${this.qr_code_nonce}, offer: ${this.connection_offer.id}`);
-							this.agent.acceptConnection(this.connection_offer.id);
-							connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
-						} else if (inbound_offer.state === 'inbound_verification_request') {
+					const nonce_item = await watcher.start();
+					if (nonce_item && nonce_item.state) {
+						if (nonce_item.state === 'connected') {
+							// found a connection with the given nonce, invitation
+							//  has been accepted
+							logger.info(`Received connection with nonce: ${this.qr_code_nonce}, connection: ${nonce_item.id}`);
+							connection = nonce_item;
+						} else if (nonce_item.state === 'inbound_verification_request') {
 							// found a verification request
-							connection = inbound_offer.connection;
-							this.verification = inbound_offer;
+							connection = nonce_item.connection;
+							this.verification = nonce_item;
 						}
 					}
 
-				} else if (this.connection_method === 'in_band') {
-
-					if (!user_doc.opts || !user_doc.opts.agent_name) {
-						const err = new Error('User record does not have an associated agent name');
+				} else {
+					if (!user_doc.opts || !user_doc.opts.invitation_url) {
+						const err = new Error('User record does not have an associated invitation url');
 						err.code = LOGIN_ERRORS.AGENT_NOT_FOUND;
 						throw err;
 					}
 
-					let connection_to = user_doc.opts.agent_name;
-					if (typeof connection_to === 'string') {
-						if (connection_to.toLowerCase().indexOf('http') >= 0)
-							connection_to = {url: connection_to};
-						else
-							connection_to = {name: connection_to};
-					}
-					logger.info(`Sending connection offer to ${JSON.stringify(connection_to)}`);
-					this.connection_offer = await this.agent.createConnection(connection_to, connection_opts);
-					logger.info(`Sent connection offer ${this.connection_offer.id} to ${user_doc.opts.agent_name}`);
-					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
-
-				} else if (this.connection_method === 'out_of_band') {
-
-					this.connection_offer = await this.agent.createConnection(null, connection_opts);
-					logger.info(`Created out-of-band connection offer ${this.connection_offer.id}`);
-					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
-
-				} else {
-					const error = new Error(`An invalid connection method was used: ${this.connection_method}`);
-					logger.error(`Credential issuance could not proceed: ${error}`);
-					error.code = LOGIN_ERRORS.LOGIN_INVALID_CONNECTION_METHOD;
-					throw error;
+					logger.info(`Accepting invitation from ${this.user}`);
+					connection = await this.agent.acceptInvitation(user_doc.opts.invitation_url);
+					connection = await this.agent.waitForConnection(connection.id);
 				}
 
 			} catch (error) {
@@ -347,7 +317,7 @@ class Login {
 					this.verification = await this.agent.createVerification({
 						did: connection.remote.pairwise.did
 					},
-					account_proof_schema.id,
+					this.proof_schema_id,
 					'outbound_proof_request',
 					{
 						icon: icon
@@ -466,17 +436,6 @@ class Login {
 	}
 }
 
-/**
- * Sorts schema objects from the cloud agent API based on their schema version number, which
- * we assume is the order in which they were meant to be published (1.1 then 1.2 then 1.3...)
- * @param {object} a A schema object.
- * @param {object} b A schema object.
- * @return {number} <0 if a comes before b, 0 if they are the same, >0 if b comes before a
- */
-function sortSchemas (a, b) {
-	return semverCompare(a.schema_version, b.schema_version);
-}
-
 exports.LOGIN_STEPS = Login.LOGIN_STEPS;
 
 const LOGIN_ERRORS = {
@@ -485,7 +444,6 @@ const LOGIN_ERRORS = {
 	AGENT_NOT_FOUND: 'SIGNUP_HOLDER_AGENT_NOT_FOUND',
 	LOGIN_UNKNOWN_ERROR: 'LOGIN_UNKNOWN_ERROR',
 	LOGIN_NO_CREDENTIAL_DEFINITIONS: 'LOGIN_NO_CREDENTIAL_DEFINITIONS',
-	LOGIN_INVALID_CONNECTION_METHOD: 'LOGIN_INVALID_CONNECTION_METHOD',
 	LOGIN_CONNECTION_FAILED: 'LOGIN_CONNECTION_FAILED'
 };
 

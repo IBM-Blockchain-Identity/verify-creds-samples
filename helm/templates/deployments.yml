@@ -1,0 +1,247 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gov-dmv
+  labels:
+    app: gov-dmv
+spec:
+  selector:
+    matchLabels:
+      app: gov-dmv
+  template:
+    metadata:
+      labels:
+        app: gov-dmv
+    spec:
+      containers:
+        - name: gov-dmv
+          image: {{ .Values.registryHost }}/ssi-samples/gov-dmv.{{ .Values.domain }}:latest
+          imagePullPolicy: Always
+          ports:
+            - name: gov-dmv
+              containerPort: 3000
+          env:
+            - name: DB_CONNECTION_STRING
+              value: "http://admin:adminpw@couchdb:5984"
+            - name: DB_USERS
+              value: "gov_dmv_db"
+            - name: LOG_LEVEL
+              value: "debug"
+            - name: ACCOUNT_URL
+              value: https://agency.{{ .Values.domain }}
+            - name: AGENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: gov-dmv-agent
+                  key: id
+            - name: AGENT_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: gov-dmv-agent
+                  key: name
+            - name: AGENT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: gov-dmv-agent
+                  key: pass
+            - name: FRIENDLY_NAME
+              value: "Gov DMV"
+            - name: CARD_IMAGE_RENDERING
+              value: "branding_server"
+            - name: BRANDING_SERVER_ENDPOINT
+              value: "http://branding-server/branding/MiBrandService/createImage"
+            - name: BRANDING_SERVER_FRONT_TEMPLATE
+              value: "GovDMVfront"
+            - name: BRANDING_SERVER_BACK_TEMPLATE
+              value: "GovDMVback"
+            - name: ADMIN_API_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: gov-dmv-admin
+                  key: name
+            - name: ADMIN_API_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: gov-dmv-admin
+                  key: pass
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: gov-dmv-session
+                  key: secret
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ibm-hr
+  labels:
+    app: ibm-hr
+spec:
+  selector:
+    matchLabels:
+      app: ibm-hr
+  template:
+    metadata:
+      labels:
+        app: ibm-hr
+    spec:
+      containers:
+        - name: ibm-hr
+          image: {{ .Values.registryHost }}/ssi-samples/ibm-hr.{{ .Values.domain }}:latest
+          imagePullPolicy: Always
+          ports:
+            - name: ibm-hr
+              containerPort: 3000
+          env:
+            - name: DB_CONNECTION_STRING
+              value: "http://admin:adminpw@couchdb:5984"
+            - name: DB_USERS
+              value: "ibm_hr_db"
+            - name: LOG_LEVEL
+              value: "debug"
+            - name: ACCOUNT_URL
+              value: https://agency.{{ .Values.domain }}
+            - name: AGENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: ibm-hr-agent
+                  key: id
+            - name: AGENT_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: ibm-hr-agent
+                  key: name
+            - name: AGENT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ibm-hr-agent
+                  key: pass
+            - name: FRIENDLY_NAME
+              value: "IBM HR"
+            - name: CARD_IMAGE_RENDERING
+              value: "branding_server"
+            - name: BRANDING_SERVER_ENDPOINT
+              value: "http://branding-server/branding/MiBrandService/createImage"
+            - name: BRANDING_SERVER_FRONT_TEMPLATE
+              value: "IBMHRfront"
+            - name: BRANDING_SERVER_BACK_TEMPLATE
+              value: "IBMHRback"
+            - name: ADMIN_API_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: ibm-hr-admin
+                  key: name
+            - name: ADMIN_API_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ibm-hr-admin
+                  key: pass
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ibm-hr-session
+                  key: secret
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bbcu
+  labels:
+    app: bbcu
+spec:
+  selector:
+    matchLabels:
+      app: bbcu
+  template:
+    metadata:
+      labels:
+        app: bbcu
+    spec:
+      containers:
+        - name: bbcu
+          image: {{ .Values.registryHost }}/ssi-samples/bbcu.{{ .Values.domain }}:latest
+          imagePullPolicy: Always
+          ports:
+            - name: bbcu
+              containerPort: 3000
+          env:
+            - name: DB_CONNECTION_STRING
+              value: "http://admin:adminpw@couchdb:5984"
+            - name: DB_USERS
+              value: "bbcu_db"
+            - name: LOG_LEVEL
+              value: "debug"
+            - name: ACCOUNT_URL
+              value: https://agency.{{ .Values.domain }}
+            - name: AGENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: bbcu-agent
+                  key: id
+            - name: AGENT_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: bbcu-agent
+                  key: name
+            - name: AGENT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bbcu-agent
+                  key: pass
+            - name: FRIENDLY_NAME
+              value: "Big Blue Credit Union"
+            - name: SIGNUP_DMV_ISSUER_AGENT_DID
+              value: {{ .Values.dmvGovAgentDid }}
+            - name: SIGNUP_HR_ISSUER_AGENT_DID
+              value: {{ .Values.ibmHrAgentDid }}
+            - name: CARD_IMAGE_RENDERING
+              value: "branding_server"
+            - name: BRANDING_SERVER_ENDPOINT
+              value: "http://branding-server/branding/MiBrandService/createImage"
+            - name: BRANDING_SERVER_FRONT_TEMPLATE
+              value: "BBCUFront"
+            - name: BRANDING_SERVER_BACK_TEMPLATE
+              value: "BBCUback"
+            - name: ADMIN_API_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: bbcu-admin
+                  key: name
+            - name: ADMIN_API_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bbcu-admin
+                  key: pass
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: bbcu-session
+                  key: secret
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: couchdb
+  labels:
+    app: couchdb
+spec:
+  selector:
+    matchLabels:
+      app: couchdb
+  template:
+    metadata:
+      labels:
+        app: couchdb
+    spec:
+      containers:
+        - name: couchdb
+          image: couchdb
+          imagePullPolicy: Always
+          ports:
+            - name: couchdb
+              containerPort: 5984
+          env:
+            - name: COUCHDB_USER
+              value: "admin"
+            - name: COUCHDB_PASSWORD
+              value: "adminpw"

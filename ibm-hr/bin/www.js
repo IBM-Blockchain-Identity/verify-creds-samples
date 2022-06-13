@@ -1,5 +1,5 @@
 /**
- © Copyright IBM Corp. 2019, 2019
+ © Copyright IBM Corp. 2019, 2020
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 
 const http = require('http');
 const crypto = require('crypto');
-const request = require('request');
+const axios = require('axios');
 const async = require('async');
 const Nano = require('nano');
 const Agent = require('openssi-websdk').Agent;
@@ -38,6 +38,7 @@ const logger = Logger.makeLogger(Logger.logPrefix(__filename));
 const required = [
 	'DB_CONNECTION_STRING',
 	'DB_USERS',
+	'AGENT_ID',
 	'AGENT_NAME',
 	'AGENT_PASSWORD',
 	'FRIENDLY_NAME',
@@ -59,6 +60,7 @@ const ev = {
 	DB_CONNECTION_STRING: process.env['DB_CONNECTION_STRING'],
 	DB_USERS: process.env['DB_USERS'],
 	ACCOUNT_URL: process.env['ACCOUNT_URL'],
+	AGENT_ID: process.env['AGENT_ID'],
 	AGENT_NAME: process.env['AGENT_NAME'],
 	AGENT_PASSWORD: process.env['AGENT_PASSWORD'],
 	FRIENDLY_NAME: process.env['FRIENDLY_NAME'],
@@ -82,7 +84,6 @@ const ev = {
 	SIGNUP_DMV_ISSUER_AGENT: process.env.SIGNUP_DMV_ISSUER_AGENT,
 	SIGNUP_HR_ISSUER_AGENT: process.env.SIGNUP_HR_ISSUER_AGENT,
 	SCHEMA_TEMPLATE_PATH: process.env.SCHEMA_TEMPLATE_PATH,
-	ACCEPT_INCOMING_CONNECTIONS: process.env.ACCEPT_INCOMING_CONNECTIONS === 'true',
 	ADMIN_API_USERNAME: process.env.ADMIN_API_USERNAME,
 	ADMIN_API_PASSWORD: process.env.ADMIN_API_PASSWORD
 };
@@ -157,7 +158,7 @@ async function start () {
 	await wait_for_url(account_health_url, agent_retries, agent_retry_backoff_limit);
 
 	// Generally, you won't have to wait for your agent, so the above is optional
-	const agent = new Agent(ev.ACCOUNT_URL, ev.AGENT_NAME, ev.AGENT_PASSWORD, ev.FRIENDLY_NAME);
+	const agent = new Agent(ev.ACCOUNT_URL, ev.AGENT_ID, ev.AGENT_NAME, ev.AGENT_PASSWORD, ev.FRIENDLY_NAME);
 	agent.setLoggingLevel(ev.AGENT_LOG_LEVEL ? ev.AGENT_LOG_LEVEL : 'info');
 
 	let agent_info;
@@ -183,18 +184,13 @@ async function start () {
 		}
 	}
 
-	if (!agent_info || agent_info.role !== 'TRUST_ANCHOR') {
-		if (ev.AGENT_ADMIN_NAME && ev.AGENT_ADMIN_PASSWORD) {
-			try {
-				logger.info(`Onboarding ${ev.AGENT_NAME} as trust anchor`);
-				agent_info = await agent.onboardAsTrustAnchor(ev.AGENT_ADMIN_NAME, ev.AGENT_ADMIN_PASSWORD);
-				logger.info(`${ev.AGENT_NAME} is now a trust anchor`);
-			} catch (error) {
-				logger.error(`Failed to registery ${ev.AGENT_NAME} as a trust anchor: ${error}`);
-				process.exit(1);
-			}
-		} else {
-			logger.error(`Agent ${ev.AGENT_NAME} must be a trust anchor!`);
+	if (!agent_info || agent_info.issuer !== true) {
+		try {
+			logger.info(`Onboarding ${ev.AGENT_NAME} as trust anchor`);
+			agent_info = await agent.onboardAsTrustAnchor();
+			logger.info(`${ev.AGENT_NAME} is now a trust anchor`);
+		} catch (error) {
+			logger.error(`Failed to register ${ev.AGENT_NAME} as a trust anchor: ${error}`);
 			process.exit(1);
 		}
 	}
@@ -287,21 +283,11 @@ async function start () {
 			throw new Error('SIGNUP_HR_ISSUER_AGENT must be set in order to use `account` SIGNUP_PROOF_PROVIDER');
 		logger.info(`${ev.SIGNUP_PROOF_PROVIDER} signup proof selected.  Proof request path: ${ev.SIGNUP_ACCOUNT_PROOF_PATH}`);
 		signup_helper = new Helpers.AccountSignupHelper(ev.SIGNUP_HR_ISSUER_AGENT, ev.SIGNUP_DMV_ISSUER_AGENT, ev.SIGNUP_ACCOUNT_PROOF_PATH, agent);
-		await signup_helper.cleanup();
-		await signup_helper.setup();
 
 	} else if (ev.SIGNUP_PROOF_PROVIDER === 'none') {
 		logger.info('VC signups will be disabled');
 	} else {
 		throw new Error(`Invalid value for SIGNUP_PROOF_PROVIDER: ${ev.SIGNUP_PROOF_PROVIDER}`);
-	}
-
-	if (ev.ACCEPT_INCOMING_CONNECTIONS) {
-		logger.info(`Listening for and accepting connection offers to my agent, ${agent.name}`);
-		const responder = new Helpers.ConnectionResponder(agent);
-		responder.start();
-	} else {
-		logger.info(`Not listening for connection offers to my agent, ${agent.name}`);
 	}
 
 	/*************************
@@ -425,23 +411,22 @@ async function wait_for_url (url, max_attempts, max_backoff_period) {
 		async.retry(retry_opts, (callback) => {
 
 			logger.info(`Connecting to ${url}.  Attempt ${++attempts} out of ${max_attempts}`);
-			request({url: url, method: 'HEAD'}, (error, response, body) => {
-				if (error) {
+			axios({url: url, method: 'HEAD'})
+				.then(response => {
+					if (response.status >= 300) {
+						logger.info(`Connected but got invalid response code: ${response.statusCode}`);
+						logger.debug(`Full response: ${JSON.stringify(response)}`);
+						return callback(new Error(`Invalid response code ${response.statusCode}`));
+					}
+
+					logger.info(`Connected to ${url}`);
+					callback(null, response.data);
+				})
+				.catch(error => {
 					logger.info('Could not connect, sleeping...');
 					logger.debug(`Connection attempt error: ${error}`);
 					return callback(error);
-				}
-
-				if (response.statusCode >= 300) {
-					logger.info(`Connected but got invalid response code: ${response.statusCode}`);
-					logger.debug(`Full response: ${JSON.stringify(response)}`);
-					return callback(new Error(`Invalid response code ${response.statusCode}`));
-				}
-
-				logger.info(`Connected to ${url}`);
-				logger.debug(`Connection response: ${JSON.stringify(response)}`);
-				callback(null, body);
-			});
+				});
 		}, (error, result) => {
 			if (error) {
 				logger.error(`Failed to connect to ${url}: ${error}`);

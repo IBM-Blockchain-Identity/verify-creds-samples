@@ -14,7 +14,7 @@ experiences that you will have, as a digital identity user, when signing up for 
 ### Path 1: Signing up for an account manually
 
 If you select the `I want to use browser extension` button, you will be taken through a user
-experience where you will need to manually enter a username, password and Agent URL in order
+experience where you will need to manually enter a username, password and Invitation URL in order
 to establish an account.  This path may be taken whether you use the IBM Verify Creds browser
 extension or the IBM Verify Creds mobile app.
 
@@ -22,8 +22,7 @@ extension or the IBM Verify Creds mobile app.
 still support the mobile app.
 2. Click the `Next` button on the modal that appears.
   ![signup_1.png](docs/signup_1.png)
-3. Fill out the signup form and click the `Next` button. The Agent URL entered here will be used to connect to the
-your agent.
+3. Fill out the signup form and click the `Next` button. The Invitation URL entered here will be used to connect to the agent.
   ![signup_2.png](docs/signup_2.png)
 4. Accept the connection offer from `Big Blue Credit Union` on your mobile app or browser extension.
 5. Respond to proof request on your mobile app or browser extension.
@@ -34,7 +33,7 @@ If you select the `I want to use mobile app` button, you will be taken through a
 
 1. Click on the `Sign up for an account - Mobile` button on the login page.
 2. Click the `Next` button on the modal that appears.
-  ![signup_1.png](docs/signup_1.png)
+  ![signup_3.png](docs/signup_3.png)
 3. Scan the QR code in order to connect with BBCU.
 4. Respond to proof request on your mobile app.
 5. Accept the credential offer from `Big Blue Credit Union` on your mobile app.  You will be logged in to your new account.
@@ -65,10 +64,12 @@ experiences that you will have, as a digital identity user, when logging into an
 
 ## Running through the demo again
 
-Remember to delete the user that you created before attempting [Part 3](#part-3-signing-up-for-a-bank-account) again.
-This can be done from the admin panel; simply click the `Delete` button on the user's row in the User List table.
+Remember to delete the account that you created before attempting [Part 3](#part-3-signing-up-for-a-bank-account) again.
+If you are running the samples locally, this can be done from the admin panel; simply click the `Delete` button on the
+user's row in the User List table.
   ![delete_user.png](docs/delete_user.png)
-This can also be done by logging into your BBCU account and then clicking on the Delete Account button at the top of the page.
+This can also be done by logging into your BBCU account and then clicking on the `Delete Account` button at the top of the page.
+  ![delete_user2.png](docs/delete_user2.png)
 
 ## Development
 
@@ -87,3 +88,20 @@ BBCU app.
 5. Click the `Publish Cred Def` button on the entry in the Schemas table. The new credential definition should appear in
 the Credential Definitions table momentarily.
   ![publish_cred_def.png](docs/publish_cred_def.png)
+
+#### Integrating advanced QR Codes into your code
+
+This sample takes advantage of QR codes to introduce a different user experience.  The IBM Verify Credentials mobile app
+understands a variety of QR codes, documented [here](https://doc.ibmsecurity.verify-creds.com/develop/mobile/).  By using
+these, a web app developer can communicate an agent's contact information (invitation URL) and allow the mobile app to
+initiate the connections to the web app's agent.  This saves the user from having to understand invitation URLs and also
+eliminates a connection offer prompt to the user, making their experience even simpler.  Web apps choosing to use these
+QR codes will need to watch for incoming credential requests and verification requests that the mobile app's agent will
+be sending the web app's agent when it processes the QR code.
+
+Also worth noting, any meta information included in the QR code will make it back to the web app in any connection, credential
+and verification requests spawned from scanning the QR code, as properties on those objects.  So, for example, if you add a
+nonce representing a specific user that you are presenting a credential-type QR code to, when that user's agent sends the
+credential request to your web app's agent, the credential object will include that nonce.  If there was no existing
+connection with the user prior to scanning the QR code, the connection offer and connection that gets created when the user
+scans the QR code would also contain that nonce.

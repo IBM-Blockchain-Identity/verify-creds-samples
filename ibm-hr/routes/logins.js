@@ -1,5 +1,5 @@
 /**
- © Copyright IBM Corp. 2019, 2019
+ © Copyright IBM Corp. 2019, 2020
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -106,14 +106,7 @@ exports.createRouter = function (users_instance, login_manager) {
 			});
 		}
 		const username = req.body.username;
-
-		if (!req.body || !req.body.connection_method || typeof req.body.connection_method !== 'string')
-			return res.status(400).json({
-				error: LOGIN_API_ERRORS.BAD_REQUEST,
-				reason: 'Invalid connection_method for issuing the credential'
-			});
-
-		const login_id = login_manager.create_login(username, req.body.connection_method);
+		const login_id = login_manager.create_login(username);
 
 		// Calls to the status API will be determined by the login associated with the session
 		req.session.vc_login = login_id;

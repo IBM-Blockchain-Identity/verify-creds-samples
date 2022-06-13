@@ -1,6 +1,6 @@
 FROM node:10-alpine
 
-RUN apk add --update python g++ make
+RUN apk add --update python g++ make git
 
 WORKDIR /opt/app
 
@@ -26,6 +26,5 @@ ENV SIGNUP_PROOF_PROVIDER=account
 ENV SIGNUP_ACCOUNT_PROOF_PATH=/opt/app/docs/account_proof_request.json
 
 ENV SCHEMA_TEMPLATE_PATH=/opt/app/docs/us_bank_account.json
-ENV ACCEPT_INCOMING_CONNECTIONS=false
 
 CMD npm start

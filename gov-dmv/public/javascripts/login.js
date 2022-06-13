@@ -1,5 +1,5 @@
 /**
- © Copyright IBM Corp. 2019, 2019
+ © Copyright IBM Corp. 2019, 2020
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -221,9 +221,9 @@ $(document).ready(async () => {
 		delete formObject.confirm_password;
 
 		const opts = {
-			agent_name: formObject.agent_url
+			invitation_url: formObject.invitation_url
 		};
-		delete formObject.agent_url;
+		delete formObject.invitation_url;
 
 		// Build a complete user record from the form inputs and some hardcoded attributes
 		if (!window.default_attributes)
@@ -330,8 +330,7 @@ $(document).ready(async () => {
 
 		// You can only use the sign on api with a username
 		const data = {
-			username: formObject.email,
-			connection_method: 'in_band'
+			username: formObject.email
 		};
 
 		// Reset the signon carousel

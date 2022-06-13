@@ -1,5 +1,5 @@
 /**
- © Copyright IBM Corp. 2019, 2019
+ © Copyright IBM Corp. 2019, 2020
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -85,16 +85,16 @@ function createApp (ev, nano, agent, card_renderer, users, connection_icon_provi
 
 	// UI routers
 	app.use('/', UserUI.createRouter(users, ev, middleware));
-	app.use('/', LoginAPI.createRouter(users, login_manager));
+	app.use('/', LoginAPI.createRouter(agent, users, login_manager));
 	if (signup_helper)
-		app.use('/', SignupAPI.createRouter(signup_manager));
+		app.use('/', SignupAPI.createRouter(agent, signup_manager));
 
 	// API routers
 	app.use('/api', UserAPI.createRouter(users, agent, middleware));
 	app.use('/api', SchemaAPI.createRouter(agent, ev.SCHEMA_TEMPLATE_PATH, middleware));
 	app.use('/api', CredDefsAPI.createRouter(agent, middleware));
 	app.use('/api', CredentialsAPI.createRouter(issuance_manager, middleware));
-	app.use('/api', AgentAPI.createRouter(agent, middleware));
+	app.use('/api', AgentAPI.createRouter(agent, connection_icon_provider, middleware));
 
 	// catch 404 and forward to error handler
 	app.use((req, res, next) => {

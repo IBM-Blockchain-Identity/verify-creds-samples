@@ -2,18 +2,20 @@
 
 Play with these samples to learn how to integrate the [openssi-websdk](https://github.com/IBM-Blockchain-Identity/openssi-websdk) into your own website.
 
-For more information on the project surrounding these samples, take a look at [our docs](https://docs.info.verify-creds.com/).
+For more information on the project surrounding these samples, take a look at [our docs](https://doc.ibmsecurity.verify-creds.com/).
 
 ## Try it out
 
 We've provided some live samples that you can play with without needing to download or build any code.  Use these if
 you're going through these demos for the first time.
 
-- [Gov DMV](https://gov.livedemo.verify-creds.com)
-- [IBM HR](https://employer.livedemo.verify-creds.com)
-- [Big Blue Credit Union](https://bbcu.livedemo.verify-creds.com)
+- [Gov DMV](https://gov.ibmsecurity.verify-creds.com/)
+- [IBM HR](https://employer.ibmsecurity.verify-creds.com/)
+- [Big Blue Credit Union](https://bbcu.ibmsecurity.verify-creds.com/)
 
 ### Passwordless Authentication
+
+Here is our scenario:
 
 Several institutions, including a fictional DMV called Gov DMV and a fictional company called IBM, have begun issuing
 verifiable credentials.  Gov DMV requires customers to show up at a physical location with traditional, paper-based
@@ -52,7 +54,7 @@ build your own sample websites from the templates we've provided.
 1. Visit your agent account management page and provision three new agents, `govdmv`, `ibmhr`, and `bbcu`.  Make sure the
 box marking the new agents as issuers is checked.
 
-2. Find your account url and record the passwords for the three agents that you created.  You can find this information
+2. Find your account url and record the ids and passwords for the three agents that you created.  You can find this information
 by visiting your account dashboard, clicking on each agent, clicking the `Add Device` on the `General` page for the agent,
 and clicking on `Manual Entry` in the `Register Device` popup panel.
 
@@ -63,23 +65,23 @@ and clicking on `Manual Entry` in the `Register Device` popup panel.
         Agent DID: WpAsRjUvWNdJhgcpcir1TL
         Agent Role: Issuer
         ```
-    2. Use curl to check the agent's `role`, making sure it is set to `TRUST_ANCHOR`.  Use this curl command to check the
+    2. Use curl to check the agent's `issuer` property, making sure it is set to `true`.  Use this curl command to check the
     agent's role:
         ```
-        curl -u <agent_name>:<agent_password> <account_url>/api/v1/info
+        curl -u <agent_id>:<agent_password> <account_url>/api/v1/info
         ```
 4. If any of the agents are not issuers, use the following `curl` command to update their role:
     ```
-    curl -u <account_admin_agent_name>:<account_admin_agent_password> -X PATCH \
-        <account_url>/api/v1/identities/<agent_name> \
+    curl -u <agent_id>:<agent_password> -X PATCH \
+        <account_url>/api/v1/agents/<agent_id> \
         -H 'Content-Type: application/json' \
-        -d '{ "role": "TRUST_ANCHOR" }'
+        -d '{"role":{"name":"ENDORSER"}}'
     ```
 
 5. Install...
-    - [the Verify Creds mobile app](https://docs.info.verify-creds.com/explore/mobile_app/).
+    - [the Verify Creds mobile app](https://doc.ibmsecurity.verify-creds.com/explore/mobile_app/)
     OR
-    - [the Verify Creds browser extension](https://docs.info.verify-creds.com/explore/browser_extension/).
+    - [the Verify Creds browser extension](https://doc.ibmsecurity.verify-creds.com/explore/browser_extension/)
 
 ### Building the samples
 
@@ -91,21 +93,28 @@ docker-compose build
 
 ### Running the samples
 
-1. Setup your `.env` file with the necessary parameters to connect.  The account url value can be found in your welcome email or by visiting your account dashboard, clicking on an agent, clicking the `Add Device` on the `General` page for the agent, and clicking on `Manual Entry` in the `Register Device` popup panel.
+1. Setup your `.env` file with the necessary parameters to connect.  The account url value can be found in your welcome email or
+by visiting your account dashboard, clicking on an agent, clicking the `Add Device` on the `General` page for the agent,
+and clicking on `Manual Entry` in the `Register Device` popup panel.
     ```
     $ cp .env_template .env
     
     # edit your .env file
     
     $ cat .env
-    ACCOUNT_URL=https://my-account.example.com
-    
+    ACCOUNT_URL=https://my-agency.example.com
+
+    DMV_AGENT_ID=<govdmv_agent_id> 
     DMV_AGENT_NAME=govdmv
     DMV_AGENT_PASSWORD=****
+    DMV_AGENT_DID=<govdmv_agent_did>
     
+    IBMHR_AGENT_ID=<ibmhr_agent_id>
     IBMHR_AGENT_NAME=ibmhr
     IBMHR_AGENT_PASSWORD=****
+    IBMHR_AGENT_DID=<ibmhr_agent_did>
     
+    BBCU_AGENT_ID=<bbcu_agent_id>
     BBCU_AGENT_NAME=bbcu
     BBCU_AGENT_PASSWORD=****
 
@@ -115,7 +124,7 @@ docker-compose build
 
     *Note:* If you have previously run these samples, the COUCHDB_xxx values need to reflect those of your current couch database.  The default values used to be admin/password.  If you can no longer remember the credentials for your couch database, you can always remove the `couchdb` directory and restart the container using `docker-compose build couchdb && docker-compose up -d couchdb`.
 
-2. Start the issuers.
+2. Start the issuers now.
     ```
     docker-compose up -d
     ```
@@ -131,6 +140,10 @@ docker-compose build
     - [BBCU](bbcu/README.md#development)
 
 4. Browse to the [CouchDB UI](http://localhost:5984/_utils) to see what the apps are writing to the database.
+
+### Travis
+
+The CI is via travis at https://app.travis-ci.com/github/IBM-Blockchain-Identity/verify-creds-samples
 
 ### Troubleshooting
 
@@ -176,17 +189,18 @@ list of the existing configuration parameters:
   Compose environment.
 - `DB_USERS`: The name of the Couchdb database where user records will be stored.  If the database is not present, the
   app will attempt to create it at startup. ex. `dmv_db`
-- `ACCOUNT_URL`: The URL that is assigned to an account on our Public Agency and associated with a single IBMid.  The
-  issuer agent should be registered under this account url. ex. `https://<account_uuid>.staging-cloud-agents.us-east.containers.appdomain.cloud/`
+- `ACCOUNT_URL`: The URL that refers to a Public Agency.  The
+  issuer agent should be registered under this agency. ex. `https://agency.ibmsecurity.verify-creds.com/`
+- `AGENT_ID`: The id of the issuer agent on the Public Agency account. ex. `01234567890`
 - `AGENT_NAME`: The name of the issuer agent on the Public Agency account. ex. `dmv`
 - `AGENT_PASSWORD`: The password associate with the issuer agent.
 - `FRIENDLY_NAME`: The friendly name to attach to connection offers, credential offers, verification requests, etc. If
   not provided, the issuer's agent name will be used. ex. `Big Blue Credit Union`
 - `AGENT_LOG_LEVEL`: The log level to set for the `openssi-websdk`.  Defaults to `info`.
-- `AGENT_ADMIN_NAME`: The agent name for the first agent on your Public Agency account.  These agent credentials are used
-  to create the issuer agent if it doesn't already exist.  Due to performance issues with creating agents, using these
-  parameters is not recommended or supported.
-- `AGENT_ADMIN_PASSWORD`: The password for the admin agent.
+- `AGENT_ADMIN_NAME`: The agent name for the account agent on your Public Agency account.  These agent credentials are used
+  to create the issuer agent if it doesn't already exist.  Using these AGENT_ADMIN_*
+  parameters is not recommended or supported and remain only for legacy purposes.
+- `AGENT_ADMIN_PASSWORD`: The password for the account agent.
 - `CARD_IMAGE_RENDERING`: The type of rendering that should be used for credentials.  Credential rendering only comes
   into play when the issuer's credential schema has `card_front` and/or `card_back` attributes.  The available options are
   described below:
@@ -236,9 +250,6 @@ list of the existing configuration parameters:
 - `SCHEMA_TEMPLATE_PATH`: The path to a JSON file describing the credential schema for the issuer.  This parameter is configured
   in the Docker image file for each sample issuer and describes the locations of the driver's license, employment badge, and
   bank account schema files.
-- `ACCEPT_INCOMING_CONNECTIONS`: A toggle that causes the sample app to pole for incoming connection offers and accept
-  them.  This is the mechanism that allows BBCU to connect to Gov DMV and IBM HR in order to get a list of credential schemas
-  when `SIGNUP_PROOF_PROVIDER === 'account'`.
 - `ADMIN_API_USERNAME`: The username to use to protect the admin UI/API.  If this and `ADMIN_API_PASSWORD`
   are left blank, the admin panel will not be protected by authentication.
 - `ADMIN_API_PASSWORD`: The password to use to protect the admin UI/API.

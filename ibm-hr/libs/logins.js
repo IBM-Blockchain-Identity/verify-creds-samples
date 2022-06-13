@@ -1,5 +1,5 @@
 /**
- © Copyright IBM Corp. 2019, 2019
+ © Copyright IBM Corp. 2019, 2020
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  limitations under the License.
  */
 
-const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 const semverCompare = require('semver-compare');
 
 const Logger = require('./logger.js').Logger;
@@ -51,18 +51,15 @@ class LoginManager {
 	/**
 	 * Creates an Login flow for the given user.
 	 * @param {string} user The app user we want to log in.
-	 * @param {ConnectionMethod} connection_method The method for connecting to the user.
 	 * @returns {string} A Login instance ID to be used to check the status of the Login later.
 	 */
-	create_login (user, connection_method) {
+	create_login (user) {
 		if (!user || typeof user !== 'string')
 			throw new TypeError('Invalid user was provided to login manager');
-		if (!connection_method || typeof connection_method !== 'string')
-			throw new TypeError('Invalid connection method for logging in');
 
 		const login_id = uuidv4();
 		logger.info(`Creating login ${login_id}`);
-		this.logins[login_id] = new Login(login_id, this.agent, user, this.user_records, this.connection_icon_provider, this.login_helper, connection_method);
+		this.logins[login_id] = new Login(login_id, this.agent, user, this.user_records, this.connection_icon_provider, this.login_helper);
 		this.logins[login_id].start();
 		return login_id;
 	}
@@ -181,9 +178,8 @@ class Login {
 	 * @param {Users} user_records The database of app Users where personal information is stored.
 	 * @param {ImageProvider} connection_icon_provider Provides the image data for connection offers.
 	 * @param {ProofHelper} login_helper Provides proof schemas and checks proof responses.
-	 * @param {ConnectionMethod} connection_method The method for establishing the connection to the user
 	 */
-	constructor (id, agent, user, user_records, connection_icon_provider, login_helper, connection_method) {
+	constructor (id, agent, user, user_records, connection_icon_provider, login_helper) {
 		this.id = id;
 		this.agent = agent;
 		this.user = user;
@@ -195,7 +191,6 @@ class Login {
 		this.login_helper = login_helper;
 		this.connection_offer = null;
 		this.verification = null;
-		this.connection_method = connection_method;
 	}
 
 	/**
@@ -234,45 +229,18 @@ class Login {
 			logger.debug(`Created proof schema: ${JSON.stringify(account_proof_schema)}`);
 
 			this.status = Login.LOGIN_STEPS.ESTABLISHING_CONNECTION;
-			logger.info(`Connection to user via the ${this.connection_method} method`);
 			const connection_opts = icon ? {icon: icon} : null;
 			let connection;
 
 			try {
-
-				if (this.connection_method === 'in_band') {
-
-					if (!user_doc.opts || !user_doc.opts.agent_name) {
-						const err = new Error('User record does not have an associated agent name');
-						err.code = LOGIN_ERRORS.AGENT_NOT_FOUND;
-						throw err;
-					}
-
-					let connection_to = user_doc.opts.agent_name;
-					if (typeof connection_to === 'string') {
-						if (connection_to.toLowerCase().indexOf('http') >= 0)
-							connection_to = {url: connection_to};
-						else
-							connection_to = {name: connection_to};
-					}
-					logger.info(`Sending connection offer to ${JSON.stringify(connection_to)}`);
-					this.connection_offer = await this.agent.createConnection(connection_to, connection_opts);
-					logger.info(`Sent connection offer ${this.connection_offer.id} to ${user_doc.opts.agent_name}`);
-					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
-
-				} else if (this.connection_method === 'out_of_band') {
-
-					this.connection_offer = await this.agent.createConnection(null, connection_opts);
-					logger.info(`Created out-of-band connection offer ${this.connection_offer.id}`);
-					connection = await this.agent.waitForConnection(this.connection_offer.id, 30, 3000);
-
-				} else {
-					const error = new Error(`An invalid connection method was used: ${this.connection_method}`);
-					logger.error(`Credential issuance could not proceed: ${error}`);
-					error.code = LOGIN_ERRORS.LOGIN_INVALID_CONNECTION_METHOD;
-					throw error;
+				if (!user_doc.opts || !user_doc.opts.invitation_url) {
+					const err = new Error('User record does not have an associated invitation url');
+					err.code = LOGIN_ERRORS.AGENT_NOT_FOUND;
+					throw err;
 				}
 
+				logger.info(`Accepting invitation from ${this.user}`);
+				connection = await this.agent.acceptInvitation(user_doc.opts.invitation_url);
 			} catch (error) {
 				logger.error(`Failed to establish a connection with the user. error: ${error}`);
 				error.code = error.code ? error.code : LOGIN_ERRORS.LOGIN_CONNECTION_FAILED;
@@ -398,7 +366,7 @@ class Login {
  * @return {number} <0 if a comes before b, 0 if they are the same, >0 if b comes before a
  */
 function sortSchemas (a, b) {
-	return semverCompare(a.schema_version, b.schema_version);
+	return semverCompare(a.schema.version, b.schema.version);
 }
 
 exports.LOGIN_STEPS = Login.LOGIN_STEPS;
@@ -409,7 +377,6 @@ const LOGIN_ERRORS = {
 	AGENT_NOT_FOUND: 'SIGNUP_HOLDER_AGENT_NOT_FOUND',
 	LOGIN_UNKNOWN_ERROR: 'LOGIN_UNKNOWN_ERROR',
 	LOGIN_NO_CREDENTIAL_DEFINITIONS: 'LOGIN_NO_CREDENTIAL_DEFINITIONS',
-	LOGIN_INVALID_CONNECTION_METHOD: 'LOGIN_INVALID_CONNECTION_METHOD',
 	LOGIN_CONNECTION_FAILED: 'LOGIN_CONNECTION_FAILED'
 };
 

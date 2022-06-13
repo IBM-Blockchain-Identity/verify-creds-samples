@@ -1,5 +1,5 @@
 /**
- © Copyright IBM Corp. 2019, 2019
+ © Copyright IBM Corp. 2019, 2020
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -190,8 +190,8 @@ $(document).ready(() => {
 	const signup_password_label = $('label[for="signupPassword"]');
 	const signup_confirm_password = $('#signupConfirmPassword');
 	const signup_confirm_password_label = $('label[for="signupConfirmPassword"]');
-	const signup_agent_name = $('#signupAgentName');
-	const signup_agent_name_label = $('label[for="signupAgentName"]');
+	const signup_invitation_url = $('#signupInvitationURL');
+	const signup_invitation_url_label = $('label[for="signupInvitationURL"]');
 
 	signup_user.focus(() => {
 		signup_user_label.css('visibility', 'visible');
@@ -214,12 +214,12 @@ $(document).ready(() => {
 		if (!signup_confirm_password.val().trim())
 			signup_confirm_password_label.css('visibility', 'hidden');
 	});
-	signup_agent_name.focus(() => {
-		signup_agent_name_label.css('visibility', 'visible');
+	signup_invitation_url.focus(() => {
+		signup_invitation_url_label.css('visibility', 'visible');
 	});
-	signup_agent_name.focusout(() => {
-		if (!signup_agent_name.val().trim())
-			signup_agent_name_label.css('visibility', 'hidden');
+	signup_invitation_url.focusout(() => {
+		if (!signup_invitation_url.val().trim())
+			signup_invitation_url_label.css('visibility', 'hidden');
 	});
 
 	// Make sure new users are being given the password we think they are
@@ -285,8 +285,7 @@ async function ProcessSignon (vcSignonModal, vcSignonCarousel, mobileCredMgr=fal
 
 	// You can only use the sign on api with a username
 	const data = {
-		username: formObject.username,
-		connection_method: 'in_band'
+		username: formObject.username
 	};
 
 	// Reset the signon carousel
@@ -299,15 +298,28 @@ async function ProcessSignon (vcSignonModal, vcSignonCarousel, mobileCredMgr=fal
 
 	let qrCodeNonce = null;
 	try {
+		// Build a proof request using the latest cred defs from from
+		//  ibmhr and govdmv
+		let response = await $.ajax({
+			url: '/login/proofschema',
+			method: 'POST',
+			dataType: 'json',
+			contentType: 'application/json',
+			data: {}
+		});
+		console.log(`Login proofschema response: ${JSON.stringify(response)}`);
+		const verifierSchema = response.proof_schema;
+
+		data['proof_schema_id'] = verifierSchema.id;
 		if (mobileCredMgr) {
 			// If the user selected for a signon for a mobile app, establish a
 			//  connection and verification using a QR code rather than forcing
-			//  the user to provide their agent url
-			qrCodeNonce = await displayProofQRCode(data.username, 'BBCU Login Request', 'connectionReqQRLogin');
+			//  the user to provide their invitation url
+			qrCodeNonce = await displayProofQRCode(data.username, verifierSchema, 'connectionReqQRLogin');
 			data['qr_code_nonce'] = qrCodeNonce;
 		}
 
-		const response = await $.ajax({
+		response = await $.ajax({
 			url: '/login/vc',
 			method: 'POST',
 			dataType: 'json',
@@ -376,6 +388,7 @@ async function ProcessSignon (vcSignonModal, vcSignonCarousel, mobileCredMgr=fal
 
 				// Redirect to account page.  The user's session should be logged in at this point.
 				window.location.href = '/account';
+				return;
 			}
 
 			if ([ 'STOPPED', 'ERROR' ].indexOf(response.status) >= 0) {
@@ -449,7 +462,7 @@ async function ProcessSignup (vcSignupCarousel, mobileCredMgr=false) {
 		username = `${formObject.username.trim()}@example.com`;
 	}
 	const password = formObject.password ? formObject.password : null;
-	const agent_name = formObject.agent_name ? formObject.agent_name : null;
+	const invitation_url = formObject.invitation_url ? formObject.invitation_url : null;
 
 	if (formObject.password !== formObject.confirm_password)
 		return console.error('Passwords must match!');
@@ -472,13 +485,23 @@ async function ProcessSignup (vcSignupCarousel, mobileCredMgr=false) {
 	console.log(`Creating signup for user ${username}`);
 	let qrCodeNonce = null;
 	try {
+		// Build a proof request using the latest cred defs from from
+		//  ibmhr and govdmv
+		let response = await $.ajax({
+			url: '/signup/proofschema',
+			method: 'POST',
+			dataType: 'json',
+			contentType: 'application/json',
+			data: {}
+		});
+		console.log(`Signup proofschema response: ${JSON.stringify(response)}`);
+		const verifierSchema = response.proof_schema;
 
-		let response = null;
 		if (mobileCredMgr) {
 			// If the user selected for a signon for a mobile app, establish a
 			//  connection and verification using a QR code rather than forcing
-			//  the user to provide their agent url
-			qrCodeNonce = await displayProofQRCode(username, 'Verify Employment', 'connectionReqQR');
+			//  the user to provide their invitation url
+			qrCodeNonce = await displayProofQRCode(username, verifierSchema, 'connectionReqQR');
 		}
 
 		// The user selected a "normal" signon, so needs to provide his/her
@@ -491,8 +514,8 @@ async function ProcessSignup (vcSignupCarousel, mobileCredMgr=false) {
 			data: JSON.stringify({
 				password: password,
 				username: username,
-				agent_name: agent_name,
-				connection_method: 'in_band',
+				invitation_url: invitation_url,
+				proof_schema_id: verifierSchema.id,
 				qr_code_nonce: mobileCredMgr ? qrCodeNonce: null,
 			})
 		});
@@ -551,6 +574,7 @@ async function ProcessSignup (vcSignupCarousel, mobileCredMgr=false) {
 					setTimeout(resolve, 3000);
 				});
 				window.location.href = '/account';
+				return;
 
 			} else if (signup_status === REMOTE_SIGNUP_STEPS.STOPPED) {
 				vcSignupCarousel.carousel(vcSignupCarouselSlides.NOT_ALLOWED);
@@ -625,18 +649,18 @@ async function ProcessSignup (vcSignupCarousel, mobileCredMgr=false) {
 	}
 }
 
-async function displayProofQRCode (username, schemaName, qrCodeParentId) {
+async function displayProofQRCode (username, verifierSchema, qrCodeParentId) {
 
 	return new Promise(async (resolve, reject) => {
 		try {
 			if (username === undefined || username === null || typeof username !== 'string') {
 				throw new TypeError('Invalid username was provided to displayProofQRCode');
 			}
-			if (!schemaName || typeof schemaName !== 'string') {
-				throw new TypeError('Invalid schemaName was provided to displayProofQRCode');
-			}
 			if (!qrCodeParentId || typeof qrCodeParentId !== 'string') {
 				throw new TypeError('Invalid qrCode parent element was provided to displayProofQRCode');
+			}
+			if (!verifierSchema || typeof verifierSchema !== 'object') {
+				throw new Error('Verifier schema not found');
 			}
 
 			let response = null;
@@ -652,32 +676,7 @@ async function displayProofQRCode (username, schemaName, qrCodeParentId) {
 				throw new Error(`No agent information returned in response: ${JSON.stringify(response)}`);
 			const verifierAgent = response.agent;
 
-			// get the schemas registered by the agent
-			response = await $.ajax({
-				url: '/api/proof_schemas',
-				method: 'GET',
-				dataType: 'json',
-				contentType: 'application/json',
-				data: {name: schemaName, sort: true},
-			});
-			if (!response || !response.schemas)
-				throw new Error(`No schema information returned in response: ${JSON.stringify(response)}`);
-			const verifierSchemasArray = response.schemas;
-
-			// schemas sorted by latest version number.  Look for the given schemaName to find
-			//  the correct name and most recent version number to use.
-			let verifierSchema = null;
-			for (let i=0; i<verifierSchemasArray.length; i++) {
-				if (verifierSchemasArray[i].name === schemaName) {
-					verifierSchema = verifierSchemasArray[i];
-					break;
-				}
-			}
-
-			if (!verifierSchema) {
-				throw new Error('Requested schema not found');
-			}
-			// Find most current schema versio
+			// Find most current schema version
 			console.log('Showing qrcode with connection+verification information');
 			// Proof request
 			// {
@@ -692,25 +691,12 @@ async function displayProofQRCode (username, schemaName, qrCodeParentId) {
 			// 	}
 			// }
 			const qrCodeNonce = window.makeid(20);
-			let protocol = verifierAgent.url.indexOf('https://');
-			// create the agent url from the account url
-			if (protocol === 0) {
-				protocol = 'https://';
-			} else {
-				protocol = verifierAgent.url.indexOf('http://');
-				if (protocol === 0) {
-					protocol = 'http://';
-				}
-			}
-			if (protocol && protocol.length) {
-				verifierAgent.url = `${protocol}${verifierAgent.user}:@${verifierAgent.url.slice(protocol.length)}`;
-			}
 			const qrcodeContent = JSON.stringify({
 				type: 'proof',
 				data: {
 					name: verifierAgent.user,
 					nickname: verifierAgent.name,
-					verifier: verifierAgent.url,
+					verifier: verifierAgent.invitation_url,
 					proof_schema_id: verifierSchema.id,
 					wait: false,
 					meta: {
